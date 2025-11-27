@@ -1,0 +1,76 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "globalEnv": [
+    "ZERO_UPSTREAM_DB",
+    "ZERO_AUTH_SECRET",
+    "ZERO_REPLICA_FILE",
+    "ZERO_LOG_LEVEL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "VITE_PUBLIC_ZERO_SERVER",
+    "VITE_PUBLIC_API_SERVER"
+  ],
+  "globalPassThroughEnv": [
+    "ZERO_UPSTREAM_DB",
+    "ZERO_AUTH_SECRET",
+    "ZERO_REPLICA_FILE",
+    "ZERO_LOG_LEVEL"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "@repo/docker#dev": {
+      "cache": false
+    },
+    "@repo/db#db:push": {
+      "dependsOn": ["@repo/docker#dev"],
+      "cache": false
+    },
+    "@repo/web#drizzle-zero:generate": {
+      "dependsOn": ["@repo/db#db:push", "@repo/db#build"],
+      "cache": false
+    },
+    "@repo/web#dev:zero-cache": {
+      "dependsOn": ["@repo/web#drizzle-zero:generate"],
+      "cache": false,
+      "persistent": true
+    },
+    "@repo/web#dev:vite": {
+      "dependsOn": ["@repo/web#drizzle-zero:generate"],
+      "cache": false,
+      "persistent": true
+    },
+    "@repo/web#dev": {
+      "dependsOn": ["@repo/web#drizzle-zero:generate"],
+      "cache": false,
+      "persistent": true
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "db:push": {
+      "cache": false
+    },
+    "db:generate": {
+      "outputs": ["migrations/**"]
+    },
+    "db:seed": {
+      "cache": false
+    },
+    "drizzle-zero:generate": {
+      "dependsOn": ["@repo/db#build"],
+      "cache": false
+    }
+  }
+}

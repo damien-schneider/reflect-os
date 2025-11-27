@@ -1,0 +1,22 @@
+import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { ZeroSetup } from "../components/zero-setup";
+import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { ThemeProvider } from "../components/theme-provider";
+
+export const Route = createRootRoute({
+  component: RootLayout,
+});
+
+function RootLayout() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ZeroSetup>
+        <div className="min-h-screen bg-background">
+
+        <Outlet />
+        </div>
+        {process.env.NODE_ENV === "development" && <TanStackRouterDevtools position="bottom-right" />}
+      </ZeroSetup>
+    </ThemeProvider>
+  );
+}

@@ -1,0 +1,279 @@
+import { useState, useMemo } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { useZero } from "@rocicorp/zero/react";
+import { type RoadmapLane, type RoadmapLaneWithBacklog, ROADMAP_LANES, ROADMAP_LANES_WITH_BACKLOG, LANE_CONFIG } from "../../lib/constants";
+import { RoadmapLaneColumn } from "./roadmap-lane";
+import { RoadmapItemCard } from "./roadmap-item-card";
+import type { Schema, Tag } from "../../schema";
+
+// Feedback item with roadmap fields
+interface RoadmapFeedbackItem {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  voteCount: number;
+  roadmapLane: RoadmapLane | string | null;
+  roadmapOrder: number;
+  completedAt?: number | null;
+}
+
+// Lane configuration from tags
+export interface LaneConfig {
+  id: string;
+  label: string;
+  color: string;
+  bgColor: string;
+  isDoneStatus: boolean;
+  laneOrder: number;
+}
+
+interface RoadmapKanbanProps {
+  items: readonly RoadmapFeedbackItem[];
+  backlogItems?: readonly RoadmapFeedbackItem[];
+  isAdmin?: boolean;
+  boardId: string;
+  /** Custom lanes from tags - if provided, uses these instead of default lanes */
+  customLanes?: readonly Tag[];
+  /** Organization ID for tag-based lanes */
+  organizationId?: string;
+}
+
+export function RoadmapKanban({ 
+  items, 
+  backlogItems = [], 
+  isAdmin = false, 
+  boardId: _boardId,
+  customLanes,
+  organizationId: _organizationId,
+}: RoadmapKanbanProps) {
+  const z = useZero<Schema>();
+  const [activeItem, setActiveItem] = useState<RoadmapFeedbackItem | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Build lane configuration from custom lanes or use defaults
+  const laneConfigs = useMemo((): LaneConfig[] => {
+    if (customLanes && customLanes.length > 0) {
+      // Filter to only roadmap lane tags and sort by lane order
+      return customLanes
+        .filter((t) => t.isRoadmapLane)
+        .sort((a, b) => (a.laneOrder ?? 0) - (b.laneOrder ?? 0))
+        .map((t) => ({
+          id: t.id,
+          label: t.name,
+          color: t.color,
+          bgColor: `bg-[${t.color}]/10`,
+          isDoneStatus: t.isDoneStatus ?? false,
+          laneOrder: t.laneOrder ?? 0,
+        }));
+    }
+    // Use default lanes
+    return ROADMAP_LANES.map((lane) => ({
+      id: lane,
+      label: LANE_CONFIG[lane].label,
+      color: LANE_CONFIG[lane].color,
+      bgColor: LANE_CONFIG[lane].bgColor,
+      isDoneStatus: false, // Default lanes don't have done status
+      laneOrder: ROADMAP_LANES.indexOf(lane),
+    }));
+  }, [customLanes]);
+
+  // Get all lane IDs including backlog for admin
+  const laneIds = useMemo(() => {
+    const ids = laneConfigs.map((l) => l.id);
+    return isAdmin ? ["backlog", ...ids] : ids;
+  }, [laneConfigs, isAdmin]);
+
+  // Combine items and backlog for lookup
+  const allItems = useMemo(() => [...items, ...backlogItems], [items, backlogItems]);
+
+  // Group items by lane (including backlog)
+  const itemsByLane = useMemo(() => {
+    const grouped: Record<string, RoadmapFeedbackItem[]> = {
+      backlog: [],
+    };
+    
+    // Initialize lanes
+    laneConfigs.forEach((lane) => {
+      grouped[lane.id] = [];
+    });
+
+    // Add backlog items
+    backlogItems.forEach((item) => {
+      grouped.backlog.push(item);
+    });
+
+    // Add roadmap items to their lanes
+    items.forEach((item) => {
+      if (item.roadmapLane && item.roadmapLane in grouped) {
+        grouped[item.roadmapLane].push(item);
+      }
+    });
+
+    // Sort by roadmapOrder within each lane (backlog sorted by title)
+    grouped.backlog.sort((a, b) => a.title.localeCompare(b.title));
+    laneConfigs.forEach((lane) => {
+      grouped[lane.id]?.sort((a, b) => a.roadmapOrder - b.roadmapOrder);
+    });
+
+    return grouped;
+  }, [items, backlogItems, laneConfigs]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const item = allItems.find((i) => i.id === active.id);
+    if (item) {
+      setActiveItem(item);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveItem(null);
+
+    if (!over || !isAdmin) return;
+
+    const activeItem = allItems.find((i) => i.id === active.id);
+    if (!activeItem) return;
+
+    // Determine target lane
+    let targetLane: string;
+    let targetIndex: number;
+
+    // Check if dropped on a lane
+    if (laneIds.includes(over.id as string)) {
+      targetLane = over.id as string;
+      targetIndex = itemsByLane[targetLane]?.length ?? 0;
+    } else {
+      // Dropped on another item
+      const overItem = allItems.find((i) => i.id === over.id);
+      if (!overItem) return;
+
+      targetLane = overItem.roadmapLane ?? "backlog";
+      const laneItems = itemsByLane[targetLane] ?? [];
+      targetIndex = laneItems.findIndex((i) => i.id === over.id);
+    }
+
+    // If dropping into backlog, remove from roadmap
+    if (targetLane === "backlog") {
+      z.mutate.feedback.update({
+        id: activeItem.id,
+        roadmapLane: null,
+        roadmapOrder: null,
+        completedAt: null, // Clear completion date when moving to backlog
+        updatedAt: Date.now(),
+      });
+      return;
+    }
+
+    // Calculate new sort order
+    const laneItems = (itemsByLane[targetLane] ?? []).filter((i) => i.id !== activeItem.id);
+    let newSortOrder: number;
+
+    if (laneItems.length === 0) {
+      newSortOrder = 1000;
+    } else if (targetIndex === 0) {
+      newSortOrder = (laneItems[0]?.roadmapOrder ?? 1000) / 2;
+    } else if (targetIndex >= laneItems.length) {
+      newSortOrder = (laneItems[laneItems.length - 1]?.roadmapOrder ?? 0) + 1000;
+    } else {
+      const prevOrder = laneItems[targetIndex - 1]?.roadmapOrder ?? 0;
+      const nextOrder = laneItems[targetIndex]?.roadmapOrder ?? prevOrder + 2000;
+      newSortOrder = (prevOrder + nextOrder) / 2;
+    }
+
+    // Check if target lane is a "Done" status lane
+    const targetLaneConfig = laneConfigs.find((l) => l.id === targetLane);
+    const isDoneLane = targetLaneConfig?.isDoneStatus ?? false;
+    
+    // Get previous lane to check if we're moving from a done lane
+    const previousLane = activeItem.roadmapLane;
+    const previousLaneConfig = laneConfigs.find((l) => l.id === previousLane);
+    const wasInDoneLane = previousLaneConfig?.isDoneStatus ?? false;
+
+    // Update the feedback item's roadmap fields
+    const updateData: Parameters<typeof z.mutate.feedback.update>[0] = {
+      id: activeItem.id,
+      roadmapLane: targetLane,
+      roadmapOrder: newSortOrder,
+      updatedAt: Date.now(),
+    };
+
+    // Set completedAt when moving to a done lane (if not already set)
+    if (isDoneLane && !activeItem.completedAt) {
+      updateData.completedAt = Date.now();
+    }
+    // Clear completedAt when moving out of a done lane
+    else if (!isDoneLane && wasInDoneLane) {
+      updateData.completedAt = null;
+    }
+
+    z.mutate.feedback.update(updateData);
+  };
+
+  // Build lane display config including backlog
+  const allLaneConfigs = useMemo(() => {
+    const backlogConfig: LaneConfig = {
+      id: "backlog",
+      label: "Backlog",
+      color: "#f59e0b",
+      bgColor: "bg-amber-50 dark:bg-amber-950",
+      isDoneStatus: false,
+      laneOrder: -1,
+    };
+    return isAdmin ? [backlogConfig, ...laneConfigs] : laneConfigs;
+  }, [laneConfigs, isAdmin]);
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div 
+        className="grid grid-cols-1 gap-4"
+        style={{ 
+          gridTemplateColumns: `repeat(${allLaneConfigs.length}, minmax(0, 1fr))` 
+        }}
+      >
+        {allLaneConfigs.map((laneConfig) => (
+          <RoadmapLaneColumn
+            key={laneConfig.id}
+            lane={laneConfig.id as RoadmapLaneWithBacklog}
+            items={itemsByLane[laneConfig.id] ?? []}
+            isAdmin={isAdmin}
+            laneConfig={laneConfig}
+          />
+        ))}
+      </div>
+
+      <DragOverlay>
+        {activeItem ? (
+          <RoadmapItemCard item={activeItem} isDragging />
+        ) : null}
+      </DragOverlay>
+    </DndContext>
+  );
+}

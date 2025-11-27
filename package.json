@@ -1,0 +1,48 @@
+{
+  "name": "reflect-os-zero",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "dev:docker": "bun --filter @repo/docker dev",
+    "dev:web": "bun --filter @repo/web dev",
+    "dev:zero-cache": "bun --filter @repo/web dev:zero-cache",
+    "db:push": "bun --filter @repo/db db:push",
+    "db:generate": "bun --filter @repo/db db:generate",
+    "db:migrate": "bun --filter @repo/db db:migrate",
+    "db:studio": "bun --filter @repo/db db:studio",
+    "db:seed": "bun --filter @repo/db db:seed",
+    "drizzle-zero:generate": "bun --filter @repo/web drizzle-zero:generate",
+    "schema:sync": "bun db:push && bun drizzle-zero:generate",
+    "docker:start": "bun --filter @repo/docker start",
+    "docker:stop": "bun --filter @repo/docker stop",
+    "docker:logs": "bun --filter @repo/docker logs",
+    "docker:clean": "bun --filter @repo/docker clean",
+    "zero:clean": "source .env && rm -rf \"${ZERO_REPLICA_FILE}\"*"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0",
+    "turbo": "^2.5.4"
+  },
+  "dependencies": {
+    "sst": "3.9.33"
+  },
+  "trustedDependencies": [
+    "@rocicorp/zero-sqlite3"
+  ],
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@rocicorp/zero-sqlite3"
+    ]
+  },
+  "_": "For some reason, sst requires esbuild 0.25.0 when deploying the permission deployer",
+  "overrides": {
+    "esbuild": "0.25.0"
+  },
+  "packageManager": "bun@1.3.2"
+}

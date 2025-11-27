@@ -1,0 +1,13 @@
+{
+  "name": "@repo/docker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "docker compose --env-file ../../.env -f ./docker-compose.yml up -d && ./wait-for-pg.sh",
+    "start": "docker compose --env-file ../../.env -f ./docker-compose.yml up -d",
+    "stop": "docker compose --env-file ../../.env -f ./docker-compose.yml down",
+    "logs": "docker compose --env-file ../../.env -f ./docker-compose.yml logs -f",
+    "clean": "docker compose --env-file ../../.env -f ./docker-compose.yml down -v"
+  }
+}

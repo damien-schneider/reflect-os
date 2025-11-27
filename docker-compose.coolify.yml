@@ -35,26 +35,31 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      # Database connections - Zero needs separate databases for different purposes
+      # Using the same database with different logical databases for simplicity
       - ZERO_UPSTREAM_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
+      - ZERO_CVR_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
+      - ZERO_CHANGE_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
+      # Authentication
       - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?}
+      # Replica file for local caching
       - ZERO_REPLICA_FILE=/data/zero_replica.db
+      # Logging and workers
       - ZERO_LOG_LEVEL=${ZERO_LOG_LEVEL:-info}
+      - LOG_LEVEL=${ZERO_LOG_LEVEL:-info}
       - ZERO_NUM_SYNC_WORKERS=${ZERO_NUM_SYNC_WORKERS:-2}
     volumes:
       - zero_data:/data
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost:4848",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    # IMPORTANT: Disable health check dependency for Coolify
+    # Zero-cache needs significant time (2-5 min) for initial database sync
+    # The web app will retry connections automatically
+    # If you need health checks, uncomment below but increase start_period
+    # healthcheck:
+    #   test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:4848/ || exit 1"]
+    #   interval: 30s
+    #   timeout: 30s
+    #   start_period: 300s
+    #   retries: 10
 
   # Web Application (Vite/React frontend with API)
   web:
@@ -65,11 +70,13 @@ services:
         - VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER:?Set this to your zero-cache domain}
         - VITE_PUBLIC_API_SERVER=${VITE_PUBLIC_API_SERVER:?Set this to your web domain}
     restart: unless-stopped
+    # Only wait for postgres - zero-cache will be available eventually
+    # The frontend will retry WebSocket connections automatically
     depends_on:
       postgres:
         condition: service_healthy
       zero-cache:
-        condition: service_healthy
+        condition: service_started
     environment:
       # Public environment variables (exposed to browser via build args)
       - VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER:?Set this to your zero-cache domain}

@@ -3,33 +3,82 @@ import { z } from "zod";
 
 export const serverEnv = createEnv({
   server: {
-    // Database
-    ZERO_UPSTREAM_DB: z.url(),
+    /**
+     * PostgreSQL connection string for Zero upstream database
+     * @example "postgresql://user:password@localhost:5432/mydb"
+     */
+    ZERO_UPSTREAM_DB: z
+      .string()
+      .url("ZERO_UPSTREAM_DB must be a valid PostgreSQL URL")
+      .refine(
+        (url) => url.startsWith("postgresql://") || url.startsWith("postgres://"),
+        "ZERO_UPSTREAM_DB must be a PostgreSQL connection string"
+      ),
 
-    // Zero Auth
-    ZERO_AUTH_SECRET: z.string().min(1),
+    /**
+     * Secret key for Zero JWT authentication (min 32 chars for security)
+     */
+    ZERO_AUTH_SECRET: z
+      .string()
+      .min(1, "ZERO_AUTH_SECRET is required")
+      .refine(
+        (val) => process.env.NODE_ENV === "development" || val.length >= 32,
+        "ZERO_AUTH_SECRET must be at least 32 characters in production"
+      ),
 
-    // Zero Replica (local development)
+    /**
+     * Path to Zero replica SQLite file (for local development)
+     * @example "/tmp/zero_replica.db"
+     */
     ZERO_REPLICA_FILE: z.string().optional(),
 
-    // Zero Log Level
+    /**
+     * Zero cache server log level
+     */
     ZERO_LOG_LEVEL: z
       .enum(["debug", "info", "warn", "error"])
       .optional()
       .default("info"),
 
-    // Better Auth
-    BETTER_AUTH_SECRET: z.string().min(1),
-    BETTER_AUTH_URL: z.string().url(),
+    /**
+     * Secret key for Better Auth sessions (min 32 chars for security)
+     */
+    BETTER_AUTH_SECRET: z
+      .string()
+      .min(1, "BETTER_AUTH_SECRET is required")
+      .refine(
+        (val) => process.env.NODE_ENV === "development" || val.length >= 32,
+        "BETTER_AUTH_SECRET must be at least 32 characters in production"
+      ),
 
-    // AWS (optional, for SST deployment)
+    /**
+     * Base URL for Better Auth callbacks
+     * @example "http://localhost:5173" for development
+     * @example "https://yourdomain.com" for production
+     */
+    BETTER_AUTH_URL: z
+      .string()
+      .url("BETTER_AUTH_URL must be a valid URL"),
+
+    /**
+     * AWS Region (optional, for SST/AWS deployment)
+     */
     AWS_REGION: z.string().optional(),
 
-    // Custom domain (optional, for SST deployment)
+    /**
+     * Custom domain name (optional, for SST deployment)
+     * @example "yourdomain.com"
+     */
     DOMAIN_NAME: z.string().optional(),
+
+    /**
+     * ACM certificate ARN for custom domain (optional, for SST deployment)
+     */
     DOMAIN_CERT: z.string().optional(),
 
-    // Node environment
+    /**
+     * Node environment
+     */
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .optional()
@@ -37,4 +86,8 @@ export const serverEnv = createEnv({
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
+  // Skip validation in edge/client environments where process.env might not be available
+  skipValidation:
+    !!process.env.SKIP_ENV_VALIDATION ||
+    process.env.npm_lifecycle_event === "lint",
 });

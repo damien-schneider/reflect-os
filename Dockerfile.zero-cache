@@ -33,18 +33,25 @@ FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-# Install runtime dependencies
-RUN apk add --no-cache libc6-compat wget
+# Install runtime dependencies including netcat for database checks
+RUN apk add --no-cache libc6-compat wget netcat-openbsd
 
 # Install bun for runtime
 RUN npm install -g bun
 
-# Copy built application - bun hoists all node_modules to root level
+# Copy entire node_modules tree (preserves symlinks and hoisted packages)
 COPY --from=base /app/node_modules ./node_modules
+
+# Copy packages and source
 COPY --from=base /app/packages ./packages
 COPY --from=base /app/apps/web/src ./apps/web/src
 COPY --from=base /app/apps/web/package.json ./apps/web/package.json
 COPY --from=base /app/package.json ./package.json
+COPY --from=base /app/bun.lock ./bun.lock
+
+# Copy startup script
+COPY scripts/start-zero-cache.sh /app/start-zero-cache.sh
+RUN chmod +x /app/start-zero-cache.sh
 
 # Create data directory for Zero replica
 RUN mkdir -p /data
@@ -55,9 +62,10 @@ WORKDIR /app/apps/web
 EXPOSE 4848
 EXPOSE 4849
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:4848 || exit 1
+# Health check - generous timing for initial database sync
+# start_period gives time for initial setup before health checks matter
+HEALTHCHECK --interval=30s --timeout=30s --start-period=300s --retries=10 \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:4848/ || exit 1
 
-# Start zero-cache in production mode
-CMD ["bun", "run", "node_modules/.bin/zero-cache", "-p", "src/schema.ts"]
+# Start zero-cache with initialization script
+CMD ["/app/start-zero-cache.sh"]

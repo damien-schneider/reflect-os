@@ -1,0 +1,51 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+**/dist
+.next
+**/.next
+
+# Development
+.env
+.env.local
+.env.*.local
+*.log
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Turbo
+.turbo
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+!docker-compose.coolify.yml
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+coverage
+
+# Misc
+.npmrc
+.yarnrc
+.pnpm-debug.log

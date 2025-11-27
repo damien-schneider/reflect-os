@@ -1,0 +1,73 @@
+# Web Application Dockerfile
+# Builds the Vite/React frontend with Hono API server
+
+FROM node:22-alpine AS base
+
+# Install dependencies
+RUN apk add --no-cache libc6-compat python3 make g++
+
+WORKDIR /app
+
+# Install bun
+RUN npm install -g bun
+
+# Copy package files
+COPY package.json bun.lock* ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/db/package.json ./packages/db/
+
+# Install dependencies
+RUN bun install
+
+# Copy source code
+COPY . .
+
+# Build stage
+FROM base AS builder
+
+# Build arguments for Vite (baked into frontend at build time)
+ARG VITE_PUBLIC_ZERO_SERVER
+ARG VITE_PUBLIC_API_SERVER
+
+# Set as environment variables for the build
+ENV VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER}
+ENV VITE_PUBLIC_API_SERVER=${VITE_PUBLIC_API_SERVER}
+
+WORKDIR /app
+
+# Build the database package
+RUN cd packages/db && bun run build
+
+# Generate Zero schema
+RUN cd apps/web && bun run drizzle-zero:generate
+
+# Build the web application
+RUN cd apps/web && bun run build
+
+# Production stage
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+# Install production dependencies only
+RUN apk add --no-cache libc6-compat wget
+
+# Install bun for runtime
+RUN npm install -g bun
+
+# Copy built assets and server
+COPY --from=builder /app/apps/web/dist ./dist
+COPY --from=builder /app/apps/web/api ./api
+COPY --from=builder /app/apps/web/server.ts ./server.ts
+COPY --from=builder /app/apps/web/package.json ./package.json
+COPY --from=builder /app/apps/web/src/env ./src/env
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+
+CMD ["bun", "run", "server.ts"]

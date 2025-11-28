@@ -3,6 +3,17 @@ version: "3.8"
 # Docker Compose for Coolify deployment
 # This file is designed to work with Coolify's Docker Compose deployment
 # See: https://coolify.io/docs/knowledge-base/docker/compose
+#
+# Coolify auto-generates these variables:
+#   SERVICE_FQDN_WEB - Domain for web service
+#   SERVICE_FQDN_ZERO_CACHE - Domain for zero-cache service  
+#   SERVICE_URL_WEB - Full URL for web service (http://...)
+#   SERVICE_URL_ZERO_CACHE - Full URL for zero-cache service (http://...)
+#
+# Required environment variables to set manually in Coolify:
+#   POSTGRES_PASSWORD - Database password
+#   ZERO_AUTH_SECRET - JWT secret for Zero (32+ chars)
+#   BETTER_AUTH_SECRET - Session secret for Better Auth (32+ chars)
 
 services:
   # PostgreSQL Database
@@ -11,7 +22,7 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-user}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       - POSTGRES_DB=${POSTGRES_DB:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -35,13 +46,12 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      # Database connections - Zero needs separate databases for different purposes
-      # Using the same database with different logical databases for simplicity
+      # Database connections
       - ZERO_UPSTREAM_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CVR_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CHANGE_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
       # Authentication
-      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?}
+      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
       # Replica file for local caching
       - ZERO_REPLICA_FILE=/data/zero_replica.db
       # Logging and workers
@@ -53,16 +63,6 @@ services:
     ports:
       - "4848:4848"
       - "4849:4849"
-    # IMPORTANT: Disable health check dependency for Coolify
-    # Zero-cache needs significant time (2-5 min) for initial database sync
-    # The web app will retry connections automatically
-    # If you need health checks, uncomment below but increase start_period
-    # healthcheck:
-    #   test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:4848/ || exit 1"]
-    #   interval: 30s
-    #   timeout: 30s
-    #   start_period: 300s
-    #   retries: 10
 
   # Web Application (Vite/React frontend with API)
   web:
@@ -70,11 +70,10 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        - VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER:?Set this to your zero-cache domain}
-        - VITE_PUBLIC_API_SERVER=${VITE_PUBLIC_API_SERVER:?Set this to your web domain}
+        # Use Coolify's auto-generated SERVICE_URL variables
+        - VITE_PUBLIC_ZERO_SERVER=${SERVICE_URL_ZERO_CACHE:-http://localhost:4848}
+        - VITE_PUBLIC_API_SERVER=${SERVICE_URL_WEB:-http://localhost:3000}
     restart: unless-stopped
-    # Only wait for postgres - zero-cache will be available eventually
-    # The frontend will retry WebSocket connections automatically
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,15 +82,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # Public environment variables (exposed to browser via build args)
-      - VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER:?Set this to your zero-cache domain}
-      - VITE_PUBLIC_API_SERVER=${VITE_PUBLIC_API_SERVER:?Set this to your web domain}
       # Server-side environment variables
       - ZERO_UPSTREAM_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?}
-      - BETTER_AUTH_URL=${BETTER_AUTH_URL:?Set this to your web domain}
-      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?}
-      # Node environment
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      - BETTER_AUTH_URL=${SERVICE_URL_WEB:-http://localhost:3000}
+      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
       - NODE_ENV=production
 
 volumes:

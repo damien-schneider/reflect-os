@@ -50,6 +50,9 @@ services:
       - ZERO_NUM_SYNC_WORKERS=${ZERO_NUM_SYNC_WORKERS:-2}
     volumes:
       - zero_data:/data
+    ports:
+      - "4848:4848"
+      - "4849:4849"
     # IMPORTANT: Disable health check dependency for Coolify
     # Zero-cache needs significant time (2-5 min) for initial database sync
     # The web app will retry connections automatically
@@ -77,6 +80,8 @@ services:
         condition: service_healthy
       zero-cache:
         condition: service_started
+    ports:
+      - "3000:3000"
     environment:
       # Public environment variables (exposed to browser via build args)
       - VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER:?Set this to your zero-cache domain}

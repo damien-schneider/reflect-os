@@ -5,9 +5,7 @@ version: "3.8"
 #
 # Coolify Magic Variables (auto-generated when SERVICE_FQDN_* is declared):
 #   SERVICE_FQDN_<NAME> - Generates domain and configures proxy
-#   SERVICE_FQDN_<NAME>_<PORT> - Proxies to specific port
-#   SERVICE_URL_<NAME> - Full URL (http://...) 
-#   SERVICE_PASSWORD_<NAME> - Auto-generated password
+#   SERVICE_URL_<NAME> - Full URL (http://...)
 #
 # Required environment variables (set in Coolify UI):
 #   POSTGRES_PASSWORD - Database password
@@ -26,7 +24,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-postgres}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-postgres}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,8 +43,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      # Coolify magic variable - generates FQDN and proxies to port 4848
-      - SERVICE_FQDN_ZEROCACHE_4848
+      # Coolify magic variable - generates FQDN
+      - SERVICE_FQDN_ZERO_CACHE
       # Database connections
       - ZERO_UPSTREAM_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CVR_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
@@ -57,6 +59,12 @@ services:
       - ZERO_NUM_SYNC_WORKERS=${ZERO_NUM_SYNC_WORKERS:-2}
     volumes:
       - zero_data:/data
+    # Expose port to Coolify's Traefik proxy
+    expose:
+      - "4848"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.zero-cache.loadbalancer.server.port=4848"
 
   # Web Application (Vite/React frontend with API)
   web:
@@ -65,7 +73,7 @@ services:
       dockerfile: Dockerfile.web
       args:
         # Use the auto-generated URLs from Coolify
-        - VITE_PUBLIC_ZERO_SERVER=${SERVICE_URL_ZEROCACHE:-http://localhost:4848}
+        - VITE_PUBLIC_ZERO_SERVER=${SERVICE_URL_ZERO_CACHE:-http://localhost:4848}
         - VITE_PUBLIC_API_SERVER=${SERVICE_URL_WEB:-http://localhost:3000}
     restart: unless-stopped
     depends_on:
@@ -74,14 +82,20 @@ services:
       zero-cache:
         condition: service_started
     environment:
-      # Coolify magic variable - generates FQDN and proxies to port 3000
-      - SERVICE_FQDN_WEB_3000
+      # Coolify magic variable - generates FQDN
+      - SERVICE_FQDN_WEB
       # Server-side environment variables
       - ZERO_UPSTREAM_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?secret required}
       - BETTER_AUTH_URL=${SERVICE_URL_WEB:-http://localhost:3000}
       - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?secret required}
       - NODE_ENV=production
+    # Expose port to Coolify's Traefik proxy
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
 
 volumes:
   postgres_data:

@@ -1,16 +1,15 @@
 version: "3.8"
 
 # Docker Compose for Coolify deployment
-# This file is designed to work with Coolify's Docker Compose deployment
 # See: https://coolify.io/docs/knowledge-base/docker/compose
 #
-# Coolify auto-generates these variables:
-#   SERVICE_FQDN_WEB - Domain for web service
-#   SERVICE_FQDN_ZERO_CACHE - Domain for zero-cache service  
-#   SERVICE_URL_WEB - Full URL for web service (http://...)
-#   SERVICE_URL_ZERO_CACHE - Full URL for zero-cache service (http://...)
+# Coolify Magic Variables (auto-generated when SERVICE_FQDN_* is declared):
+#   SERVICE_FQDN_<NAME> - Generates domain and configures proxy
+#   SERVICE_FQDN_<NAME>_<PORT> - Proxies to specific port
+#   SERVICE_URL_<NAME> - Full URL (http://...) 
+#   SERVICE_PASSWORD_<NAME> - Auto-generated password
 #
-# Required environment variables to set manually in Coolify:
+# Required environment variables (set in Coolify UI):
 #   POSTGRES_PASSWORD - Database password
 #   ZERO_AUTH_SECRET - JWT secret for Zero (32+ chars)
 #   BETTER_AUTH_SECRET - Session secret for Better Auth (32+ chars)
@@ -22,16 +21,12 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-user}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?database password required}
       - POSTGRES_DB=${POSTGRES_DB:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-postgres}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -46,12 +41,14 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      # Coolify magic variable - generates FQDN and proxies to port 4848
+      - SERVICE_FQDN_ZEROCACHE_4848
       # Database connections
       - ZERO_UPSTREAM_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CVR_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CHANGE_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
       # Authentication
-      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
+      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?secret required}
       # Replica file for local caching
       - ZERO_REPLICA_FILE=/data/zero_replica.db
       # Logging and workers
@@ -60,9 +57,6 @@ services:
       - ZERO_NUM_SYNC_WORKERS=${ZERO_NUM_SYNC_WORKERS:-2}
     volumes:
       - zero_data:/data
-    ports:
-      - "4848:4848"
-      - "4849:4849"
 
   # Web Application (Vite/React frontend with API)
   web:
@@ -70,8 +64,8 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        # Use Coolify's auto-generated SERVICE_URL variables
-        - VITE_PUBLIC_ZERO_SERVER=${SERVICE_URL_ZERO_CACHE:-http://localhost:4848}
+        # Use the auto-generated URLs from Coolify
+        - VITE_PUBLIC_ZERO_SERVER=${SERVICE_URL_ZEROCACHE:-http://localhost:4848}
         - VITE_PUBLIC_API_SERVER=${SERVICE_URL_WEB:-http://localhost:3000}
     restart: unless-stopped
     depends_on:
@@ -79,14 +73,14 @@ services:
         condition: service_healthy
       zero-cache:
         condition: service_started
-    ports:
-      - "3000:3000"
     environment:
+      # Coolify magic variable - generates FQDN and proxies to port 3000
+      - SERVICE_FQDN_WEB_3000
       # Server-side environment variables
       - ZERO_UPSTREAM_DB=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?secret required}
       - BETTER_AUTH_URL=${SERVICE_URL_WEB:-http://localhost:3000}
-      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
+      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:?secret required}
       - NODE_ENV=production
 
 volumes:

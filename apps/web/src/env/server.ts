@@ -86,8 +86,11 @@ export const serverEnv = createEnv({
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
-  // Skip validation in edge/client environments where process.env might not be available
+  // Skip validation during build (when server env vars aren't available)
+  // and in lint/client environments
   skipValidation:
     !!process.env.SKIP_ENV_VALIDATION ||
-    process.env.npm_lifecycle_event === "lint",
+    process.env.npm_lifecycle_event === "lint" ||
+    process.env.npm_lifecycle_event === "build" ||
+    typeof window !== "undefined",
 });

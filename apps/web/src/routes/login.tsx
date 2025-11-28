@@ -66,6 +66,7 @@ function Login() {
             }, 1000);
           },
           onError: (ctx) => {
+            console.error("Sign up error:", ctx.error);
             setError(ctx.error.message || "Could not create account. Try a different email.");
             setIsLoading(false);
           },

@@ -4,6 +4,7 @@
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { SignJWT } from "jose";
 import { auth } from "./api/auth.js";
 
@@ -24,13 +25,29 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
+console.log(`Auth configuration:
+  BETTER_AUTH_URL: ${serverEnv.BETTER_AUTH_URL}
+  NODE_ENV: ${process.env.NODE_ENV}
+`);
+
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
 // Create API app
 const apiApp = new Hono();
 
-apiApp.on(["POST", "GET"], "/auth/**", (c) => {
-  return auth.handler(c.req.raw);
+// Enable CORS for API routes
+apiApp.use("/*", cors({
+  origin: serverEnv.BETTER_AUTH_URL,
+  credentials: true,
+}));
+
+apiApp.on(["POST", "GET"], "/auth/**", async (c) => {
+  try {
+    return await auth.handler(c.req.raw);
+  } catch (error) {
+    console.error("Auth error:", error);
+    throw error;
+  }
 });
 
 apiApp.get("/zero-token", async (c) => {

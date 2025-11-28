@@ -1,8 +1,11 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { authClient } from "../lib/auth-client";
+import { useZero, useQuery } from "@rocicorp/zero/react";
 import { AuthGuard } from "../components/auth-guard";
 import { Button } from "../components/ui/button";
-import { Building2, Plus } from "lucide-react";
+import { Building2, Plus, Loader2 } from "lucide-react";
+import type { Schema } from "../schema";
 
 export const Route = createFileRoute("/")({
   component: () => (
@@ -14,8 +17,36 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { data: organizations, isPending } = authClient.useListOrganizations();
+  const z = useZero<Schema>();
+  const [syncAttempts, setSyncAttempts] = useState(0);
+  
+  // Get the first org's ID to check if Zero has synced it
+  const firstOrgId = organizations?.[0]?.id ?? "";
+  
+  // Query Zero to see if the org is synced
+  const [zeroOrgs, { type: queryStatus }] = useQuery(
+    z.query.organization.where("id", "=", firstOrgId)
+  );
+  const zeroOrgSynced = zeroOrgs && zeroOrgs.length > 0;
+  const zeroQueryComplete = queryStatus === "complete";
 
-  // While loading, show nothing (AuthGuard handles redirect if not logged in)
+  // Retry sync check periodically if org exists in Better Auth but not in Zero yet
+  useEffect(() => {
+    if (
+      organizations && 
+      organizations.length > 0 && 
+      zeroQueryComplete && 
+      !zeroOrgSynced && 
+      syncAttempts < 10
+    ) {
+      const timer = setTimeout(() => {
+        setSyncAttempts((prev) => prev + 1);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [organizations, zeroQueryComplete, zeroOrgSynced, syncAttempts]);
+
+  // While loading from Better Auth, show loading
   if (isPending) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -24,9 +55,20 @@ function Index() {
     );
   }
 
-  // If user has organizations, redirect to the first one
+  // If user has organizations, wait for Zero sync then redirect
   if (organizations && organizations.length > 0) {
-    return <Navigate to="/$orgSlug" params={{ orgSlug: organizations[0].slug }} />;
+    // If Zero has synced or we've waited long enough, redirect
+    if (zeroOrgSynced || syncAttempts >= 10) {
+      return <Navigate to="/$orgSlug" params={{ orgSlug: organizations[0].slug }} />;
+    }
+    
+    // Still waiting for Zero to sync
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Syncing organization data...</p>
+      </div>
+    );
   }
 
   // No organizations - show welcome screen

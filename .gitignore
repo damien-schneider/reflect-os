@@ -32,3 +32,5 @@ zero-schema.json
 
 # sst
 .sst
+
+.turbo

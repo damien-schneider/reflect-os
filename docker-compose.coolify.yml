@@ -71,9 +71,10 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        # Use SERVICE_URL_* variables (Coolify provides these with protocol)
-        - VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER:-$SERVICE_URL_ZERO_CACHE}
-        - VITE_PUBLIC_API_SERVER=${VITE_PUBLIC_API_SERVER:-$SERVICE_URL_WEB}
+        # Build args for Vite - these get baked into the frontend
+        # Override with VITE_PUBLIC_* env vars in Coolify for HTTPS URLs
+        - VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER}
+        - VITE_PUBLIC_API_SERVER=${VITE_PUBLIC_API_SERVER}
     restart: unless-stopped
     depends_on:
       postgres:

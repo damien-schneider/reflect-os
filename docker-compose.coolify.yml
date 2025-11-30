@@ -71,9 +71,10 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        # Use SERVICE_URL_* (includes https://) for valid URLs
-        - VITE_PUBLIC_ZERO_SERVER=$SERVICE_URL_ZERO_CACHE
-        - VITE_PUBLIC_API_SERVER=$SERVICE_URL_WEB
+        # Use SERVICE_FQDN_* and add https:// prefix
+        # Coolify's SERVICE_URL_* may not always include protocol
+        - VITE_PUBLIC_ZERO_SERVER=https://${SERVICE_FQDN_ZERO_CACHE}
+        - VITE_PUBLIC_API_SERVER=https://${SERVICE_FQDN_WEB}
     restart: unless-stopped
     depends_on:
       postgres:
@@ -86,7 +87,8 @@ services:
       # Server-side environment variables
       - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
-      - BETTER_AUTH_URL=$SERVICE_URL_WEB
+      # Use FQDN with explicit https:// prefix for consistent URL format
+      - BETTER_AUTH_URL=https://${SERVICE_FQDN_WEB}
       - ZERO_AUTH_SECRET=$ZERO_AUTH_SECRET
       - NODE_ENV=production
 

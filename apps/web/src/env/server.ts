@@ -58,7 +58,14 @@ export const serverEnv = createEnv({
      */
     BETTER_AUTH_URL: z
       .string()
-      .url("BETTER_AUTH_URL must be a valid URL"),
+      .transform((url) => {
+        // Add https:// if no protocol is present
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          return `https://${url}`;
+        }
+        return url;
+      })
+      .pipe(z.string().url("BETTER_AUTH_URL must be a valid URL")),
 
     /**
      * AWS Region (optional, for SST/AWS deployment)

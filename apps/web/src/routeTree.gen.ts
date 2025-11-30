@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MyAccountRouteImport } from './routes/my-account'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as OrgSlugRouteRouteImport } from './routes/$orgSlug/route'
@@ -17,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as OrgSlugIndexRouteImport } from './routes/$orgSlug/index'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
+import { Route as DashboardAccountRouteImport } from './routes/dashboard/account'
 import { Route as OrgSlugChangelogRouteImport } from './routes/$orgSlug/changelog'
 import { Route as DashboardOrgSlugRouteRouteImport } from './routes/dashboard/$orgSlug/route'
 import { Route as OrgSlugAdminRouteRouteImport } from './routes/$orgSlug/admin/route'
@@ -37,11 +37,6 @@ import { Route as OrgSlugBoardSlugFeedbackIdRouteImport } from './routes/$orgSlu
 import { Route as DashboardOrgSlugBoardSlugRouteRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/route'
 import { Route as DashboardOrgSlugBoardSlugIndexRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/index'
 
-const MyAccountRoute = MyAccountRouteImport.update({
-  id: '/my-account',
-  path: '/my-account',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -76,6 +71,11 @@ const UUserIdRoute = UUserIdRouteImport.update({
   id: '/u/$userId',
   path: '/u/$userId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAccountRoute = DashboardAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const OrgSlugChangelogRoute = OrgSlugChangelogRouteImport.update({
   id: '/changelog',
@@ -183,11 +183,11 @@ export interface FileRoutesByFullPath {
   '/$orgSlug': typeof OrgSlugRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/my-account': typeof MyAccountRoute
   '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugRouteRouteWithChildren
   '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
   '/dashboard/$orgSlug': typeof DashboardOrgSlugRouteRouteWithChildren
   '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
+  '/dashboard/account': typeof DashboardAccountRoute
   '/u/$userId': typeof UUserIdRoute
   '/$orgSlug/': typeof OrgSlugIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -210,9 +210,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/my-account': typeof MyAccountRoute
   '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
   '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
+  '/dashboard/account': typeof DashboardAccountRoute
   '/u/$userId': typeof UUserIdRoute
   '/$orgSlug': typeof OrgSlugIndexRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -237,11 +237,11 @@ export interface FileRoutesById {
   '/$orgSlug': typeof OrgSlugRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/my-account': typeof MyAccountRoute
   '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugRouteRouteWithChildren
   '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
   '/dashboard/$orgSlug': typeof DashboardOrgSlugRouteRouteWithChildren
   '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
+  '/dashboard/account': typeof DashboardAccountRoute
   '/u/$userId': typeof UUserIdRoute
   '/$orgSlug/': typeof OrgSlugIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -268,11 +268,11 @@ export interface FileRouteTypes {
     | '/$orgSlug'
     | '/dashboard'
     | '/login'
-    | '/my-account'
     | '/$orgSlug/$boardSlug'
     | '/$orgSlug/admin'
     | '/dashboard/$orgSlug'
     | '/$orgSlug/changelog'
+    | '/dashboard/account'
     | '/u/$userId'
     | '/$orgSlug/'
     | '/dashboard/'
@@ -295,9 +295,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
-    | '/my-account'
     | '/$orgSlug/admin'
     | '/$orgSlug/changelog'
+    | '/dashboard/account'
     | '/u/$userId'
     | '/$orgSlug'
     | '/dashboard'
@@ -321,11 +321,11 @@ export interface FileRouteTypes {
     | '/$orgSlug'
     | '/dashboard'
     | '/login'
-    | '/my-account'
     | '/$orgSlug/$boardSlug'
     | '/$orgSlug/admin'
     | '/dashboard/$orgSlug'
     | '/$orgSlug/changelog'
+    | '/dashboard/account'
     | '/u/$userId'
     | '/$orgSlug/'
     | '/dashboard/'
@@ -351,19 +351,11 @@ export interface RootRouteChildren {
   OrgSlugRouteRoute: typeof OrgSlugRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
-  MyAccountRoute: typeof MyAccountRoute
   UUserIdRoute: typeof UUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/my-account': {
-      id: '/my-account'
-      path: '/my-account'
-      fullPath: '/my-account'
-      preLoaderRoute: typeof MyAccountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -412,6 +404,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/u/$userId'
       preLoaderRoute: typeof UUserIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/account': {
+      id: '/dashboard/account'
+      path: '/account'
+      fullPath: '/dashboard/account'
+      preLoaderRoute: typeof DashboardAccountRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/$orgSlug/changelog': {
       id: '/$orgSlug/changelog'
@@ -643,11 +642,13 @@ const DashboardOrgSlugRouteRouteWithChildren =
 
 interface DashboardRouteRouteChildren {
   DashboardOrgSlugRouteRoute: typeof DashboardOrgSlugRouteRouteWithChildren
+  DashboardAccountRoute: typeof DashboardAccountRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardOrgSlugRouteRoute: DashboardOrgSlugRouteRouteWithChildren,
+  DashboardAccountRoute: DashboardAccountRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -660,7 +661,6 @@ const rootRouteChildren: RootRouteChildren = {
   OrgSlugRouteRoute: OrgSlugRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   LoginRoute: LoginRoute,
-  MyAccountRoute: MyAccountRoute,
   UUserIdRoute: UUserIdRoute,
 }
 export const routeTree = rootRouteImport

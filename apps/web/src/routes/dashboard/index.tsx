@@ -13,18 +13,23 @@ export const Route = createFileRoute("/dashboard/")({
 function DashboardIndex() {
   const navigate = useNavigate();
   const { data: organizations, isPending: authPending } = authClient.useListOrganizations();
+  const { data: session } = authClient.useSession();
   const hasRedirected = useRef(false);
   const z = useZero<Schema>();
   const [syncAttempts, setSyncAttempts] = useState(0);
   
   // Get the first org's ID to check if Zero has synced it
   const firstOrgId = organizations?.[0]?.id ?? "";
+  const userId = session?.user?.id ?? "";
   
-  // Query Zero to see if the org is synced
-  const [zeroOrgs, { type: queryStatus }] = useQuery(
-    z.query.organization.where("id", "=", firstOrgId)
+  // Query Zero member table to see if the org membership is synced
+  // Member table has simpler permissions (allowIfLoggedIn) than organization table
+  const [zeroMembers, { type: queryStatus }] = useQuery(
+    z.query.member
+      .where("organizationId", "=", firstOrgId)
+      .where("userId", "=", userId)
   );
-  const zeroOrgSynced = zeroOrgs && zeroOrgs.length > 0;
+  const zeroOrgSynced = zeroMembers && zeroMembers.length > 0;
   const zeroQueryComplete = queryStatus === "complete";
 
   // Retry sync check periodically if org exists in Better Auth but not in Zero yet
@@ -32,6 +37,7 @@ function DashboardIndex() {
     if (
       organizations && 
       organizations.length > 0 && 
+      userId &&
       zeroQueryComplete && 
       !zeroOrgSynced && 
       syncAttempts < 10
@@ -41,7 +47,7 @@ function DashboardIndex() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [organizations, zeroQueryComplete, zeroOrgSynced, syncAttempts]);
+  }, [organizations, userId, zeroQueryComplete, zeroOrgSynced, syncAttempts]);
 
   useEffect(() => {
     // Only redirect when:
@@ -90,7 +96,7 @@ function DashboardIndex() {
           </div>
 
           <Button asChild size="lg" className="gap-2">
-            <Link to="/my-account">
+            <Link to="/dashboard/account">
               <Plus className="h-4 w-4" />
               Create Organization
             </Link>

@@ -18,33 +18,36 @@ function DashboardOrgLayout() {
 
   // Get session info
   const { data: session, isPending: sessionPending } = authClient.useSession();
+  const userId = session?.user?.id ?? "";
   
   // Check if user has this org in Better Auth (source of truth for membership)
   const { data: authOrganizations, isPending: authOrgsPending } = authClient.useListOrganizations();
   const authOrg = authOrganizations?.find((o) => o.slug === orgSlug);
   const hasAuthMembership = !!authOrg;
+  const authOrgId = authOrg?.id ?? "";
 
-  // Get organization from Zero for real-time updates
+  // Query Zero member table first - it has simpler permissions (allowIfLoggedIn)
+  // This lets us detect sync status even for private organizations
+  const [members, { type: memberQueryStatus }] = useQuery(
+    z.query.member
+      .where("organizationId", "=", authOrgId)
+      .where("userId", "=", userId)
+  );
+  const isMemberInZero = members && members.length > 0;
+
+  // Get organization from Zero for real-time updates (will only work after member syncs)
   const [orgs, { type: queryStatus }] = useQuery(
     z.query.organization.where("slug", "=", orgSlug ?? "")
   );
   const org = orgs?.[0];
-
-  // Check if user is a member in Zero
-  const [members] = useQuery(
-    z.query.member
-      .where("organizationId", "=", org?.id ?? "")
-      .where("userId", "=", session?.user?.id ?? "")
-  );
-  const isMemberInZero = members && members.length > 0;
   
   // User has access if they're a member according to Better Auth
   // We use Better Auth as source of truth since Zero might be syncing
   const hasAccess = hasAuthMembership;
   
-  // Wait for Zero to sync if user has auth membership but Zero hasn't synced yet
-  const zeroSynced = org && isMemberInZero;
-  const needsSync = hasAuthMembership && !zeroSynced && queryStatus === "complete";
+  // Wait for Zero to sync if user has auth membership but member hasn't synced yet
+  // Use member sync status as primary indicator since it has simpler permissions
+  const needsSync = hasAuthMembership && !isMemberInZero && memberQueryStatus === "complete";
 
   // Retry sync check periodically if needed
   useEffect(() => {
@@ -81,7 +84,8 @@ function DashboardOrgLayout() {
   }
   
   // Show loading while Zero syncs (only if user has auth access)
-  if (hasAccess && (queryStatus !== "complete" || needsSync)) {
+  // Use memberQueryStatus since that's what we're using to detect sync
+  if (hasAccess && (memberQueryStatus !== "complete" || needsSync)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { authClient } from "../lib/auth-client";
+import { authClient } from "../../lib/auth-client";
 import { useState } from "react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import {
   Drawer,
   DrawerClose,
@@ -10,7 +10,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from "../components/ui/drawer";
+} from "../../components/ui/drawer";
 import {
   Dialog,
   DialogClose,
@@ -18,24 +18,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
+} from "../../components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../components/ui/tooltip";
+} from "../../components/ui/tooltip";
 import { Loader2, Plus, Trash2, Undo2, ChevronRight, LogOut } from "lucide-react";
-import { useIsMobile } from "../hooks/use-mobile";
-import { useOrganizations, useOrgInvite, useOrgRename, Organization } from "../hooks/use-organization";
-import { OrgDetailContent } from "../components/organization";
-import { AuthGuard } from "../components/auth-guard";
+import { useIsMobile } from "../../hooks/use-mobile";
+import { useOrganizations, useOrgInvite, useOrgRename, Organization } from "../../hooks/use-organization";
+import { OrgDetailContent } from "../../components/organization";
 
-export const Route = createFileRoute("/my-account")({
-  component: () => (
-    <AuthGuard>
-      <MyAccount />
-    </AuthGuard>
-  ),
+export const Route = createFileRoute("/dashboard/account")({
+  component: MyAccount,
 });
 
 function MyAccount() {

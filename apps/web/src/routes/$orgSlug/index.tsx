@@ -104,7 +104,7 @@ function OrgDashboard() {
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
         <p className="text-muted-foreground">Organization not found</p>
         <Button variant="outline" asChild>
-          <Link to="/my-account">Go to My Account</Link>
+          <Link to="/dashboard/account">Go to My Account</Link>
         </Button>
       </div>
     );

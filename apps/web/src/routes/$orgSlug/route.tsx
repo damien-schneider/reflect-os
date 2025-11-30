@@ -17,28 +17,32 @@ function OrgLayout() {
 
   // Get session info
   const { data: session, isPending: sessionPending } = authClient.useSession();
+  const userId = session?.user?.id ?? "";
   
   // Check if user has this org in Better Auth
   const { data: authOrganizations, isPending: authOrgsPending } = authClient.useListOrganizations();
   const authOrg = authOrganizations?.find((o) => o.slug === orgSlug);
   const hasAuthMembership = !!authOrg;
+  const authOrgId = authOrg?.id ?? "";
 
-  // Get organization from Zero for real-time updates
+  // Query Zero member table first - it has simpler permissions (allowIfLoggedIn)
+  // This lets us detect sync status even for private organizations
+  const [members, { type: memberQueryStatus }] = useQuery(
+    z.query.member
+      .where("organizationId", "=", authOrgId)
+      .where("userId", "=", userId)
+  );
+  const isMember = members && members.length > 0;
+
+  // Get organization from Zero for real-time updates (will only work after member syncs)
   const [orgs, { type: queryStatus }] = useQuery(
     z.query.organization.where("slug", "=", orgSlug ?? "")
   );
   const org = orgs?.[0];
-
-  // Check if user is a member (for private features)
-  const [members] = useQuery(
-    z.query.member
-      .where("organizationId", "=", org?.id ?? "")
-      .where("userId", "=", session?.user?.id ?? "")
-  );
-  const isMember = members && members.length > 0;
   
-  // Wait for Zero sync if user has auth membership but Zero hasn't synced
-  const needsSync = hasAuthMembership && !org && queryStatus === "complete";
+  // Wait for Zero sync if user has auth membership but member hasn't synced yet
+  // Use member sync status as primary indicator since it has simpler permissions
+  const needsSync = hasAuthMembership && !isMember && memberQueryStatus === "complete";
 
   // Retry sync check periodically if needed
   useEffect(() => {
@@ -55,13 +59,17 @@ function OrgLayout() {
   // - User is not logged in OR user is not a member
   useEffect(() => {
     // Wait for queries to complete
-    if (sessionPending || authOrgsPending || queryStatus !== "complete") return;
+    // For members, use memberQueryStatus; for public orgs, we need org query
+    if (sessionPending || authOrgsPending) return;
     
     // If user has auth membership, they have access (Zero might just be syncing)
     if (hasAuthMembership) return;
     
-    // Still waiting for Zero sync
+    // Still waiting for Zero sync (for members)
     if (needsSync && syncAttempts < 20) return;
+    
+    // Wait for org query to complete (for non-members accessing public orgs)
+    if (queryStatus !== "complete") return;
 
     // If org doesn't exist, let the child route handle the 404
     if (!org) return;
@@ -75,14 +83,19 @@ function OrgLayout() {
       return;
     }
 
-    // If user is logged in but not a member, redirect to my-account
+    // If user is logged in but not a member, redirect to account
     if (!isMember) {
-      navigate({ to: "/my-account" });
+      navigate({ to: "/dashboard/account" });
     }
   }, [org, session, sessionPending, authOrgsPending, isMember, hasAuthMembership, queryStatus, navigate, needsSync, syncAttempts]);
 
   // Show loading while checking access or waiting for Zero sync
-  if (sessionPending || authOrgsPending || queryStatus !== "complete" || needsSync) {
+  // For members: wait for member sync. For public orgs: wait for org query
+  const isLoading = sessionPending || authOrgsPending || 
+    (hasAuthMembership && (memberQueryStatus !== "complete" || needsSync)) ||
+    (!hasAuthMembership && queryStatus !== "complete");
+    
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

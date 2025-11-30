@@ -58,7 +58,7 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
 
   // Check if we're on dashboard routes
   // Navigation is displayed when on dashboard routes
-  const isAccountPage = pathname === "/my-account";
+  const isAccountPage = pathname === "/dashboard/account";
 
   // Get current organization (or first one if not on org page)
   const currentOrg = organizations?.find((o) => o.slug === orgSlug) ?? organizations?.[0];
@@ -111,7 +111,7 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate({ to: "/my-account" })}>
+            <DropdownMenuItem onClick={() => navigate({ to: "/dashboard/account" })}>
               <Settings className="h-4 w-4 mr-2" />
               Organization Settings
             </DropdownMenuItem>
@@ -240,7 +240,7 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
           <div className="px-3 py-4 text-sm text-muted-foreground">
             <p>No organizations yet.</p>
             <Link
-              to="/my-account"
+              to="/dashboard/account"
               className="text-primary hover:underline"
             >
               Create one
@@ -255,7 +255,7 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
       <div className="p-4">
         <div className="flex items-center justify-between">
           <Link
-            to="/my-account"
+            to="/dashboard/account"
             className={cn(
               "flex items-center gap-2 p-0 h-auto rounded-md transition-colors",
               "hover:bg-accent hover:text-accent-foreground",

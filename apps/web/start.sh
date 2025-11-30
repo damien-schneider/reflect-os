@@ -11,20 +11,18 @@ echo "   PORT: ${PORT:-3000}"
 # This replaces placeholder values in the JS bundle with actual env values
 echo "🔧 Injecting runtime environment variables..."
 
-if [ -n "$VITE_PUBLIC_ZERO_SERVER" ] && [ -n "$VITE_PUBLIC_API_SERVER" ]; then
+if [ -n "$VITE_PUBLIC_ZERO_SERVER" ]; then
   echo "   VITE_PUBLIC_ZERO_SERVER: $VITE_PUBLIC_ZERO_SERVER"
-  echo "   VITE_PUBLIC_API_SERVER: $VITE_PUBLIC_API_SERVER"
   
   # Find and replace in all JS files
   find /app/dist -name '*.js' -type f | while read file; do
-    # Replace placeholder URLs with actual values
+    # Replace placeholder URL with actual value
     sed -i "s|__VITE_PUBLIC_ZERO_SERVER__|$VITE_PUBLIC_ZERO_SERVER|g" "$file"
-    sed -i "s|__VITE_PUBLIC_API_SERVER__|$VITE_PUBLIC_API_SERVER|g" "$file"
   done
   echo "✅ Environment variables injected!"
 else
-  echo "⚠️ VITE_PUBLIC_ZERO_SERVER or VITE_PUBLIC_API_SERVER not set"
-  echo "   Frontend may not work correctly"
+  echo "⚠️ VITE_PUBLIC_ZERO_SERVER not set"
+  echo "   Zero sync will not work"
 fi
 
 # Run database migrations

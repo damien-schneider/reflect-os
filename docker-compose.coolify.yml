@@ -74,9 +74,8 @@ services:
       # Coolify magic variables for domains
       - SERVICE_FQDN_WEB
       - SERVICE_FQDN_ZERO_CACHE
-      # URLs constructed from FQDNs (always HTTPS in production)
+      # Zero server URL (must be HTTPS with valid SSL cert)
       - VITE_PUBLIC_ZERO_SERVER=https://$SERVICE_FQDN_ZERO_CACHE
-      - VITE_PUBLIC_API_SERVER=https://$SERVICE_FQDN_WEB
       # Server-side environment variables
       - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-$SERVICE_PASSWORD_BETTERAUTH}

@@ -25,10 +25,9 @@ COPY . .
 # Build stage
 FROM base AS builder
 
-# Use placeholder values for build - will be replaced at runtime
+# Use placeholder value for build - will be replaced at runtime
 # This allows the same image to work with any domain configuration
 ENV VITE_PUBLIC_ZERO_SERVER=__VITE_PUBLIC_ZERO_SERVER__
-ENV VITE_PUBLIC_API_SERVER=__VITE_PUBLIC_API_SERVER__
 
 WORKDIR /app
 

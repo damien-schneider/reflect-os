@@ -1,9 +1,9 @@
 import { createAuthClient } from "better-auth/react";
 import { organizationClient } from "better-auth/client/plugins";
-import { clientEnv } from "@/env/client";
 
-
+// Use relative URL for API calls since the API is served from the same origin
+// This avoids cross-origin issues and SSL certificate problems
 export const authClient = createAuthClient({
-  baseURL: clientEnv.VITE_PUBLIC_API_SERVER,
+  baseURL: "",  // Empty string = same origin
   plugins: [organizationClient()],
 });

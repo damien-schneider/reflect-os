@@ -23,7 +23,6 @@ const isPlaceholder = (val: string) => val.startsWith('__') && val.endsWith('__'
 const processedEnv = {
   ...import.meta.env,
   VITE_PUBLIC_ZERO_SERVER: normalizeUrl(import.meta.env.VITE_PUBLIC_ZERO_SERVER as string | undefined),
-  VITE_PUBLIC_API_SERVER: normalizeUrl(import.meta.env.VITE_PUBLIC_API_SERVER as string | undefined),
 };
 
 export const clientEnv = createEnv({
@@ -39,17 +38,6 @@ export const clientEnv = createEnv({
       .refine(
         (val) => isPlaceholder(val) || z.string().url().safeParse(val).success,
         "VITE_PUBLIC_ZERO_SERVER must be a valid URL"
-      ),
-    /**
-     * URL of the API server (Hono backend)
-     * @example "http://localhost:5173" for development
-     * @example "https://api.yourdomain.com" for production
-     */
-    VITE_PUBLIC_API_SERVER: z
-      .string()
-      .refine(
-        (val) => isPlaceholder(val) || z.string().url().safeParse(val).success,
-        "VITE_PUBLIC_API_SERVER must be a valid URL"
       ),
   },
   runtimeEnv: processedEnv,

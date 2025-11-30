@@ -33,8 +33,8 @@ FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-# Install runtime dependencies including netcat for database checks
-RUN apk add --no-cache libc6-compat wget netcat-openbsd
+# Install runtime dependencies including netcat and postgresql-client for database checks
+RUN apk add --no-cache libc6-compat wget netcat-openbsd postgresql-client
 
 # Install bun for runtime
 RUN npm install -g bun

@@ -1,48 +1,207 @@
 import { ZeroProvider } from "@rocicorp/zero/react";
 import { schema } from "../schema";
 import { authClient } from "../lib/auth-client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { clientEnv } from "@/env/client";
+import { AlertCircle, RefreshCw, Loader2 } from "lucide-react";
+import { Button } from "./ui/button";
+
+type ZeroState = {
+  status: "loading" | "ready" | "error";
+  userID: string;
+  error?: string;
+};
+
+// Fetch Zero token from API
+async function fetchZeroToken(): Promise<string | null> {
+  try {
+    console.log("[ZeroSetup] Fetching Zero auth token...");
+    const res = await fetch("/api/zero-token");
+    
+    if (res.ok) {
+      const { token } = await res.json();
+      console.log("[ZeroSetup] ✅ Zero token obtained successfully");
+      return token;
+    } else {
+      const errorText = await res.text();
+      console.error("[ZeroSetup] ❌ Failed to fetch Zero token:", res.status, errorText);
+      return null;
+    }
+  } catch (err) {
+    console.error("[ZeroSetup] ❌ Error fetching Zero token:", err);
+    return null;
+  }
+}
 
 export function ZeroSetup({ children }: { children: React.ReactNode }) {
-  const [authData, setAuthData] = useState<{
-    userID: string;
-    auth?: string;
-  } | null>(null);
+  const [state, setState] = useState<ZeroState>({
+    status: "loading",
+    userID: "anon",
+  });
+  const [retryCount, setRetryCount] = useState(0);
 
   const { data: session, isPending } = authClient.useSession();
 
+  // Determine userID from session - must match the JWT's `sub` field
+  // Per Zero docs: "userID must match the sub field from token"
+  const userID = session?.user?.id ?? "anon";
+
+  // Create auth function for Zero - this is called when Zero needs a token
+  // Using async function allows Zero to automatically refresh tokens
+  // Per Zero docs: "This function is called by Zero if token verification fails"
+  const authFunction = useCallback(async () => {
+    if (!session) {
+      console.log("[ZeroSetup] No session, returning undefined for auth");
+      return undefined;
+    }
+    
+    const token = await fetchZeroToken();
+    if (!token) {
+      throw new Error("Failed to fetch Zero authentication token");
+    }
+    return token;
+  }, [session]);
+
+  // Initialize Zero when session state changes
   useEffect(() => {
-    async function fetchToken() {
-      if (session) {
-        const res = await fetch("/api/zero-token");
-        if (res.ok) {
-          const { token } = await res.json();
-          setAuthData({ userID: session.user.id, auth: token });
+    // Don't run while auth is still pending
+    if (isPending) {
+      console.log("[ZeroSetup] Auth pending, waiting...");
+      return;
+    }
+
+    let isCancelled = false;
+
+    console.log("[ZeroSetup] Initializing Zero...", {
+      hasSession: !!session,
+      userID,
+      server: clientEnv.VITE_PUBLIC_ZERO_SERVER,
+      retryCount,
+    });
+
+    async function initializeZero() {
+      // For anonymous users, we're ready immediately
+      if (!session) {
+        console.log("[ZeroSetup] No session, setting up anonymous user");
+        // Use setTimeout to avoid synchronous setState in effect
+        setTimeout(() => {
+          if (!isCancelled) {
+            setState({
+              status: "ready",
+              userID: "anon",
+            });
+          }
+        }, 0);
+        return;
+      }
+
+      // For authenticated users, verify we can get a token before showing as ready
+      try {
+        const token = await fetchZeroToken();
+        if (isCancelled) return;
+        
+        if (token) {
+          setState({
+            status: "ready",
+            userID: session.user.id,
+          });
         } else {
-          // Fallback or error handling?
-          // For now, if token fetch fails, maybe fallback to anon or just log
-          console.error("Failed to fetch zero token");
-          setAuthData({ userID: "anon" });
+          setState({
+            status: "error",
+            userID: "anon",
+            error: "Failed to authenticate with Zero server",
+          });
         }
-      } else if (!isPending) {
-        setAuthData({ userID: "anon" });
+      } catch (err) {
+        if (isCancelled) return;
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        console.error("[ZeroSetup] ❌ Error verifying auth:", err);
+        setState({
+          status: "error",
+          userID: "anon",
+          error: `Failed to connect to Zero server: ${errorMessage}`,
+        });
       }
     }
 
-    fetchToken();
-  }, [session, isPending]);
+    initializeZero();
 
-  if (!authData) {
-    return <div>Loading Zero...</div>;
+    return () => {
+      isCancelled = true;
+    };
+  }, [session, isPending, userID, retryCount]);
+
+  const handleRetry = () => {
+    console.log("[ZeroSetup] Retrying Zero connection...");
+    setState({ status: "loading", userID: "anon" });
+    setRetryCount((c) => c + 1);
+  };
+
+  // Handle schema version updates - reload the page when needed
+  const handleUpdateNeeded = useCallback((reason: { type: string }) => {
+    console.log("[ZeroSetup] Update needed:", reason);
+    if (reason.type === "SchemaVersionNotSupported") {
+      console.log("[ZeroSetup] Schema version not supported, reloading...");
+      // Give user a moment to see any pending UI changes
+      setTimeout(() => window.location.reload(), 100);
+    }
+  }, []);
+
+  // Memoize ZeroProvider props to prevent unnecessary re-renders
+  const zeroProps = useMemo(() => ({
+    userID: state.userID,
+    // Use async function for auth - Zero will call this when token verification fails
+    // This enables automatic token refresh
+    auth: state.status === "ready" && state.userID !== "anon" ? authFunction : undefined,
+    server: clientEnv.VITE_PUBLIC_ZERO_SERVER,
+    schema,
+  }), [state.userID, state.status, authFunction]);
+
+  // Loading state
+  if (state.status === "loading") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Connecting to sync server...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (state.status === "error") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-8">
+        <div className="max-w-md text-center space-y-4">
+          <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+            <AlertCircle className="h-6 w-6 text-destructive" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Connection Error</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Unable to connect to the sync server. This may be temporary.
+            </p>
+          </div>
+          {state.error && (
+            <p className="text-xs text-destructive bg-destructive/10 p-3 rounded-md font-mono">
+              {state.error}
+            </p>
+          )}
+          <Button onClick={handleRetry} variant="outline" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Retry Connection
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <ZeroProvider
-      userID={authData.userID}
-      auth={authData.auth}
-      server={clientEnv.VITE_PUBLIC_ZERO_SERVER}
-      schema={schema}
+      {...zeroProps}
+      onUpdateNeeded={handleUpdateNeeded}
+      onError={(msg, ...rest) => {
+        console.error("[ZeroProvider] ❌ Zero runtime error:", msg, ...rest);
+      }}
     >
       {children}
     </ZeroProvider>

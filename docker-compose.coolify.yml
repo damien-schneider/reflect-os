@@ -5,17 +5,11 @@ version: "3.8"
 #
 # Coolify Magic Variables (auto-generated):
 #   SERVICE_FQDN_<NAME> - Domain only (e.g., "reflect.cuicui.day")
-#   SERVICE_URL_<NAME> - Full URL with protocol (e.g., "https://reflect.cuicui.day")
-#   SERVICE_PASSWORD_<NAME> - Auto-generated password/secret for service
+#   SERVICE_URL_<NAME> - Full URL with protocol
+#   SERVICE_PASSWORD_<NAME> - Auto-generated password/secret
 #
-# Auto-generated secrets (via SERVICE_PASSWORD_*):
-#   SERVICE_PASSWORD_POSTGRES - Database password
-#   SERVICE_PASSWORD_ZEROAUTH - JWT secret for Zero (auto-generated)
-#   SERVICE_PASSWORD_BETTERAUTH - Session secret for Better Auth (auto-generated)
-#
-# Required in Coolify UI:
-#   VITE_PUBLIC_ZERO_SERVER - Zero cache URL (must be HTTPS for production)
-#   VITE_PUBLIC_API_SERVER - Web app URL (must be HTTPS for production)
+# All secrets are auto-generated - no manual env vars required!
+# Just configure domains in Coolify UI for web and zero-cache services.
 
 services:
   # PostgreSQL Database
@@ -48,13 +42,13 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      # Coolify magic variable - generates FQDN
+      # Coolify will generate FQDN when you add a domain
       - SERVICE_FQDN_ZERO_CACHE
       # Database connections
       - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CVR_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CHANGE_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
-      # Authentication - use custom or auto-generated secret
+      # Authentication - auto-generated secret
       - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:-$SERVICE_PASSWORD_ZEROAUTH}
       # Replica file for local caching
       - ZERO_REPLICA_FILE=/data/zero_replica.db
@@ -70,11 +64,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-      args:
-        # Build args for Vite - these get baked into the frontend
-        # Override with VITE_PUBLIC_* env vars in Coolify for HTTPS URLs
-        - VITE_PUBLIC_ZERO_SERVER=${VITE_PUBLIC_ZERO_SERVER}
-        - VITE_PUBLIC_API_SERVER=${VITE_PUBLIC_API_SERVER}
     restart: unless-stopped
     depends_on:
       postgres:
@@ -82,13 +71,16 @@ services:
       zero-cache:
         condition: service_started
     environment:
-      # Coolify magic variable - generates FQDN
+      # Coolify magic variables for domains
       - SERVICE_FQDN_WEB
+      - SERVICE_FQDN_ZERO_CACHE
+      # URLs constructed from FQDNs (always HTTPS in production)
+      - VITE_PUBLIC_ZERO_SERVER=https://$SERVICE_FQDN_ZERO_CACHE
+      - VITE_PUBLIC_API_SERVER=https://$SERVICE_FQDN_WEB
       # Server-side environment variables
       - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-$SERVICE_PASSWORD_BETTERAUTH}
-      # Use SERVICE_URL_WEB or custom BETTER_AUTH_URL
-      - BETTER_AUTH_URL=${BETTER_AUTH_URL:-$SERVICE_URL_WEB}
+      - BETTER_AUTH_URL=https://$SERVICE_FQDN_WEB
       - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:-$SERVICE_PASSWORD_ZEROAUTH}
       - NODE_ENV=production
 

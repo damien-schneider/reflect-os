@@ -5,7 +5,27 @@ echo "🚀 Starting Reflect OS Zero..."
 echo "📋 Environment:"
 echo "   NODE_ENV: ${NODE_ENV:-development}"
 echo "   PORT: ${PORT:-3000}"
-echo "   DATABASE_URL: ${DATABASE_URL:0:50}..."
+
+# Inject runtime environment variables into the built frontend
+# Vite bakes VITE_PUBLIC_* at build time, but we need them at runtime
+# This replaces placeholder values in the JS bundle with actual env values
+echo "🔧 Injecting runtime environment variables..."
+
+if [ -n "$VITE_PUBLIC_ZERO_SERVER" ] && [ -n "$VITE_PUBLIC_API_SERVER" ]; then
+  echo "   VITE_PUBLIC_ZERO_SERVER: $VITE_PUBLIC_ZERO_SERVER"
+  echo "   VITE_PUBLIC_API_SERVER: $VITE_PUBLIC_API_SERVER"
+  
+  # Find and replace in all JS files
+  find /app/dist -name '*.js' -type f | while read file; do
+    # Replace placeholder URLs with actual values
+    sed -i "s|__VITE_PUBLIC_ZERO_SERVER__|$VITE_PUBLIC_ZERO_SERVER|g" "$file"
+    sed -i "s|__VITE_PUBLIC_API_SERVER__|$VITE_PUBLIC_API_SERVER|g" "$file"
+  done
+  echo "✅ Environment variables injected!"
+else
+  echo "⚠️ VITE_PUBLIC_ZERO_SERVER or VITE_PUBLIC_API_SERVER not set"
+  echo "   Frontend may not work correctly"
+fi
 
 # Run database migrations
 echo "📦 Running database migrations..."

@@ -4,6 +4,10 @@ import { z } from "zod";
 // Helper to normalize URLs - adds https:// if no protocol is present
 const normalizeUrl = (url: string | undefined): string | undefined => {
   if (!url) return undefined;
+  // Skip placeholder values (will be replaced at runtime)
+  if (url.startsWith('__') && url.endsWith('__')) {
+    return url;
+  }
   // If it already has a protocol, return as-is
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
@@ -11,6 +15,9 @@ const normalizeUrl = (url: string | undefined): string | undefined => {
   // Add https:// prefix for production domains
   return `https://${url}`;
 };
+
+// Check if we're in build mode with placeholders
+const isPlaceholder = (val: string) => val.startsWith('__') && val.endsWith('__');
 
 // Pre-process environment variables to ensure they have protocols
 const processedEnv = {
@@ -29,7 +36,10 @@ export const clientEnv = createEnv({
      */
     VITE_PUBLIC_ZERO_SERVER: z
       .string()
-      .url("VITE_PUBLIC_ZERO_SERVER must be a valid URL"),
+      .refine(
+        (val) => isPlaceholder(val) || z.string().url().safeParse(val).success,
+        "VITE_PUBLIC_ZERO_SERVER must be a valid URL"
+      ),
     /**
      * URL of the API server (Hono backend)
      * @example "http://localhost:5173" for development
@@ -37,7 +47,10 @@ export const clientEnv = createEnv({
      */
     VITE_PUBLIC_API_SERVER: z
       .string()
-      .url("VITE_PUBLIC_API_SERVER must be a valid URL"),
+      .refine(
+        (val) => isPlaceholder(val) || z.string().url().safeParse(val).success,
+        "VITE_PUBLIC_API_SERVER must be a valid URL"
+      ),
   },
   runtimeEnv: processedEnv,
   emptyStringAsUndefined: true,

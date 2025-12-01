@@ -47,7 +47,6 @@ else
   echo "⚠️ Permissions deployment had issues (may be OK if already exists)"
 fi
 
-# Start zero-cache
+# Start zero-cache (production mode - no -p flag, reads schema from DB)
 echo "🚀 Starting zero-cache server on port 4848..."
-echo "   Schema: src/schema.ts"
-exec npx zero-cache -p src/schema.ts
+exec npx zero-cache

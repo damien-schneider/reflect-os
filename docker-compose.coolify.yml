@@ -41,6 +41,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    # Expose port 4848 for Coolify's reverse proxy
+    expose:
+      - "4848"
     environment:
       # Coolify will generate FQDN when you add a domain
       - SERVICE_FQDN_ZERO_CACHE
@@ -70,6 +73,9 @@ services:
         condition: service_healthy
       zero-cache:
         condition: service_started
+    # Expose port 3000 for Coolify's reverse proxy
+    expose:
+      - "3000"
     environment:
       # Coolify magic variables for domains
       - SERVICE_FQDN_WEB

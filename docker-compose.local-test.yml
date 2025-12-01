@@ -1,0 +1,79 @@
+version: "3.8"
+
+# Local test version of the Coolify deployment
+# Mimics Coolify environment but with local values
+# Usage: docker compose -f docker-compose.local-test.yml up --build
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: localpassword
+      POSTGRES_DB: postgres
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+      - "-c"
+      - "max_replication_slots=10"
+      - "-c"
+      - "max_wal_senders=10"
+    volumes:
+      - postgres_data_test:/var/lib/postgresql/data
+    ports:
+      - "5434:5432" # Different port to avoid conflicts
+
+  zero-cache:
+    build:
+      context: .
+      dockerfile: Dockerfile.zero-cache
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ZERO_UPSTREAM_DB: postgres://user:localpassword@postgres:5432/postgres
+      ZERO_CVR_DB: postgres://user:localpassword@postgres:5432/postgres
+      ZERO_CHANGE_DB: postgres://user:localpassword@postgres:5432/postgres
+      ZERO_REPLICA_FILE: /data/zero_replica.db
+      ZERO_AUTH_SECRET: testsecretkey
+      ZERO_ADMIN_PASSWORD: testadminpassword
+      ZERO_NUM_SYNC_WORKERS: "2"
+      ZERO_LOG_LEVEL: debug
+      LOG_LEVEL: debug
+      NODE_ENV: production
+    volumes:
+      - zero_data_test:/data
+    ports:
+      - "4848:4848"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      zero-cache:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      ZERO_UPSTREAM_DB: postgres://user:localpassword@postgres:5432/postgres
+      ZERO_AUTH_SECRET: testsecretkey
+      VITE_PUBLIC_ZERO_SERVER: http://localhost:4848
+      BETTER_AUTH_SECRET: testbetterauthsecret
+      BETTER_AUTH_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data_test:
+  zero_data_test:

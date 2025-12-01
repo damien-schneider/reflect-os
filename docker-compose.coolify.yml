@@ -4,8 +4,7 @@ version: "3.8"
 # See: https://coolify.io/docs/knowledge-base/docker/compose
 #
 # Coolify Magic Variables (auto-generated):
-#   SERVICE_FQDN_<NAME> - Domain only (e.g., "reflect.cuicui.day")
-#   SERVICE_URL_<NAME> - Full URL with protocol
+#   SERVICE_URL_<NAME> - Full URL with protocol (e.g., "https://reflect.cuicui.day")
 #   SERVICE_PASSWORD_<NAME> - Auto-generated password/secret
 #
 # All secrets are auto-generated - no manual env vars required!
@@ -45,20 +44,23 @@ services:
     expose:
       - "4848"
     environment:
-      # Coolify will generate FQDN when you add a domain
-      - SERVICE_FQDN_ZERO_CACHE
+      # Coolify magic variable - SERVICE_URL includes https:// protocol
+      - SERVICE_URL_ZERO_CACHE
       # Database connections
       - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CVR_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - ZERO_CHANGE_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
-      # Authentication - auto-generated secret
+      # Authentication - auto-generated secrets
       - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:-$SERVICE_PASSWORD_ZEROAUTH}
+      - ZERO_ADMIN_PASSWORD=$SERVICE_PASSWORD_ZEROADMIN
       # Replica file for local caching
       - ZERO_REPLICA_FILE=/data/zero_replica.db
       # Logging and workers
       - ZERO_LOG_LEVEL=${ZERO_LOG_LEVEL:-info}
       - LOG_LEVEL=${ZERO_LOG_LEVEL:-info}
       - ZERO_NUM_SYNC_WORKERS=${ZERO_NUM_SYNC_WORKERS:-2}
+      # Production mode
+      - NODE_ENV=production
     volumes:
       - zero_data:/data
 
@@ -77,15 +79,15 @@ services:
     expose:
       - "3000"
     environment:
-      # Coolify magic variables for domains
-      - SERVICE_FQDN_WEB
-      - SERVICE_FQDN_ZERO_CACHE
-      # Zero server URL (must be HTTPS with valid SSL cert)
-      - VITE_PUBLIC_ZERO_SERVER=https://$SERVICE_FQDN_ZERO_CACHE
+      # Coolify magic variables - SERVICE_URL includes https:// protocol
+      - SERVICE_URL_WEB
+      - SERVICE_URL_ZERO_CACHE
+      # Zero server URL (passed to frontend at runtime)
+      - VITE_PUBLIC_ZERO_SERVER=${SERVICE_URL_ZERO_CACHE}
       # Server-side environment variables
       - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-$SERVICE_PASSWORD_BETTERAUTH}
-      - BETTER_AUTH_URL=https://$SERVICE_FQDN_WEB
+      - BETTER_AUTH_URL=${SERVICE_URL_WEB}
       - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:-$SERVICE_PASSWORD_ZEROAUTH}
       - NODE_ENV=production
 

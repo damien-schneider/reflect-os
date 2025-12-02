@@ -1,7 +1,7 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ExternalLink, Globe, Lock, Save } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,25 +24,32 @@ function DashboardSettings() {
   const org = orgs?.[0];
 
   // Form state
-  const [name, setName] = useState(org?.name ?? "");
-  const [logo, setLogo] = useState(org?.logo ?? "");
-  const [primaryColor, setPrimaryColor] = useState(
-    org?.primaryColor ?? "#3b82f6"
-  );
-  const [customCss, setCustomCss] = useState(org?.customCss ?? "");
+  const [name, setName] = useState("");
+  const [logo, setLogo] = useState("");
+  const [primaryColor, setPrimaryColor] = useState("#3b82f6");
+  const [customCss, setCustomCss] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
-  // Update form when org loads
-  if (org && name !== org.name && !isSaving) {
-    setName(org.name);
-    setLogo(org.logo ?? "");
-    setPrimaryColor(org.primaryColor ?? "#3b82f6");
-    setCustomCss(org.customCss ?? "");
-  }
+  // Track which org we've initialized the form for
+  const initializedOrgId = useRef<string | null>(null);
+
+  // Initialize form when org loads or changes to a different org
+  useEffect(() => {
+    if (org && initializedOrgId.current !== org.id) {
+      initializedOrgId.current = org.id;
+      setName(org.name);
+      setLogo(org.logo ?? "");
+      setPrimaryColor(org.primaryColor ?? "#3b82f6");
+      setCustomCss(org.customCss ?? "");
+    }
+  }, [org]);
 
   const handleSave = async () => {
-    if (!org) return;
+    if (!org) {
+      return;
+    }
 
     setIsSaving(true);
     setSaved(false);
@@ -100,22 +107,26 @@ function DashboardSettings() {
             <Input
               className="flex-1"
               id="logo"
-              onChange={(e) => setLogo(e.target.value)}
+              onChange={(e) => {
+                setLogo(e.target.value);
+                setLogoError(false);
+              }}
               placeholder="https://example.com/logo.png"
               value={logo}
             />
-            {logo && (
+            {logo.length > 0 && !logoError ? (
               <div className="flex h-10 w-10 items-center justify-center rounded border bg-muted">
+                {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: onError handler needed to detect broken images */}
                 <img
                   alt="Logo preview"
                   className="max-h-8 max-w-8 object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
+                  height={32}
+                  onError={() => setLogoError(true)}
                   src={logo}
+                  width={32}
                 />
               </div>
-            )}
+            ) : null}
           </div>
           <p className="text-muted-foreground text-xs">
             Enter a URL to your logo image (recommended: 200x200px)
@@ -167,7 +178,7 @@ function DashboardSettings() {
             />
           </div>
 
-          {org.isPublic && (
+          {org.isPublic === true ? (
             <div className="flex items-center justify-between border-t pt-2">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
@@ -188,7 +199,7 @@ function DashboardSettings() {
                 View Public Page
               </a>
             </div>
-          )}
+          ) : null}
         </div>
 
         <p className="text-muted-foreground text-xs">
@@ -258,9 +269,9 @@ function DashboardSettings() {
 
       {/* Save Button */}
       <div className="flex justify-end gap-3">
-        {saved && (
+        {saved ? (
           <p className="self-center text-green-600 text-sm">Settings saved!</p>
-        )}
+        ) : null}
         <Button disabled={isSaving} onClick={handleSave}>
           <Save className="mr-2 h-4 w-4" />
           {isSaving ? "Saving..." : "Save Changes"}

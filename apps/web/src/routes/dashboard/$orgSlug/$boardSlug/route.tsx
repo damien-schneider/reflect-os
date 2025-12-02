@@ -1,5 +1,5 @@
-import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
+import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
 import type { Schema } from "../../../../schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/$boardSlug")({
@@ -25,9 +25,9 @@ function DashboardBoardLayout() {
   );
   const board = boards?.[0];
 
-  if (!org || !board) {
+  if (!(org && board)) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <p className="text-muted-foreground">Board not found</p>
       </div>
     );

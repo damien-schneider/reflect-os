@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "../lib/auth-client";
 
 export interface Organization {
@@ -9,7 +9,7 @@ export interface Organization {
 
 export function useOrganizations() {
   const { data: organizations, refetch } = authClient.useListOrganizations();
-  
+
   // Create org state
   const [showCreateOrg, setShowCreateOrg] = useState(false);
   const [newOrgName, setNewOrgName] = useState("");
@@ -36,7 +36,12 @@ export function useOrganizations() {
   // Auto-generate slug from name
   useEffect(() => {
     if (newOrgName) {
-      setNewOrgSlug(newOrgName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
+      setNewOrgSlug(
+        newOrgName
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "")
+      );
     }
   }, [newOrgName]);
 
@@ -59,7 +64,8 @@ export function useOrganizations() {
       setShowCreateOrg(false);
       refetch();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Could not create";
+      const message =
+        error instanceof Error ? error.message : "Could not create";
       setCreateOrgError(message);
     } finally {
       setIsCreatingOrg(false);
@@ -127,7 +133,9 @@ export function useOrganizations() {
 }
 
 export function useOrgInvite(selectedOrg: Organization | null) {
-  const [generatedInviteId, setGeneratedInviteId] = useState<string | null>(null);
+  const [generatedInviteId, setGeneratedInviteId] = useState<string | null>(
+    null
+  );
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -159,7 +167,8 @@ export function useOrgInvite(selectedOrg: Organization | null) {
         setGeneratedInviteId(result.data.id);
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Could not generate link";
+      const message =
+        error instanceof Error ? error.message : "Could not generate link";
       setInviteError(message);
     } finally {
       setInviteLoading(false);
@@ -177,8 +186,8 @@ export function useOrgInvite(selectedOrg: Organization | null) {
   };
 
   const shareInviteLink = async () => {
-    if (!inviteLink || !selectedOrg) return;
-    
+    if (!(inviteLink && selectedOrg)) return;
+
     try {
       await navigator.share({
         title: `Join ${selectedOrg.name}`,
@@ -208,7 +217,10 @@ export function useOrgInvite(selectedOrg: Organization | null) {
   };
 }
 
-export function useOrgRename(selectedOrg: Organization | null, onSuccess: (updated: Organization) => void) {
+export function useOrgRename(
+  selectedOrg: Organization | null,
+  onSuccess: (updated: Organization) => void
+) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState("");
   const [renameLoading, setRenameLoading] = useState(false);
@@ -223,7 +235,7 @@ export function useOrgRename(selectedOrg: Organization | null, onSuccess: (updat
   };
 
   const saveRename = async () => {
-    if (!selectedOrg || !editNameValue.trim()) return;
+    if (!(selectedOrg && editNameValue.trim())) return;
 
     setRenameLoading(true);
     try {

@@ -1,11 +1,9 @@
-import { useState } from "react";
-import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
+import { createFileRoute, useParams } from "@tanstack/react-router";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
 import { randID } from "../../../rand";
 import type { Schema, Tag } from "../../../schema";
 
@@ -72,7 +72,7 @@ function AdminTags() {
   };
 
   const handleSubmit = async () => {
-    if (!name.trim() || !org) return;
+    if (!(name.trim() && org)) return;
 
     setIsSubmitting(true);
 
@@ -103,7 +103,10 @@ function AdminTags() {
   };
 
   const handleDelete = async (tag: Tag) => {
-    if (!confirm(`Delete "${tag.name}"? This will remove it from all feedback.`)) return;
+    if (
+      !confirm(`Delete "${tag.name}"? This will remove it from all feedback.`)
+    )
+      return;
     await z.mutate.tag.delete({ id: tag.id });
   };
 
@@ -112,13 +115,13 @@ function AdminTags() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Manage Tags</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="font-bold text-2xl">Manage Tags</h1>
+          <p className="mt-1 text-muted-foreground">
             Create and manage tags to categorize feedback
           </p>
         </div>
         <Button onClick={() => setShowModal(true)}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           New Tag
         </Button>
       </div>
@@ -127,8 +130,8 @@ function AdminTags() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {tags?.map((tag) => (
           <div
+            className="flex items-center justify-between rounded-lg border p-4"
             key={tag.id}
-            className="flex items-center justify-between p-4 border rounded-lg"
           >
             <div className="flex items-center gap-3">
               <div
@@ -139,17 +142,17 @@ function AdminTags() {
             </div>
             <div className="flex gap-1">
               <Button
-                variant="ghost"
-                size="icon"
                 onClick={() => openEditModal(tag)}
+                size="icon"
+                variant="ghost"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(tag)}
                 className="text-destructive hover:text-destructive"
+                onClick={() => handleDelete(tag)}
+                size="icon"
+                variant="ghost"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -157,7 +160,7 @@ function AdminTags() {
           </div>
         ))}
         {(!tags || tags.length === 0) && (
-          <p className="text-muted-foreground col-span-full text-center py-8">
+          <p className="col-span-full py-8 text-center text-muted-foreground">
             No tags yet. Create your first tag to categorize feedback.
           </p>
         )}
@@ -165,15 +168,17 @@ function AdminTags() {
 
       {/* Create/Edit Modal */}
       <Dialog
-        open={showModal}
         onOpenChange={(open) => {
           setShowModal(open);
           if (!open) resetForm();
         }}
+        open={showModal}
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingTag ? "Edit Tag" : "Create New Tag"}</DialogTitle>
+            <DialogTitle>
+              {editingTag ? "Edit Tag" : "Create New Tag"}
+            </DialogTitle>
             <DialogDescription>
               Tags help organize and filter feedback
             </DialogDescription>
@@ -184,9 +189,9 @@ function AdminTags() {
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Bug, Feature Request, UI/UX"
+                value={name}
               />
             </div>
 
@@ -195,13 +200,13 @@ function AdminTags() {
               <div className="flex flex-wrap gap-2">
                 {COLOR_PALETTE.map((c) => (
                   <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
                     className={`h-8 w-8 rounded-full transition-all ${
-                      color === c ? "ring-2 ring-offset-2 ring-primary" : ""
+                      color === c ? "ring-2 ring-primary ring-offset-2" : ""
                     }`}
+                    key={c}
+                    onClick={() => setColor(c)}
                     style={{ backgroundColor: c }}
+                    type="button"
                   />
                 ))}
               </div>
@@ -210,8 +215,8 @@ function AdminTags() {
             <div className="space-y-2">
               <Label>Preview</Label>
               <Badge
-                variant="secondary"
                 style={{ backgroundColor: `${color}20`, color }}
+                variant="secondary"
               >
                 {name || "Tag name"}
               </Badge>
@@ -220,16 +225,23 @@ function AdminTags() {
 
           <DialogFooter>
             <Button
-              variant="outline"
               onClick={() => {
                 setShowModal(false);
                 resetForm();
               }}
+              variant="outline"
             >
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting || !name.trim()}>
-              {isSubmitting ? "Saving..." : editingTag ? "Save Changes" : "Create Tag"}
+            <Button
+              disabled={isSubmitting || !name.trim()}
+              onClick={handleSubmit}
+            >
+              {isSubmitting
+                ? "Saving..."
+                : editingTag
+                  ? "Save Changes"
+                  : "Create Tag"}
             </Button>
           </DialogFooter>
         </DialogContent>

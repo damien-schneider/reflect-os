@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { SideNav } from "../../components/side-nav";
 import { authClient } from "../../lib/auth-client";
 
@@ -15,7 +15,7 @@ function DashboardLayout() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isPending && !session) {
+    if (!(isPending || session)) {
       navigate({ to: "/login", replace: true });
     }
   }, [isPending, session, navigate]);
@@ -23,7 +23,7 @@ function DashboardLayout() {
   // Show loading while checking auth
   if (isPending) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
@@ -32,16 +32,19 @@ function DashboardLayout() {
   // Show loading while redirecting to login
   if (!session) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex">
-      <SideNav isOpen={sideNavOpen} onToggle={() => setSideNavOpen(!sideNavOpen)} />
-      <main className="flex-1 min-w-0">
+    <div className="flex min-h-screen">
+      <SideNav
+        isOpen={sideNavOpen}
+        onToggle={() => setSideNavOpen(!sideNavOpen)}
+      />
+      <main className="min-w-0 flex-1">
         <Outlet />
       </main>
     </div>

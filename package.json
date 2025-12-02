@@ -3,7 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -17,20 +20,26 @@
     "db:migrate": "bun --filter @repo/db db:migrate",
     "db:studio": "bun --filter @repo/db db:studio",
     "db:seed": "bun --filter @repo/db db:seed",
-    "drizzle-zero:generate": "bun --filter @repo/web drizzle-zero:generate",
-    "schema:sync": "bun db:push && bun drizzle-zero:generate",
     "docker:start": "bun --filter @repo/docker start",
     "docker:stop": "bun --filter @repo/docker stop",
     "docker:logs": "bun --filter @repo/docker logs",
     "docker:clean": "bun --filter @repo/docker clean",
-    "zero:clean": "source .env && rm -rf \"${ZERO_REPLICA_FILE}\"*"
+    "zero:clean": "source .env && rm -rf \"${ZERO_REPLICA_FILE}\"*",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.8",
     "dotenv-cli": "^11.0.0",
-    "turbo": "^2.5.4"
+    "husky": "^9.1.7",
+    "turbo": "^2.5.4",
+    "ultracite": "6.3.8"
   },
   "dependencies": {
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/pacer": "^0.16.3",
+    "cmdk": "^1.1.1",
     "sst": "3.9.33"
   },
   "trustedDependencies": [

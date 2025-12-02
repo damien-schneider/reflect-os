@@ -1,9 +1,15 @@
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Calendar, CheckCircle } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import type { Board, Feedback, Release } from "../../schema";
 import { Badge } from "../ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
-import type { Release, Feedback, Board } from "../../schema";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 
 interface ReleaseCardProps {
   release: Release & {
@@ -15,24 +21,30 @@ interface ReleaseCardProps {
   showFullContent?: boolean;
 }
 
-export function ReleaseCard({ release, orgSlug, showFullContent = false }: ReleaseCardProps) {
-  const publishDate = release.publishedAt 
+export function ReleaseCard({
+  release,
+  orgSlug,
+  showFullContent = false,
+}: ReleaseCardProps) {
+  const publishDate = release.publishedAt
     ? format(new Date(release.publishedAt), "MMMM d, yyyy")
     : "Draft";
 
   return (
-    <Card className={release.publishedAt ? "" : "border-dashed border-amber-500/50"}>
+    <Card
+      className={release.publishedAt ? "" : "border-amber-500/50 border-dashed"}
+    >
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               {release.version && (
-                <Badge variant="outline" className="font-mono">
+                <Badge className="font-mono" variant="outline">
                   {release.version}
                 </Badge>
               )}
               {!release.publishedAt && (
-                <Badge variant="secondary" className="text-amber-600">
+                <Badge className="text-amber-600" variant="secondary">
                   Draft
                 </Badge>
               )}
@@ -44,38 +56,44 @@ export function ReleaseCard({ release, orgSlug, showFullContent = false }: Relea
               </CardDescription>
             )}
           </div>
-          <div className="flex items-center gap-1 text-muted-foreground text-sm shrink-0">
+          <div className="flex shrink-0 items-center gap-1 text-muted-foreground text-sm">
             <Calendar className="h-4 w-4" />
             <span>{publishDate}</span>
           </div>
         </div>
       </CardHeader>
-      
+
       {release.feedbacks && release.feedbacks.length > 0 && (
         <CardContent>
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <h4 className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
               <CheckCircle className="h-4 w-4" />
-              {release.feedbacks.length} Completed Item{release.feedbacks.length !== 1 ? "s" : ""}
+              {release.feedbacks.length} Completed Item
+              {release.feedbacks.length !== 1 ? "s" : ""}
             </h4>
-            <ul className={`space-y-2 ${!showFullContent && release.feedbacks.length > 5 ? "" : ""}`}>
-              {(showFullContent ? release.feedbacks : release.feedbacks.slice(0, 5)).map((feedback) => (
-                <li key={feedback.id} className="flex items-start gap-2">
-                  <span className="text-green-600 mt-1">•</span>
-                  <div className="flex-1 min-w-0">
+            <ul
+              className={`space-y-2 ${!showFullContent && release.feedbacks.length > 5 ? "" : ""}`}
+            >
+              {(showFullContent
+                ? release.feedbacks
+                : release.feedbacks.slice(0, 5)
+              ).map((feedback) => (
+                <li className="flex items-start gap-2" key={feedback.id}>
+                  <span className="mt-1 text-green-600">•</span>
+                  <div className="min-w-0 flex-1">
                     <Link
-                      to="/$orgSlug/$boardSlug/$feedbackId"
-                      params={{ 
-                        orgSlug, 
+                      className="font-medium hover:underline"
+                      params={{
+                        orgSlug,
                         boardSlug: feedback.board?.slug ?? "",
-                        feedbackId: feedback.id 
+                        feedbackId: feedback.id,
                       }}
-                      className="hover:underline font-medium"
+                      to="/$orgSlug/$boardSlug/$feedbackId"
                     >
                       {feedback.title}
                     </Link>
                     {feedback.board && (
-                      <span className="text-xs text-muted-foreground ml-2">
+                      <span className="ml-2 text-muted-foreground text-xs">
                         in {feedback.board.name}
                       </span>
                     )}
@@ -83,7 +101,7 @@ export function ReleaseCard({ release, orgSlug, showFullContent = false }: Relea
                 </li>
               ))}
               {!showFullContent && release.feedbacks.length > 5 && (
-                <li className="text-sm text-muted-foreground">
+                <li className="text-muted-foreground text-sm">
                   +{release.feedbacks.length - 5} more items
                 </li>
               )}

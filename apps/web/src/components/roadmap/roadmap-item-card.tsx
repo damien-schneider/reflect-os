@@ -1,19 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, ChevronUp, ExternalLink } from "lucide-react";
+import { ChevronUp, ExternalLink, GripVertical } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { type RoadmapLane } from "../../lib/constants";
-
-// Feedback item with roadmap fields
-interface RoadmapFeedbackItem {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  voteCount: number;
-  roadmapLane: RoadmapLane | null;
-  roadmapOrder: number;
-}
+import type { RoadmapFeedbackItem } from "./roadmap-kanban";
 
 interface RoadmapItemCardProps {
   item: RoadmapFeedbackItem;
@@ -21,7 +10,11 @@ interface RoadmapItemCardProps {
   isDragging?: boolean;
 }
 
-export function RoadmapItemCard({ item, isAdmin = false, isDragging = false }: RoadmapItemCardProps) {
+export function RoadmapItemCard({
+  item,
+  isAdmin = false,
+  isDragging = false,
+}: RoadmapItemCardProps) {
   const {
     attributes,
     listeners,
@@ -41,19 +34,20 @@ export function RoadmapItemCard({ item, isAdmin = false, isDragging = false }: R
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
       className={cn(
         "rounded-lg border bg-card p-3 shadow-sm",
-        (isDragging || isSortableDragging) && "opacity-50 shadow-lg ring-2 ring-primary",
+        (isDragging || isSortableDragging) &&
+          "opacity-50 shadow-lg ring-2 ring-primary",
         !isAdmin && "cursor-default"
       )}
+      ref={setNodeRef}
+      style={style}
     >
       <div className="flex items-start gap-2">
         {/* Drag Handle (admin only) */}
         {isAdmin && (
           <button
-            className="mt-0.5 cursor-grab active:cursor-grabbing touch-none"
+            className="mt-0.5 cursor-grab touch-none active:cursor-grabbing"
             {...attributes}
             {...listeners}
           >
@@ -61,27 +55,25 @@ export function RoadmapItemCard({ item, isAdmin = false, isDragging = false }: R
           </button>
         )}
 
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {/* Title */}
-          <h4 className="font-medium text-sm line-clamp-2">
-            {item.title}
-          </h4>
+          <h4 className="line-clamp-2 font-medium text-sm">{item.title}</h4>
 
           {/* Description preview */}
           {item.description && (
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+            <p className="mt-1 line-clamp-2 text-muted-foreground text-xs">
               {stripHtml(item.description)}
             </p>
           )}
 
           {/* Footer */}
-          <div className="flex items-center justify-between mt-2">
+          <div className="mt-2 flex items-center justify-between">
             <div className="flex items-center gap-1 text-muted-foreground">
               <ChevronUp className="h-3 w-3" />
               <span className="text-xs">{item.voteCount}</span>
             </div>
 
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <span className="flex items-center gap-1 text-muted-foreground text-xs">
               View
               <ExternalLink className="h-3 w-3" />
             </span>

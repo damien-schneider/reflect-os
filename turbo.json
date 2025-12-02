@@ -29,22 +29,18 @@
       "dependsOn": ["@repo/docker#dev"],
       "cache": false
     },
-    "@repo/web#drizzle-zero:generate": {
-      "dependsOn": ["@repo/db#db:push", "@repo/db#build"],
-      "cache": false
-    },
     "@repo/web#dev:zero-cache": {
-      "dependsOn": ["@repo/web#drizzle-zero:generate"],
+      "dependsOn": ["@repo/db#db:push"],
       "cache": false,
       "persistent": true
     },
     "@repo/web#dev:vite": {
-      "dependsOn": ["@repo/web#drizzle-zero:generate"],
+      "dependsOn": ["@repo/db#db:push"],
       "cache": false,
       "persistent": true
     },
     "@repo/web#dev": {
-      "dependsOn": ["@repo/web#drizzle-zero:generate"],
+      "dependsOn": ["@repo/db#db:push"],
       "cache": false,
       "persistent": true
     },
@@ -66,10 +62,6 @@
       "outputs": ["migrations/**"]
     },
     "db:seed": {
-      "cache": false
-    },
-    "drizzle-zero:generate": {
-      "dependsOn": ["@repo/db#build"],
       "cache": false
     }
   }

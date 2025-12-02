@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { authClient } from "../lib/auth-client";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { authClient } from "../lib/auth-client";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -67,7 +67,10 @@ function Login() {
           },
           onError: (ctx) => {
             console.error("Sign up error:", ctx.error);
-            setError(ctx.error.message || "Could not create account. Try a different email.");
+            setError(
+              ctx.error.message ||
+                "Could not create account. Try a different email."
+            );
             setIsLoading(false);
           },
         }
@@ -86,7 +89,10 @@ function Login() {
             }, 1000);
           },
           onError: (ctx) => {
-            setError(ctx.error.message || "Invalid email or password. Check your credentials.");
+            setError(
+              ctx.error.message ||
+                "Invalid email or password. Check your credentials."
+            );
             setIsLoading(false);
           },
         }
@@ -101,31 +107,31 @@ function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[80vh] p-4">
+    <div className="flex min-h-[80vh] items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold">
+        <div className="space-y-2 text-center">
+          <h1 className="font-semibold text-2xl">
             {isSignUp ? "Create Account" : "Sign In"}
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {isSignUp
               ? "Enter your details to get started"
               : "Enter your credentials to continue"}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Inline error - actionable message */}
           {error && (
-            <div className="flex items-start gap-2 text-sm text-destructive">
-              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2 text-destructive text-sm">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Subtle success feedback */}
           {success && (
-            <div className="flex items-center gap-2 text-sm text-green-600">
+            <div className="flex items-center gap-2 text-green-600 text-sm">
               <CheckCircle2 className="h-4 w-4" />
               <span>{success}</span>
             </div>
@@ -135,16 +141,16 @@ function Login() {
             <div className="space-y-1.5">
               <Label htmlFor="name">Name</Label>
               <Input
+                autoComplete="name"
+                disabled={isLoading}
                 id="name"
-                type="text"
-                placeholder="Your name"
-                value={name}
                 onChange={(e) => {
                   setName(e.target.value);
                   if (error) setError(null);
                 }}
-                disabled={isLoading}
-                autoComplete="name"
+                placeholder="Your name"
+                type="text"
+                value={name}
               />
             </div>
           )}
@@ -152,36 +158,36 @@ function Login() {
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
             <Input
+              autoComplete="email"
+              disabled={isLoading}
               id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 if (error) setError(null);
               }}
-              disabled={isLoading}
-              autoComplete="email"
+              placeholder="you@example.com"
+              type="email"
+              value={email}
             />
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
             <Input
+              autoComplete={isSignUp ? "new-password" : "current-password"}
+              disabled={isLoading}
               id="password"
-              type="password"
-              placeholder="At least 6 characters"
-              value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
                 if (error) setError(null);
               }}
-              disabled={isLoading}
-              autoComplete={isSignUp ? "new-password" : "current-password"}
+              placeholder="At least 6 characters"
+              type="password"
+              value={password}
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button className="w-full" disabled={isLoading} type="submit">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -194,7 +200,12 @@ function Login() {
         </form>
 
         <div className="text-center">
-          <Button variant="link" onClick={toggleMode} disabled={isLoading} className="text-sm">
+          <Button
+            className="text-sm"
+            disabled={isLoading}
+            onClick={toggleMode}
+            variant="link"
+          >
             {isSignUp
               ? "Already have an account? Sign in"
               : "Need an account? Sign up"}

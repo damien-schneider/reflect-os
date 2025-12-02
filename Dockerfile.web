@@ -34,9 +34,6 @@ WORKDIR /app
 # Build the database package
 RUN cd packages/db && bun run build
 
-# Generate Zero schema
-RUN cd apps/web && bun run drizzle-zero:generate
-
 # Build the web application
 RUN cd apps/web && bun run build
 

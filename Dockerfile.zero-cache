@@ -25,9 +25,6 @@ COPY . .
 # Build the database package
 RUN cd packages/db && bun run build
 
-# Generate the Zero schema
-RUN cd apps/web && bun run drizzle-zero:generate
-
 # Runtime stage
 FROM node:22-alpine AS runner
 

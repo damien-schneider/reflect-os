@@ -3,13 +3,13 @@ import { z } from "zod";
 
 // Helper to normalize URLs - adds https:// if no protocol is present
 const normalizeUrl = (url: string | undefined): string | undefined => {
-  if (!url) return undefined;
+  if (!url) return;
   // Skip placeholder values (will be replaced at runtime)
-  if (url.startsWith('__') && url.endsWith('__')) {
+  if (url.startsWith("__") && url.endsWith("__")) {
     return url;
   }
   // If it already has a protocol, return as-is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
   }
   // Add https:// prefix for production domains
@@ -17,12 +17,15 @@ const normalizeUrl = (url: string | undefined): string | undefined => {
 };
 
 // Check if we're in build mode with placeholders
-const isPlaceholder = (val: string) => val.startsWith('__') && val.endsWith('__');
+const isPlaceholder = (val: string) =>
+  val.startsWith("__") && val.endsWith("__");
 
 // Pre-process environment variables to ensure they have protocols
 const processedEnv = {
   ...import.meta.env,
-  VITE_PUBLIC_ZERO_SERVER: normalizeUrl(import.meta.env.VITE_PUBLIC_ZERO_SERVER as string | undefined),
+  VITE_PUBLIC_ZERO_SERVER: normalizeUrl(
+    import.meta.env.VITE_PUBLIC_ZERO_SERVER as string | undefined
+  ),
 };
 
 export const clientEnv = createEnv({

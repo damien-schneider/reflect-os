@@ -1,6 +1,6 @@
-import { Badge } from "../ui/badge";
+import { type FeedbackStatus, STATUS_CONFIG } from "../../lib/constants";
 import { cn } from "../../lib/utils";
-import { STATUS_CONFIG, type FeedbackStatus } from "../../lib/constants";
+import { Badge } from "../ui/badge";
 
 interface StatusBadgeProps {
   status: FeedbackStatus | string;
@@ -15,10 +15,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   };
 
   return (
-    <Badge
-      variant={config.variant}
-      className={cn(config.className, className)}
-    >
+    <Badge className={cn(config.className, className)} variant={config.variant}>
       {config.label}
     </Badge>
   );

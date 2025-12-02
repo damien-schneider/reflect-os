@@ -1,9 +1,14 @@
-import { createFileRoute, Link, Outlet, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { ArrowLeft, LayoutGrid, Tags, Users, Settings } from "lucide-react";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useParams,
+} from "@tanstack/react-router";
+import { ArrowLeft, LayoutGrid, Settings, Tags, Users } from "lucide-react";
 import { Button } from "../../../components/ui/button";
-import { cn } from "../../../lib/utils";
 import { authClient } from "../../../lib/auth-client";
+import { cn } from "../../../lib/utils";
 import type { Schema } from "../../../schema";
 
 export const Route = createFileRoute("/$orgSlug/admin")({
@@ -20,10 +25,13 @@ const adminNavItems = [
 function AdminLayout() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
   const z = useZero<Schema>();
-  const { data: session, isPending: isSessionPending } = authClient.useSession();
+  const { data: session, isPending: isSessionPending } =
+    authClient.useSession();
 
   // Get organization
-  const [orgs, orgsResult] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs, orgsResult] = useQuery(
+    z.query.organization.where("slug", "=", orgSlug)
+  );
   const org = orgs?.[0];
 
   // Check if user is admin/owner
@@ -36,11 +44,14 @@ function AdminLayout() {
   const isAdmin = memberRole === "admin" || memberRole === "owner";
 
   // Show loading state while data is being fetched
-  const isLoading = isSessionPending || orgsResult.type !== 'complete' || membersResult.type !== 'complete';
+  const isLoading =
+    isSessionPending ||
+    orgsResult.type !== "complete" ||
+    membersResult.type !== "complete";
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">Loading...</p>
       </div>
     );
@@ -48,13 +59,13 @@ function AdminLayout() {
 
   if (!isAdmin) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">
           You don't have permission to access this area.
         </p>
         <Button asChild variant="outline">
-          <Link to="/$orgSlug" params={{ orgSlug }}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+          <Link params={{ orgSlug }} to="/$orgSlug">
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Go Back
           </Link>
         </Button>
@@ -68,34 +79,34 @@ function AdminLayout() {
       <div className="flex items-center justify-between border-b pb-4">
         <div className="flex items-center gap-4">
           <Link
-            to="/$orgSlug"
-            params={{ orgSlug }}
             className="text-muted-foreground hover:text-foreground"
+            params={{ orgSlug }}
+            to="/$orgSlug"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold">Admin Dashboard</h1>
-            <p className="text-sm text-muted-foreground">{org?.name}</p>
+            <h1 className="font-bold text-xl">Admin Dashboard</h1>
+            <p className="text-muted-foreground text-sm">{org?.name}</p>
           </div>
         </div>
       </div>
 
       {/* Admin Navigation */}
-      <nav className="flex gap-2 border-b pb-2 overflow-x-auto">
+      <nav className="flex gap-2 overflow-x-auto border-b pb-2">
         {adminNavItems.map((item) => (
           <Link
-            key={item.href}
-            to={"/$orgSlug/admin/" + item.href as "/$orgSlug/admin/boards"}
-            params={{ orgSlug }}
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
-              "hover:bg-accent hover:text-accent-foreground",
-              "whitespace-nowrap"
-            )}
             activeProps={{
               className: "bg-accent text-accent-foreground",
             }}
+            className={cn(
+              "flex items-center gap-2 rounded-md px-3 py-2 font-medium text-sm transition-colors",
+              "hover:bg-accent hover:text-accent-foreground",
+              "whitespace-nowrap"
+            )}
+            key={item.href}
+            params={{ orgSlug }}
+            to={("/$orgSlug/admin/" + item.href) as "/$orgSlug/admin/boards"}
           >
             <item.icon className="h-4 w-4" />
             {item.label}

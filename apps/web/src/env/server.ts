@@ -11,7 +11,8 @@ export const serverEnv = createEnv({
       .string()
       .url("ZERO_UPSTREAM_DB must be a valid PostgreSQL URL")
       .refine(
-        (url) => url.startsWith("postgresql://") || url.startsWith("postgres://"),
+        (url) =>
+          url.startsWith("postgresql://") || url.startsWith("postgres://"),
         "ZERO_UPSTREAM_DB must be a PostgreSQL connection string"
       ),
 
@@ -60,7 +61,7 @@ export const serverEnv = createEnv({
       .string()
       .transform((url) => {
         // Add https:// if no protocol is present
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        if (!(url.startsWith("http://") || url.startsWith("https://"))) {
           return `https://${url}`;
         }
         return url;

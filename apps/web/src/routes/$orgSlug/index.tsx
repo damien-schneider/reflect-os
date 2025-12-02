@@ -1,22 +1,22 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import {
-  MessageSquare,
-  TrendingUp,
-  Users,
-  Plus,
   ArrowRight,
-  Globe,
-  Lock,
+  ExternalLink,
   Eye,
   EyeOff,
-  ExternalLink,
+  Globe,
   Loader2,
+  Lock,
+  MessageSquare,
+  Plus,
+  TrendingUp,
+  Users,
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
-import { Switch } from "../../components/ui/switch";
+import { Button } from "../../components/ui/button";
 import { Separator } from "../../components/ui/separator";
+import { Switch } from "../../components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -35,7 +35,9 @@ function OrgDashboard() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
 
   // Get organization
-  const [orgs, { type: orgQueryStatus }] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs, { type: orgQueryStatus }] = useQuery(
+    z.query.organization.where("slug", "=", orgSlug)
+  );
   const org = orgs?.[0];
 
   // Check if user is a member
@@ -80,7 +82,10 @@ function OrgDashboard() {
   };
 
   // Handle board visibility toggle
-  const handleBoardVisibilityToggle = async (boardId: string, checked: boolean) => {
+  const handleBoardVisibilityToggle = async (
+    boardId: string,
+    checked: boolean
+  ) => {
     await z.mutate.board.update({
       id: boardId,
       isPublic: checked,
@@ -89,11 +94,14 @@ function OrgDashboard() {
   };
 
   // Show loading state while checking membership
-  const isLoading = sessionPending || orgQueryStatus !== "complete" || (session && memberQueryStatus !== "complete");
+  const isLoading =
+    sessionPending ||
+    orgQueryStatus !== "complete" ||
+    (session && memberQueryStatus !== "complete");
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
@@ -101,9 +109,9 @@ function OrgDashboard() {
 
   if (!org) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">Organization not found</p>
-        <Button variant="outline" asChild>
+        <Button asChild variant="outline">
           <Link to="/dashboard/account">Go to My Account</Link>
         </Button>
       </div>
@@ -112,15 +120,17 @@ function OrgDashboard() {
 
   // Public view for non-members
   if (!isMember) {
-    return <PublicOrgView org={org} boards={visibleBoards ?? []} orgSlug={orgSlug} />;
+    return (
+      <PublicOrgView boards={visibleBoards ?? []} org={org} orgSlug={orgSlug} />
+    );
   }
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">{org.name}</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="font-bold text-2xl">{org.name}</h1>
+        <p className="mt-1 text-muted-foreground">
           Welcome back, {session?.user?.name ?? "there"}!
         </p>
       </div>
@@ -128,10 +138,10 @@ function OrgDashboard() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard
+          href={`/${orgSlug}/admin/boards`}
           icon={<MessageSquare className="h-5 w-5" />}
           label="Boards"
           value={totalBoards}
-          href={`/${orgSlug}/admin/boards`}
         />
         <StatCard
           icon={<TrendingUp className="h-5 w-5" />}
@@ -143,15 +153,15 @@ function OrgDashboard() {
       {/* Visibility Controls */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Visibility</h2>
+          <h2 className="font-semibold text-lg">Visibility</h2>
           {org.isPublic && publicBoards.length > 0 && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <a
+                  className="inline-flex items-center gap-1 text-primary text-sm hover:underline"
                   href={`/${orgSlug}`}
-                  target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                  target="_blank"
                 >
                   <ExternalLink className="h-3 w-3" />
                   View Public Page
@@ -165,21 +175,21 @@ function OrgDashboard() {
         </div>
 
         {/* Organization Visibility Card */}
-        <div className="p-4 border rounded-lg space-y-4">
+        <div className="space-y-4 rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {org.isPublic ? (
-                <div className="p-2 bg-green-500/10 rounded-lg text-green-600 dark:text-green-400">
+                <div className="rounded-lg bg-green-500/10 p-2 text-green-600 dark:text-green-400">
                   <Globe className="h-5 w-5" />
                 </div>
               ) : (
-                <div className="p-2 bg-muted rounded-lg text-muted-foreground">
+                <div className="rounded-lg bg-muted p-2 text-muted-foreground">
                   <Lock className="h-5 w-5" />
                 </div>
               )}
               <div>
                 <p className="font-medium">Organization Visibility</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {org.isPublic
                     ? "Your organization is visible to the public"
                     : "Only members can see your organization"}
@@ -198,7 +208,9 @@ function OrgDashboard() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Public Boards</span>
-                  <Badge variant={publicBoards.length > 0 ? "secondary" : "outline"}>
+                  <Badge
+                    variant={publicBoards.length > 0 ? "secondary" : "outline"}
+                  >
                     {publicBoards.length} / {boards?.length ?? 0}
                   </Badge>
                 </div>
@@ -206,20 +218,20 @@ function OrgDashboard() {
                   <div className="space-y-2">
                     {boards.map((board) => (
                       <div
+                        className="flex items-center justify-between rounded-md bg-muted/50 p-2"
                         key={board.id}
-                        className="flex items-center justify-between p-2 rounded-md bg-muted/50"
                       >
                         <div className="flex items-center gap-2">
                           <MessageSquare className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">{board.name}</span>
                           {board.isPublic ? (
-                            <Badge variant="secondary" className="text-[10px]">
-                              <Eye className="h-3 w-3 mr-1" />
+                            <Badge className="text-[10px]" variant="secondary">
+                              <Eye className="mr-1 h-3 w-3" />
                               Public
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-[10px]">
-                              <EyeOff className="h-3 w-3 mr-1" />
+                            <Badge className="text-[10px]" variant="outline">
+                              <EyeOff className="mr-1 h-3 w-3" />
                               Private
                             </Badge>
                           )}
@@ -234,7 +246,7 @@ function OrgDashboard() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-2">
+                  <p className="py-2 text-center text-muted-foreground text-sm">
                     No boards yet. Create one to get started.
                   </p>
                 )}
@@ -243,8 +255,9 @@ function OrgDashboard() {
           )}
 
           {!org.isPublic && (
-            <p className="text-xs text-muted-foreground">
-              Enable organization visibility to allow public access to your boards.
+            <p className="text-muted-foreground text-xs">
+              Enable organization visibility to allow public access to your
+              boards.
             </p>
           )}
         </div>
@@ -252,22 +265,30 @@ function OrgDashboard() {
 
       {/* Quick Actions */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Quick Actions</h2>
+        <h2 className="font-semibold text-lg">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Button asChild>
-            <Link to="/$orgSlug/admin/boards" params={{ orgSlug }} search={{ type: "feedback" }}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Link
+              params={{ orgSlug }}
+              search={{ type: "feedback" }}
+              to="/$orgSlug/admin/boards"
+            >
+              <Plus className="mr-2 h-4 w-4" />
               New Feedback Board
             </Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link to="/$orgSlug/admin/boards" params={{ orgSlug }} search={{ type: "roadmap" }}>
-              <Plus className="h-4 w-4 mr-2" />
+          <Button asChild variant="outline">
+            <Link
+              params={{ orgSlug }}
+              search={{ type: "roadmap" }}
+              to="/$orgSlug/admin/boards"
+            >
+              <Plus className="mr-2 h-4 w-4" />
               New Roadmap
             </Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link to="/$orgSlug/admin/tags" params={{ orgSlug }}>
+          <Button asChild variant="outline">
+            <Link params={{ orgSlug }} to="/$orgSlug/admin/tags">
               Manage Tags
             </Link>
           </Button>
@@ -277,14 +298,14 @@ function OrgDashboard() {
       {/* Boards List */}
       {boards && boards.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Your Boards</h2>
+          <h2 className="font-semibold text-lg">Your Boards</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {boards.map((board) => (
               <Link
+                className="block rounded-lg border p-4 transition-colors hover:bg-accent/50"
                 key={board.id}
-                to="/$orgSlug/$boardSlug"
                 params={{ orgSlug, boardSlug: board.slug }}
-                className="block p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                to="/$orgSlug/$boardSlug"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -293,7 +314,7 @@ function OrgDashboard() {
                       <h3 className="font-medium">{board.name}</h3>
                     </div>
                     {board.description && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      <p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
                         {board.description}
                       </p>
                     )}
@@ -308,15 +329,15 @@ function OrgDashboard() {
 
       {/* Empty State */}
       {(!boards || boards.length === 0) && (
-        <div className="text-center py-12 border rounded-lg bg-muted/30">
-          <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">No boards yet</h3>
-          <p className="text-muted-foreground mb-4">
+        <div className="rounded-lg border bg-muted/30 py-12 text-center">
+          <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+          <h3 className="mb-2 font-medium text-lg">No boards yet</h3>
+          <p className="mb-4 text-muted-foreground">
             Create your first feedback board or roadmap to get started.
           </p>
           <Button asChild>
-            <Link to="/$orgSlug/admin/boards" params={{ orgSlug }}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Link params={{ orgSlug }} to="/$orgSlug/admin/boards">
+              <Plus className="mr-2 h-4 w-4" />
               Create Board
             </Link>
           </Button>
@@ -338,18 +359,21 @@ function StatCard({
   href?: string;
 }) {
   const content = (
-    <div className="flex items-center gap-4 p-4 border rounded-lg">
-      <div className="p-2 bg-primary/10 rounded-lg text-primary">{icon}</div>
+    <div className="flex items-center gap-4 rounded-lg border p-4">
+      <div className="rounded-lg bg-primary/10 p-2 text-primary">{icon}</div>
       <div>
-        <p className="text-2xl font-bold">{value}</p>
-        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="font-bold text-2xl">{value}</p>
+        <p className="text-muted-foreground text-sm">{label}</p>
       </div>
     </div>
   );
 
   if (href) {
     return (
-      <Link to={href} className="block hover:bg-accent/50 rounded-lg transition-colors">
+      <Link
+        className="block rounded-lg transition-colors hover:bg-accent/50"
+        to={href}
+      >
         {content}
       </Link>
     );
@@ -365,22 +389,27 @@ function PublicOrgView({
   orgSlug,
 }: {
   org: { id: string; name: string; logo?: string | null };
-  boards: readonly { id: string; name: string; slug: string; description?: string | null }[];
+  boards: readonly {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string | null;
+  }[];
   orgSlug: string;
 }) {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="text-center py-8">
+      <div className="py-8 text-center">
         {org.logo && (
           <img
-            src={org.logo}
             alt={org.name}
-            className="h-16 w-16 rounded-lg mx-auto mb-4 object-cover"
+            className="mx-auto mb-4 h-16 w-16 rounded-lg object-cover"
+            src={org.logo}
           />
         )}
-        <h1 className="text-3xl font-bold">{org.name}</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="font-bold text-3xl">{org.name}</h1>
+        <p className="mt-2 text-muted-foreground">
           Share your feedback and help us improve
         </p>
       </div>
@@ -389,23 +418,23 @@ function PublicOrgView({
       {boards.length > 0 ? (
         <div className="space-y-6">
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+            <h2 className="flex items-center gap-2 font-semibold text-lg">
               <MessageSquare className="h-5 w-5" />
               Boards
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
               {boards.map((board) => (
                 <Link
+                  className="block rounded-lg border p-4 transition-colors hover:bg-accent/50"
                   key={board.id}
-                  to="/$orgSlug/$boardSlug"
                   params={{ orgSlug, boardSlug: board.slug }}
-                  className="block p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                  to="/$orgSlug/$boardSlug"
                 >
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-medium">{board.name}</h3>
                       {board.description && (
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        <p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
                           {board.description}
                         </p>
                       )}
@@ -418,9 +447,9 @@ function PublicOrgView({
           </div>
         </div>
       ) : (
-        <div className="text-center py-12 border rounded-lg bg-muted/30">
-          <Globe className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">No public boards</h3>
+        <div className="rounded-lg border bg-muted/30 py-12 text-center">
+          <Globe className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+          <h3 className="mb-2 font-medium text-lg">No public boards</h3>
           <p className="text-muted-foreground">
             This organization hasn't published any boards yet.
           </p>

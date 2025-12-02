@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { Save, Globe, Lock, ExternalLink } from "lucide-react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { ExternalLink, Globe, Lock, Save } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/settings")({
@@ -26,7 +26,9 @@ function DashboardSettings() {
   // Form state
   const [name, setName] = useState(org?.name ?? "");
   const [logo, setLogo] = useState(org?.logo ?? "");
-  const [primaryColor, setPrimaryColor] = useState(org?.primaryColor ?? "#3b82f6");
+  const [primaryColor, setPrimaryColor] = useState(
+    org?.primaryColor ?? "#3b82f6"
+  );
   const [customCss, setCustomCss] = useState(org?.customCss ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -62,7 +64,7 @@ function DashboardSettings() {
 
   if (!org) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <p className="text-muted-foreground">Loading...</p>
       </div>
     );
@@ -72,23 +74,23 @@ function DashboardSettings() {
     <div className="max-w-2xl space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Organization Settings</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="font-bold text-2xl">Organization Settings</h1>
+        <p className="mt-1 text-muted-foreground">
           Customize your organization's branding and appearance
         </p>
       </div>
 
       {/* General Settings */}
       <div className="space-y-6">
-        <h2 className="text-lg font-semibold">General</h2>
+        <h2 className="font-semibold text-lg">General</h2>
 
         <div className="space-y-2">
           <Label htmlFor="name">Organization Name</Label>
           <Input
             id="name"
-            value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your Organization"
+            value={name}
           />
         </div>
 
@@ -96,26 +98,26 @@ function DashboardSettings() {
           <Label htmlFor="logo">Logo URL</Label>
           <div className="flex gap-3">
             <Input
+              className="flex-1"
               id="logo"
-              value={logo}
               onChange={(e) => setLogo(e.target.value)}
               placeholder="https://example.com/logo.png"
-              className="flex-1"
+              value={logo}
             />
             {logo && (
-              <div className="h-10 w-10 border rounded flex items-center justify-center bg-muted">
+              <div className="flex h-10 w-10 items-center justify-center rounded border bg-muted">
                 <img
-                  src={logo}
                   alt="Logo preview"
                   className="max-h-8 max-w-8 object-contain"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = "none";
                   }}
+                  src={logo}
                 />
               </div>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Enter a URL to your logo image (recommended: 200x200px)
           </p>
         </div>
@@ -125,25 +127,28 @@ function DashboardSettings() {
 
       {/* Visibility Settings */}
       <div className="space-y-6">
-        <h2 className="text-lg font-semibold">Visibility</h2>
+        <h2 className="font-semibold text-lg">Visibility</h2>
 
-        <div className="p-4 border rounded-lg space-y-4">
+        <div className="space-y-4 rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {org.isPublic ? (
-                <div className="p-2 bg-green-500/10 rounded-lg text-green-600 dark:text-green-400">
+                <div className="rounded-lg bg-green-500/10 p-2 text-green-600 dark:text-green-400">
                   <Globe className="h-5 w-5" />
                 </div>
               ) : (
-                <div className="p-2 bg-muted rounded-lg text-muted-foreground">
+                <div className="rounded-lg bg-muted p-2 text-muted-foreground">
                   <Lock className="h-5 w-5" />
                 </div>
               )}
               <div>
-                <Label htmlFor="public-toggle" className="text-base font-medium">
+                <Label
+                  className="font-medium text-base"
+                  htmlFor="public-toggle"
+                >
                   Public Organization
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {org.isPublic
                     ? "Your organization and public boards are visible to everyone"
                     : "Only organization members can access your content"}
@@ -151,8 +156,8 @@ function DashboardSettings() {
               </div>
             </div>
             <Switch
-              id="public-toggle"
               checked={org.isPublic ?? false}
+              id="public-toggle"
               onCheckedChange={async (checked) => {
                 await z.mutate.organization.update({
                   id: org.id,
@@ -163,21 +168,21 @@ function DashboardSettings() {
           </div>
 
           {org.isPublic && (
-            <div className="flex items-center justify-between pt-2 border-t">
+            <div className="flex items-center justify-between border-t pt-2">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
-                  <Globe className="h-3 w-3 mr-1" />
+                  <Globe className="mr-1 h-3 w-3" />
                   Published
                 </Badge>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   /{orgSlug}
                 </span>
               </div>
               <a
+                className="inline-flex items-center gap-1 text-primary text-sm hover:underline"
                 href={`/${orgSlug}`}
-                target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                target="_blank"
               >
                 <ExternalLink className="h-3 w-3" />
                 View Public Page
@@ -186,17 +191,18 @@ function DashboardSettings() {
           )}
         </div>
 
-        <p className="text-xs text-muted-foreground">
-          When your organization is public, visitors can see your public boards and submit feedback.
-          You can control individual board visibility in the{" "}
+        <p className="text-muted-foreground text-xs">
+          When your organization is public, visitors can see your public boards
+          and submit feedback. You can control individual board visibility from
+          the{" "}
           <Link
-            to="/dashboard/$orgSlug/boards"
-            params={{ orgSlug }}
             className="text-primary hover:underline"
+            params={{ orgSlug }}
+            to="/dashboard/$orgSlug"
           >
-            Manage Boards
+            Dashboard
           </Link>{" "}
-          section.
+          or directly in each board&apos;s settings.
         </p>
       </div>
 
@@ -204,26 +210,26 @@ function DashboardSettings() {
 
       {/* Branding */}
       <div className="space-y-6">
-        <h2 className="text-lg font-semibold">Branding</h2>
+        <h2 className="font-semibold text-lg">Branding</h2>
 
         <div className="space-y-2">
           <Label htmlFor="primaryColor">Primary Color</Label>
           <div className="flex gap-3">
             <Input
+              className="h-10 w-16 cursor-pointer p-1"
               id="primaryColor"
+              onChange={(e) => setPrimaryColor(e.target.value)}
               type="color"
               value={primaryColor}
-              onChange={(e) => setPrimaryColor(e.target.value)}
-              className="w-16 h-10 p-1 cursor-pointer"
             />
             <Input
-              value={primaryColor}
+              className="flex-1"
               onChange={(e) => setPrimaryColor(e.target.value)}
               placeholder="#3b82f6"
-              className="flex-1"
+              value={primaryColor}
             />
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Used for buttons, links, and accents
           </p>
         </div>
@@ -231,18 +237,19 @@ function DashboardSettings() {
         <div className="space-y-2">
           <Label htmlFor="customCss">Custom CSS</Label>
           <Textarea
+            className="font-mono text-sm"
             id="customCss"
-            value={customCss}
             onChange={(e) => setCustomCss(e.target.value)}
             placeholder={`/* Custom styles */
 .your-class {
   /* your styles */
 }`}
             rows={8}
-            className="font-mono text-sm"
+            value={customCss}
           />
-          <p className="text-xs text-muted-foreground">
-            Add custom CSS to further customize the appearance. Be careful with this feature.
+          <p className="text-muted-foreground text-xs">
+            Add custom CSS to further customize the appearance. Be careful with
+            this feature.
           </p>
         </div>
       </div>
@@ -252,12 +259,10 @@ function DashboardSettings() {
       {/* Save Button */}
       <div className="flex justify-end gap-3">
         {saved && (
-          <p className="text-sm text-green-600 self-center">
-            Settings saved!
-          </p>
+          <p className="self-center text-green-600 text-sm">Settings saved!</p>
         )}
-        <Button onClick={handleSave} disabled={isSaving}>
-          <Save className="h-4 w-4 mr-2" />
+        <Button disabled={isSaving} onClick={handleSave}>
+          <Save className="mr-2 h-4 w-4" />
           {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </div>

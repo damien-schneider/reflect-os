@@ -1,7 +1,7 @@
-import { useMemo } from "react";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { format } from "date-fns";
 import { Check, CheckCircle } from "lucide-react";
+import { useMemo } from "react";
 import { cn } from "../../lib/utils";
 import type { Schema } from "../../schema";
 
@@ -27,16 +27,14 @@ export function ChangelogItemSelector({
   );
 
   // Get all completed feedback (items with completedAt set) across all boards
-  const [allFeedback] = useQuery(
-    z.query.feedback.related("board")
-  );
+  const [allFeedback] = useQuery(z.query.feedback.related("board"));
 
   // Filter to only completed items from this org's boards
   const completedItems = useMemo(() => {
-    if (!allFeedback || !boards) return [];
-    
+    if (!(allFeedback && boards)) return [];
+
     const boardIds = new Set(boards.map((b) => b.id));
-    
+
     return allFeedback
       .filter((f) => {
         // Must be in one of the org's boards
@@ -52,18 +50,21 @@ export function ChangelogItemSelector({
 
   // Group by board for better organization
   const groupedByBoard = useMemo(() => {
-    const groups: Record<string, { board: typeof boards[number]; items: typeof completedItems }> = {};
-    
+    const groups: Record<
+      string,
+      { board: (typeof boards)[number]; items: typeof completedItems }
+    > = {};
+
     for (const item of completedItems) {
       const board = boards?.find((b) => b.id === item.boardId);
       if (!board) continue;
-      
+
       if (!groups[board.id]) {
         groups[board.id] = { board, items: [] };
       }
       groups[board.id].items.push(item);
     }
-    
+
     return Object.values(groups);
   }, [completedItems, boards]);
 
@@ -85,10 +86,11 @@ export function ChangelogItemSelector({
 
   if (completedItems.length === 0) {
     return (
-      <div className="text-center py-8 border rounded-lg bg-muted/30">
-        <CheckCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+      <div className="rounded-lg border bg-muted/30 py-8 text-center">
+        <CheckCircle className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
         <p className="text-muted-foreground text-sm">
-          No completed items yet. Items marked as "Done" in the roadmap will appear here.
+          No completed items yet. Items marked as "Done" in the roadmap will
+          appear here.
         </p>
       </div>
     );
@@ -103,17 +105,17 @@ export function ChangelogItemSelector({
         </span>
         <div className="flex gap-2">
           <button
-            type="button"
-            onClick={selectAll}
             className="text-primary hover:underline"
+            onClick={selectAll}
+            type="button"
           >
             Select all
           </button>
           <span className="text-muted-foreground">·</span>
           <button
-            type="button"
-            onClick={deselectAll}
             className="text-primary hover:underline"
+            onClick={deselectAll}
+            type="button"
           >
             Deselect all
           </button>
@@ -121,30 +123,30 @@ export function ChangelogItemSelector({
       </div>
 
       {/* Grouped items */}
-      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+      <div className="max-h-[400px] space-y-4 overflow-y-auto pr-2">
         {groupedByBoard.map(({ board, items }) => (
-          <div key={board.id} className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground sticky top-0 bg-background py-1">
+          <div className="space-y-2" key={board.id}>
+            <h4 className="sticky top-0 bg-background py-1 font-medium text-muted-foreground text-sm">
               {board.name}
             </h4>
             <div className="space-y-1">
               {items.map((item) => (
                 <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => toggleSelection(item.id)}
                   className={cn(
-                    "w-full flex items-start gap-3 p-3 rounded-lg border text-left transition-colors",
+                    "flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors",
                     selectedIds.includes(item.id)
-                      ? "bg-primary/10 border-primary"
+                      ? "border-primary bg-primary/10"
                       : "hover:bg-muted/50"
                   )}
+                  key={item.id}
+                  onClick={() => toggleSelection(item.id)}
+                  type="button"
                 >
                   <div
                     className={cn(
-                      "h-5 w-5 rounded border flex items-center justify-center shrink-0 mt-0.5",
+                      "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border",
                       selectedIds.includes(item.id)
-                        ? "bg-primary border-primary text-primary-foreground"
+                        ? "border-primary bg-primary text-primary-foreground"
                         : "border-muted-foreground/30"
                     )}
                   >
@@ -152,13 +154,14 @@ export function ChangelogItemSelector({
                       <Check className="h-3 w-3" />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm line-clamp-1">
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-1 font-medium text-sm">
                       {item.title}
                     </p>
                     {item.completedAt && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Completed {format(new Date(item.completedAt), "MMM d, yyyy")}
+                      <p className="mt-0.5 text-muted-foreground text-xs">
+                        Completed{" "}
+                        {format(new Date(item.completedAt), "MMM d, yyyy")}
                       </p>
                     )}
                   </div>

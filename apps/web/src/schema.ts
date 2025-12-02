@@ -1,14 +1,16 @@
 // Zero schema with permissions
-// Tables and relationships are auto-generated from Drizzle in zero-schema.gen.ts
-// Run `pnpm drizzle-zero:generate` to regenerate after schema changes
+// Tables and relationships are defined natively in zero-schema.ts
+// This mirrors the Drizzle schema in packages/db/src/schema.ts
 
-import { definePermissions, ExpressionBuilder, ANYONE_CAN } from "@rocicorp/zero";
 import type { PermissionsConfig } from "@rocicorp/zero";
+import {
+  ANYONE_CAN,
+  definePermissions,
+  type ExpressionBuilder,
+} from "@rocicorp/zero";
 
-// Re-export generated schema and types
+// Re-export native schema and types
 export {
-  schema,
-  type Schema,
   type AdminNote,
   type Board,
   type Comment,
@@ -20,12 +22,14 @@ export {
   type Organization,
   type Release,
   type ReleaseItem,
+  type Schema,
+  schema,
   type Tag,
   type User,
   type Vote,
-} from "./zero-schema.gen";
+} from "./zero-schema";
 
-import { schema, type Schema } from "./zero-schema.gen";
+import { type Schema, schema } from "./zero-schema";
 
 // The contents of your decoded JWT.
 type AuthData = {
@@ -108,7 +112,9 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
     { exists }: ExpressionBuilder<Schema, "comment">
   ) =>
     exists("feedback", (q) =>
-      q.whereExists("board", (b) => b.where((r) => r.cmp("isPublic", "=", true)))
+      q.whereExists("board", (b) =>
+        b.where((r) => r.cmp("isPublic", "=", true))
+      )
     );
 
   const allowIfCommentFeedbackBoardOrgMember = (
@@ -139,7 +145,8 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
   const allowIfTagOrgPublic = (
     _authData: AuthData,
     { exists }: ExpressionBuilder<Schema, "tag">
-  ) => exists("organization", (q) => q.where((r) => r.cmp("isPublic", "=", true)));
+  ) =>
+    exists("organization", (q) => q.where((r) => r.cmp("isPublic", "=", true)));
 
   // Notification permissions - only own notifications
   const allowIfNotificationOwner = (
@@ -166,7 +173,8 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
   const allowIfReleaseOrgPublic = (
     _authData: AuthData,
     { exists }: ExpressionBuilder<Schema, "release">
-  ) => exists("organization", (q) => q.where((r) => r.cmp("isPublic", "=", true)));
+  ) =>
+    exists("organization", (q) => q.where((r) => r.cmp("isPublic", "=", true)));
 
   const allowIfReleaseOrgMember = (
     authData: AuthData,
@@ -268,8 +276,16 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
         update: {
           // Allow author or org member to update (for editing feedback)
           // Allow any logged-in user for postMutation (needed for vote count updates)
-          preMutation: [allowIfFeedbackAuthor, allowIfFeedbackBoardOrgMember, allowIfLoggedIn],
-          postMutation: [allowIfFeedbackAuthor, allowIfFeedbackBoardOrgMember, allowIfLoggedIn],
+          preMutation: [
+            allowIfFeedbackAuthor,
+            allowIfFeedbackBoardOrgMember,
+            allowIfLoggedIn,
+          ],
+          postMutation: [
+            allowIfFeedbackAuthor,
+            allowIfFeedbackBoardOrgMember,
+            allowIfLoggedIn,
+          ],
         },
         delete: [allowIfFeedbackBoardOrgMember],
       },
@@ -288,7 +304,10 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
     comment: {
       row: {
         // Viewable if feedback's board is public or user is org member
-        select: [allowIfCommentFeedbackBoardPublic, allowIfCommentFeedbackBoardOrgMember],
+        select: [
+          allowIfCommentFeedbackBoardPublic,
+          allowIfCommentFeedbackBoardOrgMember,
+        ],
         insert: [allowIfLoggedIn],
         update: {
           preMutation: [allowIfCommentAuthor],

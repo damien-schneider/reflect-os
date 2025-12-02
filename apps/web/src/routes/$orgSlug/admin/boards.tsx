@@ -1,20 +1,9 @@
-import { useState } from "react";
-import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Globe,
-  Lock,
-  Layers,
-} from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { Textarea } from "../../../components/ui/textarea";
-import { Switch } from "../../../components/ui/switch";
+import { createFileRoute, useParams } from "@tanstack/react-router";
+import { Globe, Layers, Lock, Pencil, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -23,8 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Switch } from "../../../components/ui/switch";
+import { Textarea } from "../../../components/ui/textarea";
 import { randID } from "../../../rand";
-import type { Schema, Board } from "../../../schema";
+import type { Board, Schema } from "../../../schema";
 
 export const Route = createFileRoute("/$orgSlug/admin/boards")({
   component: AdminBoards,
@@ -74,7 +67,7 @@ function AdminBoards() {
   };
 
   const handleSubmit = async () => {
-    if (!name.trim() || !slug.trim() || !org) return;
+    if (!(name.trim() && slug.trim() && org)) return;
 
     setIsSubmitting(true);
 
@@ -133,34 +126,34 @@ function AdminBoards() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Manage Boards</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="font-bold text-2xl">Manage Boards</h1>
+          <p className="mt-1 text-muted-foreground">
             Create and manage feedback boards
           </p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           New Board
         </Button>
       </div>
 
       {/* All Boards */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
+        <h2 className="flex items-center gap-2 font-semibold text-lg">
           <Layers className="h-5 w-5" />
           Boards ({(boards ?? []).length})
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {(boards ?? []).map((board) => (
             <BoardCard
-              key={board.id}
               board={board}
-              onEdit={() => openEditModal(board)}
+              key={board.id}
               onDelete={() => handleDelete(board)}
+              onEdit={() => openEditModal(board)}
             />
           ))}
           {(boards ?? []).length === 0 && (
-            <p className="text-muted-foreground col-span-2 py-8 text-center">
+            <p className="col-span-2 py-8 text-center text-muted-foreground">
               No boards yet
             </p>
           )}
@@ -169,11 +162,11 @@ function AdminBoards() {
 
       {/* Create/Edit Modal */}
       <Dialog
-        open={showCreateModal}
         onOpenChange={(open) => {
           setShowCreateModal(open);
           if (!open) resetForm();
         }}
+        open={showCreateModal}
       >
         <DialogContent>
           <DialogHeader>
@@ -192,9 +185,9 @@ function AdminBoards() {
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="e.g., Product Feedback"
+                value={name}
               />
             </div>
 
@@ -202,11 +195,11 @@ function AdminBoards() {
               <Label htmlFor="slug">URL Slug</Label>
               <Input
                 id="slug"
-                value={slug}
                 onChange={(e) => setSlug(e.target.value)}
                 placeholder="e.g., product-feedback"
+                value={slug}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 /{orgSlug}/{slug || "slug"}
               </p>
             </div>
@@ -215,25 +208,25 @@ function AdminBoards() {
               <Label htmlFor="description">Description (optional)</Label>
               <Textarea
                 id="description"
-                value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What is this board for?"
                 rows={3}
+                value={description}
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="public">Public Board</Label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {isPublic
                     ? "Anyone can view this board"
                     : "Only organization members can view"}
                 </p>
               </div>
               <Switch
-                id="public"
                 checked={isPublic}
+                id="public"
                 onCheckedChange={setIsPublic}
               />
             </div>
@@ -241,20 +234,23 @@ function AdminBoards() {
 
           <DialogFooter>
             <Button
-              variant="outline"
               onClick={() => {
                 setShowCreateModal(false);
                 resetForm();
               }}
+              variant="outline"
             >
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting || !name.trim()}>
+            <Button
+              disabled={isSubmitting || !name.trim()}
+              onClick={handleSubmit}
+            >
               {isSubmitting
                 ? "Saving..."
                 : editingBoard
-                ? "Save Changes"
-                : "Create Board"}
+                  ? "Save Changes"
+                  : "Create Board"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -273,24 +269,24 @@ function BoardCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="p-4 border rounded-lg space-y-3">
+    <div className="space-y-3 rounded-lg border p-4">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
             <Layers className="h-4 w-4 text-muted-foreground" />
             <h3 className="font-medium">{board.name}</h3>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">/{board.slug}</p>
+          <p className="mt-1 text-muted-foreground text-sm">/{board.slug}</p>
         </div>
         <Badge variant={board.isPublic ? "secondary" : "outline"}>
           {board.isPublic ? (
             <>
-              <Globe className="h-3 w-3 mr-1" />
+              <Globe className="mr-1 h-3 w-3" />
               Public
             </>
           ) : (
             <>
-              <Lock className="h-3 w-3 mr-1" />
+              <Lock className="mr-1 h-3 w-3" />
               Private
             </>
           )}
@@ -298,23 +294,23 @@ function BoardCard({
       </div>
 
       {board.description && (
-        <p className="text-sm text-muted-foreground line-clamp-2">
+        <p className="line-clamp-2 text-muted-foreground text-sm">
           {board.description}
         </p>
       )}
 
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={onEdit}>
-          <Pencil className="h-3 w-3 mr-1" />
+        <Button onClick={onEdit} size="sm" variant="outline">
+          <Pencil className="mr-1 h-3 w-3" />
           Edit
         </Button>
         <Button
-          variant="outline"
-          size="sm"
-          onClick={onDelete}
           className="text-destructive hover:text-destructive"
+          onClick={onDelete}
+          size="sm"
+          variant="outline"
         >
-          <Trash2 className="h-3 w-3 mr-1" />
+          <Trash2 className="mr-1 h-3 w-3" />
           Delete
         </Button>
       </div>

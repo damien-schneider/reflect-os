@@ -1,11 +1,15 @@
-import { useState } from "react";
-import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
+import {
+  createFileRoute,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { MarkdownEditor } from "../../../components/editor-new/markdown-editor";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
-import { TiptapEditor } from "../../../components/editor/tiptap-editor";
 import { authClient } from "../../../lib/auth-client";
 import { randID } from "../../../rand";
 import type { Schema } from "../../../schema";
@@ -69,7 +73,7 @@ function NewFeedback() {
         id: feedbackId,
         boardId: board.id,
         title: title.trim(),
-        description: description,
+        description,
         status: board.settings?.defaultStatus ?? "open",
         authorId: session.user.id,
         voteCount: 0,
@@ -93,31 +97,27 @@ function NewFeedback() {
 
   if (!session) {
     return (
-      <div className="max-w-2xl mx-auto py-12 text-center">
-        <p className="text-muted-foreground mb-4">
+      <div className="mx-auto max-w-2xl py-12 text-center">
+        <p className="mb-4 text-muted-foreground">
           You must be logged in to submit feedback.
         </p>
-        <Button
-          onClick={() => navigate({ to: "/login" })}
-        >
-          Sign In
-        </Button>
+        <Button onClick={() => navigate({ to: "/login" })}>Sign In</Button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6">
       {/* Back link */}
       <Button
-        variant="ghost"
+        className="gap-2"
         onClick={() =>
           navigate({
             to: "/$orgSlug/$boardSlug",
             params: { orgSlug, boardSlug },
           })
         }
-        className="gap-2"
+        variant="ghost"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to {board?.name ?? "Board"}
@@ -125,16 +125,16 @@ function NewFeedback() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Submit Feedback</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="font-bold text-2xl">Submit Feedback</h1>
+        <p className="mt-1 text-muted-foreground">
           Share your ideas, suggestions, or report issues
         </p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form className="space-y-6" onSubmit={handleSubmit}>
         {error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm">
+          <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
             {error}
           </div>
         )}
@@ -142,44 +142,44 @@ function NewFeedback() {
         <div className="space-y-2">
           <Label htmlFor="title">Title</Label>
           <Input
+            disabled={isSubmitting}
             id="title"
+            maxLength={200}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder="Brief summary of your feedback"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={isSubmitting}
-            maxLength={200}
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {title.length}/200 characters
           </p>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
-          <TiptapEditor
-            content={description}
-            onChange={setDescription}
-            placeholder="Provide more details about your feedback..."
+          <MarkdownEditor
+            className="min-h-[200px]"
             editable={!isSubmitting}
-            minHeight="200px"
+            onChange={setDescription}
+            placeholder="Provide more details about your feedback... Press '/' for commands"
+            value={description}
           />
         </div>
 
         <div className="flex justify-end gap-3">
           <Button
-            type="button"
-            variant="outline"
+            disabled={isSubmitting}
             onClick={() =>
               navigate({
                 to: "/$orgSlug/$boardSlug",
                 params: { orgSlug, boardSlug },
               })
             }
-            disabled={isSubmitting}
+            type="button"
+            variant="outline"
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button disabled={isSubmitting} type="submit">
             {isSubmitting ? "Submitting..." : "Submit Feedback"}
           </Button>
         </div>

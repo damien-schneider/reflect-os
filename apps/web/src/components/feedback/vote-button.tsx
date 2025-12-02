@@ -1,16 +1,12 @@
-import { useZero, useQuery } from "@rocicorp/zero/react";
-import { ChevronUp } from "lucide-react";
+import { useQuery, useZero } from "@rocicorp/zero/react";
 import { useNavigate } from "@tanstack/react-router";
-import { Button } from "../ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../ui/tooltip";
-import { cn } from "../../lib/utils";
+import { ChevronUp } from "lucide-react";
 import { authClient } from "../../lib/auth-client";
-import type { Schema } from "../../schema";
+import { cn } from "../../lib/utils";
 import { randID } from "../../rand";
+import type { Schema } from "../../schema";
+import { Button } from "../ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface VoteButtonProps {
   feedbackId: string;
@@ -85,14 +81,14 @@ export function VoteButton({
 
   const button = (
     <Button
-      variant={hasVoted ? "default" : "outline"}
-      onClick={handleVote}
       className={cn(
         "flex flex-col items-center justify-center gap-0.5 font-semibold",
         sizeClasses[size],
         hasVoted && "bg-primary text-primary-foreground",
         className
       )}
+      onClick={handleVote}
+      variant={hasVoted ? "default" : "outline"}
     >
       <ChevronUp className={iconSizes[size]} />
       <span>{voteCount}</span>

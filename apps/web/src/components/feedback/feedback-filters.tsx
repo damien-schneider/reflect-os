@@ -1,8 +1,12 @@
+import { Filter, Search, SortAsc, SortDesc, X } from "lucide-react";
 import { useState } from "react";
-import { Search, Filter, X, SortAsc, SortDesc } from "lucide-react";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { type FeedbackStatus, STATUS_OPTIONS } from "../../lib/constants";
+import { cn } from "../../lib/utils";
+import type { Tag } from "../../schema";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   Select,
   SelectContent,
@@ -10,14 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../ui/popover";
-import { STATUS_OPTIONS, type FeedbackStatus } from "../../lib/constants";
-import { cn } from "../../lib/utils";
-import type { Tag } from "../../schema";
 
 export type SortOption = "newest" | "oldest" | "most_votes" | "most_comments";
 
@@ -77,42 +73,49 @@ export function FeedbackFilters({
       {/* Search and main controls */}
       <div className="flex items-center gap-2">
         {/* Search */}
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative max-w-sm flex-1">
+          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
           <Input
-            type="search"
-            placeholder="Search feedback..."
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search feedback..."
+            type="search"
+            value={search}
           />
         </div>
 
         {/* Filter button */}
-        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+        <Popover onOpenChange={setFilterOpen} open={filterOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="gap-2">
+            <Button className="gap-2" variant="outline">
               <Filter className="h-4 w-4" />
               Filter
               {filterCount > 0 && (
-                <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
+                <Badge
+                  className="ml-1 flex h-5 w-5 items-center justify-center p-0"
+                  variant="secondary"
+                >
                   {filterCount}
                 </Badge>
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-72" align="end">
+          <PopoverContent align="end" className="w-72">
             <div className="space-y-4">
               {/* Status filters */}
               <div>
-                <h4 className="text-sm font-medium mb-2">Status</h4>
+                <h4 className="mb-2 font-medium text-sm">Status</h4>
                 <div className="flex flex-wrap gap-1">
                   {STATUS_OPTIONS.map((option) => (
                     <Badge
-                      key={option.value}
-                      variant={selectedStatuses.includes(option.value) ? "default" : "outline"}
                       className="cursor-pointer"
+                      key={option.value}
                       onClick={() => toggleStatus(option.value)}
+                      variant={
+                        selectedStatuses.includes(option.value)
+                          ? "default"
+                          : "outline"
+                      }
                     >
                       {option.label}
                     </Badge>
@@ -123,19 +126,26 @@ export function FeedbackFilters({
               {/* Tag filters */}
               {availableTags.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Tags</h4>
+                  <h4 className="mb-2 font-medium text-sm">Tags</h4>
                   <div className="flex flex-wrap gap-1">
                     {availableTags.map((tag) => (
                       <Badge
-                        key={tag.id}
-                        variant={selectedTagIds.includes(tag.id) ? "default" : "outline"}
                         className="cursor-pointer"
+                        key={tag.id}
+                        onClick={() => toggleTag(tag.id)}
                         style={
                           selectedTagIds.includes(tag.id)
-                            ? { backgroundColor: tag.color, borderColor: tag.color }
+                            ? {
+                                backgroundColor: tag.color,
+                                borderColor: tag.color,
+                              }
                             : { borderColor: tag.color, color: tag.color }
                         }
-                        onClick={() => toggleTag(tag.id)}
+                        variant={
+                          selectedTagIds.includes(tag.id)
+                            ? "default"
+                            : "outline"
+                        }
                       >
                         {tag.name}
                       </Badge>
@@ -147,10 +157,10 @@ export function FeedbackFilters({
               {/* Clear button */}
               {hasFilters && (
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearFilters}
                   className="w-full"
+                  onClick={clearFilters}
+                  size="sm"
+                  variant="ghost"
                 >
                   Clear all filters
                 </Button>
@@ -160,12 +170,15 @@ export function FeedbackFilters({
         </Popover>
 
         {/* Sort */}
-        <Select value={sortBy} onValueChange={(v) => onSortChange(v as SortOption)}>
+        <Select
+          onValueChange={(v) => onSortChange(v as SortOption)}
+          value={sortBy}
+        >
           <SelectTrigger className="w-[160px]">
             {sortBy === "newest" || sortBy === "oldest" ? (
-              <SortDesc className="h-4 w-4 mr-2" />
+              <SortDesc className="mr-2 h-4 w-4" />
             ) : (
-              <SortAsc className="h-4 w-4 mr-2" />
+              <SortAsc className="mr-2 h-4 w-4" />
             )}
             <SelectValue />
           </SelectTrigger>
@@ -181,15 +194,15 @@ export function FeedbackFilters({
       {/* Active filter tags */}
       {hasFilters && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground">Active filters:</span>
+          <span className="text-muted-foreground text-sm">Active filters:</span>
           {selectedStatuses.map((status) => {
             const option = STATUS_OPTIONS.find((o) => o.value === status);
             return (
               <Badge
+                className="cursor-pointer gap-1"
                 key={status}
-                variant="secondary"
-                className="gap-1 cursor-pointer"
                 onClick={() => toggleStatus(status)}
+                variant="secondary"
               >
                 {option?.label ?? status}
                 <X className="h-3 w-3" />
@@ -201,11 +214,11 @@ export function FeedbackFilters({
             if (!tag) return null;
             return (
               <Badge
+                className="cursor-pointer gap-1"
                 key={tagId}
-                variant="secondary"
-                style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
-                className="gap-1 cursor-pointer"
                 onClick={() => toggleTag(tagId)}
+                style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
+                variant="secondary"
               >
                 {tag.name}
                 <X className="h-3 w-3" />
@@ -213,10 +226,10 @@ export function FeedbackFilters({
             );
           })}
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
             className="h-6 text-xs"
+            onClick={clearFilters}
+            size="sm"
+            variant="ghost"
           >
             Clear all
           </Button>

@@ -1,12 +1,9 @@
-import { useState } from "react";
-import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { Plus, Pencil, Trash2, CheckCircle, Map, GripVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { createFileRoute, useParams } from "@tanstack/react-router";
+import { CheckCircle, Map, Pencil, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { randID } from "@/rand";
 import type { Schema, Tag } from "@/schema";
 
@@ -79,7 +79,7 @@ function DashboardTags() {
   };
 
   const handleSubmit = async () => {
-    if (!name.trim() || !org) return;
+    if (!(name.trim() && org)) return;
 
     setIsSubmitting(true);
 
@@ -99,11 +99,12 @@ function DashboardTags() {
           isDoneStatus,
           isRoadmapLane,
           // Set lane order if becoming a roadmap lane
-          laneOrder: isRoadmapLane && !editingTag.isRoadmapLane 
-            ? maxOrder + 1000 
-            : isRoadmapLane 
-              ? editingTag.laneOrder 
-              : null,
+          laneOrder:
+            isRoadmapLane && !editingTag.isRoadmapLane
+              ? maxOrder + 1000
+              : isRoadmapLane
+                ? editingTag.laneOrder
+                : null,
         });
       } else {
         await z.mutate.tag.insert({
@@ -126,7 +127,10 @@ function DashboardTags() {
   };
 
   const handleDelete = async (tag: Tag) => {
-    if (!confirm(`Delete "${tag.name}"? This will remove it from all feedback.`)) return;
+    if (
+      !confirm(`Delete "${tag.name}"? This will remove it from all feedback.`)
+    )
+      return;
     await z.mutate.tag.delete({ id: tag.id });
   };
 
@@ -135,13 +139,13 @@ function DashboardTags() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Manage Tags</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="font-bold text-2xl">Manage Tags</h1>
+          <p className="mt-1 text-muted-foreground">
             Create and manage tags to categorize feedback
           </p>
         </div>
         <Button onClick={() => setShowModal(true)}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           New Tag
         </Button>
       </div>
@@ -150,26 +154,29 @@ function DashboardTags() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {tags?.map((tag) => (
           <div
+            className="flex items-center justify-between rounded-lg border p-4"
             key={tag.id}
-            className="flex items-center justify-between p-4 border rounded-lg"
           >
             <div className="flex items-center gap-3">
               <div
-                className="h-4 w-4 rounded-full shrink-0"
+                className="h-4 w-4 shrink-0 rounded-full"
                 style={{ backgroundColor: tag.color }}
               />
               <div className="min-w-0">
                 <span className="font-medium">{tag.name}</span>
-                <div className="flex gap-1 mt-1 flex-wrap">
+                <div className="mt-1 flex flex-wrap gap-1">
                   {tag.isRoadmapLane && (
-                    <Badge variant="outline" className="text-xs py-0">
-                      <Map className="h-3 w-3 mr-1" />
+                    <Badge className="py-0 text-xs" variant="outline">
+                      <Map className="mr-1 h-3 w-3" />
                       Lane
                     </Badge>
                   )}
                   {tag.isDoneStatus && (
-                    <Badge variant="outline" className="text-xs py-0 text-green-600 border-green-600">
-                      <CheckCircle className="h-3 w-3 mr-1" />
+                    <Badge
+                      className="border-green-600 py-0 text-green-600 text-xs"
+                      variant="outline"
+                    >
+                      <CheckCircle className="mr-1 h-3 w-3" />
                       Done
                     </Badge>
                   )}
@@ -178,17 +185,17 @@ function DashboardTags() {
             </div>
             <div className="flex gap-1">
               <Button
-                variant="ghost"
-                size="icon"
                 onClick={() => openEditModal(tag)}
+                size="icon"
+                variant="ghost"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(tag)}
                 className="text-destructive hover:text-destructive"
+                onClick={() => handleDelete(tag)}
+                size="icon"
+                variant="ghost"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -196,7 +203,7 @@ function DashboardTags() {
           </div>
         ))}
         {(!tags || tags.length === 0) && (
-          <p className="text-muted-foreground col-span-full text-center py-8">
+          <p className="col-span-full py-8 text-center text-muted-foreground">
             No tags yet. Create your first tag to categorize feedback.
           </p>
         )}
@@ -204,15 +211,17 @@ function DashboardTags() {
 
       {/* Create/Edit Modal */}
       <Dialog
-        open={showModal}
         onOpenChange={(open) => {
           setShowModal(open);
           if (!open) resetForm();
         }}
+        open={showModal}
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingTag ? "Edit Tag" : "Create New Tag"}</DialogTitle>
+            <DialogTitle>
+              {editingTag ? "Edit Tag" : "Create New Tag"}
+            </DialogTitle>
             <DialogDescription>
               Tags help organize and filter feedback
             </DialogDescription>
@@ -223,9 +232,9 @@ function DashboardTags() {
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Bug, Feature Request, UI/UX"
+                value={name}
               />
             </div>
 
@@ -234,13 +243,13 @@ function DashboardTags() {
               <div className="flex flex-wrap gap-2">
                 {COLOR_PALETTE.map((c) => (
                   <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
                     className={`h-8 w-8 rounded-full transition-all ${
-                      color === c ? "ring-2 ring-offset-2 ring-primary" : ""
+                      color === c ? "ring-2 ring-primary ring-offset-2" : ""
                     }`}
+                    key={c}
+                    onClick={() => setColor(c)}
                     style={{ backgroundColor: c }}
+                    type="button"
                   />
                 ))}
               </div>
@@ -249,44 +258,50 @@ function DashboardTags() {
             <div className="space-y-2">
               <Label>Preview</Label>
               <Badge
-                variant="secondary"
                 style={{ backgroundColor: `${color}20`, color }}
+                variant="secondary"
               >
                 {name || "Tag name"}
               </Badge>
             </div>
 
-            <div className="border-t pt-4 mt-4 space-y-4">
-              <Label className="text-base font-semibold">Roadmap Settings</Label>
-              
+            <div className="mt-4 space-y-4 border-t pt-4">
+              <Label className="font-semibold text-base">
+                Roadmap Settings
+              </Label>
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="isRoadmapLane" className="text-sm font-normal">
+                  <Label
+                    className="font-normal text-sm"
+                    htmlFor="isRoadmapLane"
+                  >
                     Use as Roadmap Lane
                   </Label>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     This tag will appear as a lane in the roadmap kanban view
                   </p>
                 </div>
                 <Switch
-                  id="isRoadmapLane"
                   checked={isRoadmapLane}
+                  id="isRoadmapLane"
                   onCheckedChange={setIsRoadmapLane}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="isDoneStatus" className="text-sm font-normal">
+                  <Label className="font-normal text-sm" htmlFor="isDoneStatus">
                     Mark as "Done" Status
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Items moved to this lane will be marked as completed for the changelog
+                  <p className="text-muted-foreground text-xs">
+                    Items moved to this lane will be marked as completed for the
+                    changelog
                   </p>
                 </div>
                 <Switch
-                  id="isDoneStatus"
                   checked={isDoneStatus}
+                  id="isDoneStatus"
                   onCheckedChange={setIsDoneStatus}
                 />
               </div>
@@ -295,16 +310,23 @@ function DashboardTags() {
 
           <DialogFooter>
             <Button
-              variant="outline"
               onClick={() => {
                 setShowModal(false);
                 resetForm();
               }}
+              variant="outline"
             >
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting || !name.trim()}>
-              {isSubmitting ? "Saving..." : editingTag ? "Save Changes" : "Create Tag"}
+            <Button
+              disabled={isSubmitting || !name.trim()}
+              onClick={handleSubmit}
+            >
+              {isSubmitting
+                ? "Saving..."
+                : editingTag
+                  ? "Save Changes"
+                  : "Create Tag"}
             </Button>
           </DialogFooter>
         </DialogContent>

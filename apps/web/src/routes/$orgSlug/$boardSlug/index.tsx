@@ -1,17 +1,20 @@
-import { useState } from "react";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { Plus, List, Map } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "../../../components/ui/toggle-group";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { List, Map, Plus } from "lucide-react";
+import { useState } from "react";
 import {
   FeedbackFilters,
   FeedbackListItem,
   type SortOption,
 } from "../../../components/feedback";
 import { RoadmapKanban } from "../../../components/roadmap/roadmap-kanban";
+import { Button } from "../../../components/ui/button";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "../../../components/ui/toggle-group";
 import { authClient } from "../../../lib/auth-client";
-import { type FeedbackStatus } from "../../../lib/constants";
+import type { FeedbackStatus } from "../../../lib/constants";
 import type { Schema } from "../../../schema";
 
 export const Route = createFileRoute("/$orgSlug/$boardSlug/")({
@@ -42,7 +45,9 @@ function BoardIndex() {
 
   // Filter state
   const [search, setSearch] = useState("");
-  const [selectedStatuses, setSelectedStatuses] = useState<FeedbackStatus[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<FeedbackStatus[]>(
+    []
+  );
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
 
@@ -107,7 +112,7 @@ function BoardIndex() {
 
   // Get roadmap lane tags (tags that are configured as roadmap lanes)
   const roadmapLaneTags = (tags ?? []).filter((t) => t.isRoadmapLane);
-  
+
   // Transform to the format expected by RoadmapKanban
   type RoadmapFeedbackItem = {
     id: string;
@@ -138,25 +143,35 @@ function BoardIndex() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{board?.name}</h1>
+          <h1 className="font-bold text-2xl">{board?.name}</h1>
           {board?.description && (
-            <p className="text-muted-foreground mt-1">{board.description}</p>
+            <p className="mt-1 text-muted-foreground">{board.description}</p>
           )}
         </div>
         <div className="flex items-center gap-2">
           {/* View Toggle */}
           <ToggleGroup
+            className="rounded-md border"
+            onValueChange={(value) =>
+              value && setViewMode(value as "list" | "roadmap")
+            }
             type="single"
             value={viewMode}
-            onValueChange={(value) => value && setViewMode(value as "list" | "roadmap")}
-            className="border rounded-md"
           >
-            <ToggleGroupItem value="list" aria-label="List view" className="px-3">
-              <List className="h-4 w-4 mr-1" />
+            <ToggleGroupItem
+              aria-label="List view"
+              className="px-3"
+              value="list"
+            >
+              <List className="mr-1 h-4 w-4" />
               List
             </ToggleGroupItem>
-            <ToggleGroupItem value="roadmap" aria-label="Roadmap view" className="px-3">
-              <Map className="h-4 w-4 mr-1" />
+            <ToggleGroupItem
+              aria-label="Roadmap view"
+              className="px-3"
+              value="roadmap"
+            >
+              <Map className="mr-1 h-4 w-4" />
               Roadmap
             </ToggleGroupItem>
           </ToggleGroup>
@@ -164,10 +179,10 @@ function BoardIndex() {
           {session && viewMode === "list" && (
             <Button asChild>
               <Link
-                to="/$orgSlug/$boardSlug/new"
                 params={{ orgSlug, boardSlug }}
+                to="/$orgSlug/$boardSlug/new"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Submit Feedback
               </Link>
             </Button>
@@ -180,19 +195,19 @@ function BoardIndex() {
         <>
           {/* Filters */}
           <FeedbackFilters
-            search={search}
-            onSearchChange={setSearch}
-            selectedStatuses={selectedStatuses}
-            onStatusChange={setSelectedStatuses}
-            selectedTagIds={selectedTagIds}
-            onTagChange={setSelectedTagIds}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
             availableTags={tags ?? []}
+            onSearchChange={setSearch}
+            onSortChange={setSortBy}
+            onStatusChange={setSelectedStatuses}
+            onTagChange={setSelectedTagIds}
+            search={search}
+            selectedStatuses={selectedStatuses}
+            selectedTagIds={selectedTagIds}
+            sortBy={sortBy}
           />
 
           {/* Results count */}
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {filteredFeedbacks.length} feedback item
             {filteredFeedbacks.length !== 1 ? "s" : ""}
           </p>
@@ -202,38 +217,40 @@ function BoardIndex() {
             {/* Pinned items first */}
             {pinnedFeedbacks.map((feedback) => (
               <FeedbackListItem
-                key={feedback.id}
-                feedback={feedback}
-                orgSlug={orgSlug}
                 boardSlug={boardSlug}
+                feedback={feedback}
+                key={feedback.id}
+                orgSlug={orgSlug}
               />
             ))}
 
             {/* Regular items */}
             {regularFeedbacks.map((feedback) => (
               <FeedbackListItem
-                key={feedback.id}
-                feedback={feedback}
-                orgSlug={orgSlug}
                 boardSlug={boardSlug}
+                feedback={feedback}
+                key={feedback.id}
+                orgSlug={orgSlug}
               />
             ))}
 
             {/* Empty state */}
             {filteredFeedbacks.length === 0 && (
-              <div className="text-center py-12 border rounded-lg bg-muted/30">
-                <p className="text-muted-foreground mb-4">
-                  {search || selectedStatuses.length > 0 || selectedTagIds.length > 0
+              <div className="rounded-lg border bg-muted/30 py-12 text-center">
+                <p className="mb-4 text-muted-foreground">
+                  {search ||
+                  selectedStatuses.length > 0 ||
+                  selectedTagIds.length > 0
                     ? "No feedback matches your filters"
                     : "No feedback yet. Be the first to share your ideas!"}
                 </p>
                 {session && (
                   <Button asChild>
                     <Link
-                      to="/$orgSlug/$boardSlug/new"
                       params={{ orgSlug, boardSlug }}
+                      to="/$orgSlug/$boardSlug/new"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                       Submit Feedback
                     </Link>
                   </Button>
@@ -246,16 +263,18 @@ function BoardIndex() {
         <>
           {/* Roadmap Kanban View - Public view is read-only, no backlog */}
           <RoadmapKanban
-            items={roadmapItems}
-            isAdmin={false}
             boardId={board?.id ?? ""}
-            customLanes={roadmapLaneTags.length > 0 ? roadmapLaneTags : undefined}
+            customLanes={
+              roadmapLaneTags.length > 0 ? roadmapLaneTags : undefined
+            }
+            isAdmin={false}
+            items={roadmapItems}
             organizationId={org?.id}
           />
 
           {/* Empty state for roadmap */}
           {roadmapItems.length === 0 && (
-            <div className="text-center py-12 border rounded-lg bg-muted/30">
+            <div className="rounded-lg border bg-muted/30 py-12 text-center">
               <p className="text-muted-foreground">
                 No items on the roadmap yet.
               </p>

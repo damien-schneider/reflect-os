@@ -29,7 +29,11 @@ export const LANE_OPTIONS: { value: RoadmapLane; label: string }[] = [
 
 export const STATUS_CONFIG: Record<
   FeedbackStatus,
-  { label: string; variant: "default" | "secondary" | "destructive" | "outline"; className: string }
+  {
+    label: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+    className: string;
+  }
 > = {
   open: {
     label: "Open",
@@ -39,12 +43,14 @@ export const STATUS_CONFIG: Record<
   under_review: {
     label: "Under Review",
     variant: "secondary",
-    className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+    className:
+      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
   },
   planned: {
     label: "Planned",
     variant: "secondary",
-    className: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+    className:
+      "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
   },
   in_progress: {
     label: "In Progress",
@@ -67,7 +73,12 @@ export const STATUS_CONFIG: Record<
 export const ROADMAP_LANES: RoadmapLane[] = ["now", "next", "later"];
 
 // Includes backlog for admin view
-export const ROADMAP_LANES_WITH_BACKLOG: RoadmapLaneWithBacklog[] = ["backlog", "now", "next", "later"];
+export const ROADMAP_LANES_WITH_BACKLOG: RoadmapLaneWithBacklog[] = [
+  "backlog",
+  "now",
+  "next",
+  "later",
+];
 
 export const LANE_CONFIG: Record<
   RoadmapLaneWithBacklog,

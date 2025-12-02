@@ -1,30 +1,34 @@
-import { useState, useMemo } from "react";
 import {
-  DndContext,
-  DragOverlay,
   closestCenter,
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  type DragStartEvent,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useZero } from "@rocicorp/zero/react";
-import { type RoadmapLane, type RoadmapLaneWithBacklog, ROADMAP_LANES, ROADMAP_LANES_WITH_BACKLOG, LANE_CONFIG } from "../../lib/constants";
-import { RoadmapLaneColumn } from "./roadmap-lane";
-import { RoadmapItemCard } from "./roadmap-item-card";
+import { useMemo, useState } from "react";
+import {
+  LANE_CONFIG,
+  ROADMAP_LANES,
+  type RoadmapLaneWithBacklog,
+} from "../../lib/constants";
 import type { Schema, Tag } from "../../schema";
+import { RoadmapItemCard } from "./roadmap-item-card";
+import { RoadmapLaneColumn } from "./roadmap-lane";
 
 // Feedback item with roadmap fields
-interface RoadmapFeedbackItem {
+export interface RoadmapFeedbackItem {
   id: string;
   title: string;
   description: string;
   status: string;
   voteCount: number;
-  roadmapLane: RoadmapLane | string | null;
+  roadmapLane: string | null;
   roadmapOrder: number;
   completedAt?: number | null;
 }
@@ -50,16 +54,18 @@ interface RoadmapKanbanProps {
   organizationId?: string;
 }
 
-export function RoadmapKanban({ 
-  items, 
-  backlogItems = [], 
-  isAdmin = false, 
+export function RoadmapKanban({
+  items,
+  backlogItems = [],
+  isAdmin = false,
   boardId: _boardId,
   customLanes,
   organizationId: _organizationId,
 }: RoadmapKanbanProps) {
   const z = useZero<Schema>();
-  const [activeItem, setActiveItem] = useState<RoadmapFeedbackItem | null>(null);
+  const [activeItem, setActiveItem] = useState<RoadmapFeedbackItem | null>(
+    null
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -106,14 +112,17 @@ export function RoadmapKanban({
   }, [laneConfigs, isAdmin]);
 
   // Combine items and backlog for lookup
-  const allItems = useMemo(() => [...items, ...backlogItems], [items, backlogItems]);
+  const allItems = useMemo(
+    () => [...items, ...backlogItems],
+    [items, backlogItems]
+  );
 
   // Group items by lane (including backlog)
   const itemsByLane = useMemo(() => {
     const grouped: Record<string, RoadmapFeedbackItem[]> = {
       backlog: [],
     };
-    
+
     // Initialize lanes
     laneConfigs.forEach((lane) => {
       grouped[lane.id] = [];
@@ -152,7 +161,7 @@ export function RoadmapKanban({
     const { active, over } = event;
     setActiveItem(null);
 
-    if (!over || !isAdmin) return;
+    if (!(over && isAdmin)) return;
 
     const activeItem = allItems.find((i) => i.id === active.id);
     if (!activeItem) return;
@@ -188,7 +197,9 @@ export function RoadmapKanban({
     }
 
     // Calculate new sort order
-    const laneItems = (itemsByLane[targetLane] ?? []).filter((i) => i.id !== activeItem.id);
+    const laneItems = (itemsByLane[targetLane] ?? []).filter(
+      (i) => i.id !== activeItem.id
+    );
     let newSortOrder: number;
 
     if (laneItems.length === 0) {
@@ -196,24 +207,32 @@ export function RoadmapKanban({
     } else if (targetIndex === 0) {
       newSortOrder = (laneItems[0]?.roadmapOrder ?? 1000) / 2;
     } else if (targetIndex >= laneItems.length) {
-      newSortOrder = (laneItems[laneItems.length - 1]?.roadmapOrder ?? 0) + 1000;
+      newSortOrder =
+        (laneItems[laneItems.length - 1]?.roadmapOrder ?? 0) + 1000;
     } else {
       const prevOrder = laneItems[targetIndex - 1]?.roadmapOrder ?? 0;
-      const nextOrder = laneItems[targetIndex]?.roadmapOrder ?? prevOrder + 2000;
+      const nextOrder =
+        laneItems[targetIndex]?.roadmapOrder ?? prevOrder + 2000;
       newSortOrder = (prevOrder + nextOrder) / 2;
     }
 
     // Check if target lane is a "Done" status lane
     const targetLaneConfig = laneConfigs.find((l) => l.id === targetLane);
     const isDoneLane = targetLaneConfig?.isDoneStatus ?? false;
-    
+
     // Get previous lane to check if we're moving from a done lane
     const previousLane = activeItem.roadmapLane;
     const previousLaneConfig = laneConfigs.find((l) => l.id === previousLane);
     const wasInDoneLane = previousLaneConfig?.isDoneStatus ?? false;
 
     // Update the feedback item's roadmap fields
-    const updateData: Parameters<typeof z.mutate.feedback.update>[0] = {
+    const updateData: {
+      id: string;
+      roadmapLane: string;
+      roadmapOrder: number;
+      updatedAt: number;
+      completedAt?: number | null;
+    } = {
       id: activeItem.id,
       roadmapLane: targetLane,
       roadmapOrder: newSortOrder,
@@ -247,32 +266,30 @@ export function RoadmapKanban({
 
   return (
     <DndContext
-      sensors={sensors}
       collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart}
+      sensors={sensors}
     >
-      <div 
+      <div
         className="grid grid-cols-1 gap-4"
-        style={{ 
-          gridTemplateColumns: `repeat(${allLaneConfigs.length}, minmax(0, 1fr))` 
+        style={{
+          gridTemplateColumns: `repeat(${allLaneConfigs.length}, minmax(0, 1fr))`,
         }}
       >
         {allLaneConfigs.map((laneConfig) => (
           <RoadmapLaneColumn
+            isAdmin={isAdmin}
+            items={itemsByLane[laneConfig.id] ?? []}
             key={laneConfig.id}
             lane={laneConfig.id as RoadmapLaneWithBacklog}
-            items={itemsByLane[laneConfig.id] ?? []}
-            isAdmin={isAdmin}
             laneConfig={laneConfig}
           />
         ))}
       </div>
 
       <DragOverlay>
-        {activeItem ? (
-          <RoadmapItemCard item={activeItem} isDragging />
-        ) : null}
+        {activeItem ? <RoadmapItemCard isDragging item={activeItem} /> : null}
       </DragOverlay>
     </DndContext>
   );

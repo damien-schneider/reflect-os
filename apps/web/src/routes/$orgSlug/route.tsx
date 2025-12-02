@@ -1,9 +1,15 @@
-import { createFileRoute, Outlet, useParams, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { authClient } from "../../lib/auth-client";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/button";
+import { authClient } from "../../lib/auth-client";
 import type { Schema } from "../../schema";
 
 export const Route = createFileRoute("/$orgSlug")({
@@ -11,7 +17,7 @@ export const Route = createFileRoute("/$orgSlug")({
 });
 
 // Maximum time to wait for Zero sync before showing error (in ms)
-const SYNC_TIMEOUT_MS = 15000;
+const SYNC_TIMEOUT_MS = 15_000;
 // Maximum number of sync retry attempts
 const MAX_SYNC_ATTEMPTS = 30;
 
@@ -24,11 +30,19 @@ function OrgLayout() {
   const syncStartTimeRef = useRef<number | null>(null);
 
   // Get session info
-  const { data: session, isPending: sessionPending, error: sessionError } = authClient.useSession();
+  const {
+    data: session,
+    isPending: sessionPending,
+    error: sessionError,
+  } = authClient.useSession();
   const userId = session?.user?.id ?? "";
-  
+
   // Check if user has this org in Better Auth
-  const { data: authOrganizations, isPending: authOrgsPending, error: authOrgsError } = authClient.useListOrganizations();
+  const {
+    data: authOrganizations,
+    isPending: authOrgsPending,
+    error: authOrgsError,
+  } = authClient.useListOrganizations();
   const authOrg = authOrganizations?.find((o) => o.slug === orgSlug);
   const hasAuthMembership = !!authOrg;
   const authOrgId = authOrg?.id ?? "";
@@ -47,10 +61,11 @@ function OrgLayout() {
     z.query.organization.where("slug", "=", orgSlug ?? "")
   );
   const org = orgs?.[0];
-  
+
   // Wait for Zero sync if user has auth membership but member hasn't synced yet
   // Use member sync status as primary indicator since it has simpler permissions
-  const needsSync = hasAuthMembership && !isMember && memberQueryStatus === "complete";
+  const needsSync =
+    hasAuthMembership && !isMember && memberQueryStatus === "complete";
 
   // Initialize sync start time when needsSync becomes true
   useEffect(() => {
@@ -61,7 +76,9 @@ function OrgLayout() {
 
   // Log sync status for debugging
   useEffect(() => {
-    const elapsed = syncStartTimeRef.current ? Date.now() - syncStartTimeRef.current : 0;
+    const elapsed = syncStartTimeRef.current
+      ? Date.now() - syncStartTimeRef.current
+      : 0;
     console.log("[OrgLayout] Sync status:", {
       orgSlug,
       sessionPending,
@@ -81,7 +98,24 @@ function OrgLayout() {
       syncTimedOut,
       elapsedMs: elapsed,
     });
-  }, [orgSlug, sessionPending, sessionError, authOrgsPending, authOrgsError, hasAuthMembership, authOrgId, userId, memberQueryStatus, members, isMember, queryStatus, org, needsSync, syncAttempts, syncTimedOut]);
+  }, [
+    orgSlug,
+    sessionPending,
+    sessionError,
+    authOrgsPending,
+    authOrgsError,
+    hasAuthMembership,
+    authOrgId,
+    userId,
+    memberQueryStatus,
+    members,
+    isMember,
+    queryStatus,
+    org,
+    needsSync,
+    syncAttempts,
+    syncTimedOut,
+  ]);
 
   // Retry sync check periodically if needed, and check for timeout
   useEffect(() => {
@@ -91,7 +125,11 @@ function OrgLayout() {
         if (syncStartTimeRef.current !== null) {
           const elapsed = Date.now() - syncStartTimeRef.current;
           if (elapsed >= SYNC_TIMEOUT_MS) {
-            console.error("[OrgLayout] ❌ Zero sync timed out after", elapsed, "ms");
+            console.error(
+              "[OrgLayout] ❌ Zero sync timed out after",
+              elapsed,
+              "ms"
+            );
             setSyncTimedOut(true);
             return;
           }
@@ -110,13 +148,13 @@ function OrgLayout() {
     // Wait for queries to complete
     // For members, use memberQueryStatus; for public orgs, we need org query
     if (sessionPending || authOrgsPending) return;
-    
+
     // If user has auth membership, they have access (Zero might just be syncing)
     if (hasAuthMembership) return;
-    
+
     // Still waiting for Zero sync (for members)
     if (needsSync && syncAttempts < MAX_SYNC_ATTEMPTS && !syncTimedOut) return;
-    
+
     // Wait for org query to complete (for non-members accessing public orgs)
     if (queryStatus !== "complete") return;
 
@@ -138,7 +176,19 @@ function OrgLayout() {
       console.log("[OrgLayout] Redirecting to account - not a member");
       navigate({ to: "/dashboard/account" });
     }
-  }, [org, session, sessionPending, authOrgsPending, isMember, hasAuthMembership, queryStatus, navigate, needsSync, syncAttempts, syncTimedOut]);
+  }, [
+    org,
+    session,
+    sessionPending,
+    authOrgsPending,
+    isMember,
+    hasAuthMembership,
+    queryStatus,
+    navigate,
+    needsSync,
+    syncAttempts,
+    syncTimedOut,
+  ]);
 
   // Handle retry
   const handleRetry = () => {
@@ -153,21 +203,21 @@ function OrgLayout() {
   if (authError) {
     console.error("[OrgLayout] ❌ Auth error:", authError);
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-8">
-        <div className="max-w-md text-center space-y-4">
-          <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-8">
+        <div className="max-w-md space-y-4 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
             <AlertCircle className="h-6 w-6 text-destructive" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Authentication Error</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h2 className="font-semibold text-lg">Authentication Error</h2>
+            <p className="mt-1 text-muted-foreground text-sm">
               Unable to verify your access to this organization.
             </p>
           </div>
-          <p className="text-xs text-destructive bg-destructive/10 p-3 rounded-md font-mono">
+          <p className="rounded-md bg-destructive/10 p-3 font-mono text-destructive text-xs">
             {authError.message}
           </p>
-          <Button onClick={handleRetry} variant="outline" className="gap-2">
+          <Button className="gap-2" onClick={handleRetry} variant="outline">
             <RefreshCw className="h-4 w-4" />
             Retry
           </Button>
@@ -179,25 +229,36 @@ function OrgLayout() {
   // Sync timed out - show error state
   if (syncTimedOut && hasAuthMembership) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-8">
-        <div className="max-w-md text-center space-y-4">
-          <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-8">
+        <div className="max-w-md space-y-4 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
             <AlertCircle className="h-6 w-6 text-destructive" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Sync Timeout</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Unable to sync organization data with the server. The sync server may be unavailable.
+            <h2 className="font-semibold text-lg">Sync Timeout</h2>
+            <p className="mt-1 text-muted-foreground text-sm">
+              Unable to sync organization data with the server. The sync server
+              may be unavailable.
             </p>
           </div>
-          <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md space-y-1">
-            <p>Organization: <span className="font-mono">{authOrg?.name ?? orgSlug}</span></p>
-            <p>Member sync: <span className="font-mono">{memberQueryStatus}</span></p>
-            <p>Org sync: <span className="font-mono">{queryStatus}</span></p>
-            <p>Sync attempts: <span className="font-mono">{syncAttempts}</span></p>
+          <div className="space-y-1 rounded-md bg-muted p-3 text-muted-foreground text-xs">
+            <p>
+              Organization:{" "}
+              <span className="font-mono">{authOrg?.name ?? orgSlug}</span>
+            </p>
+            <p>
+              Member sync:{" "}
+              <span className="font-mono">{memberQueryStatus}</span>
+            </p>
+            <p>
+              Org sync: <span className="font-mono">{queryStatus}</span>
+            </p>
+            <p>
+              Sync attempts: <span className="font-mono">{syncAttempts}</span>
+            </p>
           </div>
-          <div className="flex gap-2 justify-center">
-            <Button onClick={handleRetry} variant="outline" className="gap-2">
+          <div className="flex justify-center gap-2">
+            <Button className="gap-2" onClick={handleRetry} variant="outline">
               <RefreshCw className="h-4 w-4" />
               Retry
             </Button>
@@ -212,18 +273,22 @@ function OrgLayout() {
 
   // Show loading while checking access or waiting for Zero sync
   // For members: wait for member sync. For public orgs: wait for org query
-  const isLoading = sessionPending || authOrgsPending || 
+  const isLoading =
+    sessionPending ||
+    authOrgsPending ||
     (hasAuthMembership && (memberQueryStatus !== "complete" || needsSync)) ||
     (!hasAuthMembership && queryStatus !== "complete");
-    
+
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         {needsSync && (
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">Syncing organization data...</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-muted-foreground text-sm">
+              Syncing organization data...
+            </p>
+            <p className="mt-1 text-muted-foreground text-xs">
               Attempt {syncAttempts + 1}/{MAX_SYNC_ATTEMPTS}
             </p>
           </div>
@@ -233,9 +298,9 @@ function OrgLayout() {
   }
 
   // If org is private and user doesn't have access, show nothing while redirecting
-  if (org && !org.isPublic && !hasAuthMembership && (!session || !isMember)) {
+  if (org && !org.isPublic && !hasAuthMembership && !(session && isMember)) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
@@ -248,8 +313,8 @@ function OrgLayout() {
     <>
       {/* Inject custom CSS if available */}
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
-      
-      <div className="container mx-auto p-4 md:p-6 max-w-6xl">
+
+      <div className="container mx-auto max-w-6xl p-4 md:p-6">
         <Outlet />
       </div>
     </>

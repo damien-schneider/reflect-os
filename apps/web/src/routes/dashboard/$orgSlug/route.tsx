@@ -1,8 +1,13 @@
-import { createFileRoute, Outlet, useParams, useNavigate } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { authClient } from "../../../lib/auth-client";
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { authClient } from "../../../lib/auth-client";
 import type { Schema } from "../../../schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug")({
@@ -19,9 +24,10 @@ function DashboardOrgLayout() {
   // Get session info
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const userId = session?.user?.id ?? "";
-  
+
   // Check if user has this org in Better Auth (source of truth for membership)
-  const { data: authOrganizations, isPending: authOrgsPending } = authClient.useListOrganizations();
+  const { data: authOrganizations, isPending: authOrgsPending } =
+    authClient.useListOrganizations();
   const authOrg = authOrganizations?.find((o) => o.slug === orgSlug);
   const hasAuthMembership = !!authOrg;
   const authOrgId = authOrg?.id ?? "";
@@ -36,18 +42,19 @@ function DashboardOrgLayout() {
   const isMemberInZero = members && members.length > 0;
 
   // Get organization from Zero for real-time updates (will only work after member syncs)
-  const [orgs, { type: queryStatus }] = useQuery(
+  const [orgs] = useQuery(
     z.query.organization.where("slug", "=", orgSlug ?? "")
   );
   const org = orgs?.[0];
-  
+
   // User has access if they're a member according to Better Auth
   // We use Better Auth as source of truth since Zero might be syncing
   const hasAccess = hasAuthMembership;
-  
+
   // Wait for Zero to sync if user has auth membership but member hasn't synced yet
   // Use member sync status as primary indicator since it has simpler permissions
-  const needsSync = hasAuthMembership && !isMemberInZero && memberQueryStatus === "complete";
+  const needsSync =
+    hasAuthMembership && !isMemberInZero && memberQueryStatus === "complete";
 
   // Retry sync check periodically if needed
   useEffect(() => {
@@ -63,7 +70,7 @@ function DashboardOrgLayout() {
   useEffect(() => {
     // Wait for auth queries to complete
     if (sessionPending || authOrgsPending) return;
-    
+
     // Prevent multiple redirects
     if (hasRedirected.current) return;
 
@@ -77,19 +84,21 @@ function DashboardOrgLayout() {
   // Show loading while checking auth
   if (sessionPending || authOrgsPending) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
   }
-  
+
   // Show loading while Zero syncs (only if user has auth access)
   // Use memberQueryStatus since that's what we're using to detect sync
   if (hasAccess && (memberQueryStatus !== "complete" || needsSync)) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Syncing organization data...</p>
+        <p className="text-muted-foreground text-sm">
+          Syncing organization data...
+        </p>
       </div>
     );
   }
@@ -97,7 +106,7 @@ function DashboardOrgLayout() {
   // If user doesn't have access, show nothing while redirecting
   if (!hasAccess) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
@@ -110,8 +119,8 @@ function DashboardOrgLayout() {
     <>
       {/* Inject custom CSS if available */}
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
-      
-      <div className="container mx-auto p-4 md:p-6 max-w-6xl">
+
+      <div className="container mx-auto max-w-6xl p-4 md:p-6">
         <Outlet />
       </div>
     </>

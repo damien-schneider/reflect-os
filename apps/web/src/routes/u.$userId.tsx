@@ -1,12 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { ChevronUp, MessageSquare, Calendar, User } from "lucide-react";
-import { Card, CardContent } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Separator } from "../components/ui/separator";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Calendar, ChevronUp, MessageSquare, User } from "lucide-react";
 import { StatusBadge } from "../components/feedback/status-badge";
-import type { Schema } from "../schema";
+import { Badge } from "../components/ui/badge";
+import { Card, CardContent } from "../components/ui/card";
+import { Separator } from "../components/ui/separator";
 import type { FeedbackStatus } from "../lib/constants";
+import type { Schema } from "../schema";
 
 export const Route = createFileRoute("/u/$userId")({
   component: UserProfile,
@@ -43,9 +43,8 @@ function UserProfile() {
   );
 
   // Filter to only comments on public feedback
-  const publicComments = allComments?.filter(
-    (c) => c.feedback?.board?.isPublic
-  ) ?? [];
+  const publicComments =
+    allComments?.filter((c) => c.feedback?.board?.isPublic) ?? [];
 
   // Stats
   const totalVotes = votes?.length ?? 0;
@@ -54,8 +53,8 @@ function UserProfile() {
 
   if (!user) {
     return (
-      <div className="container mx-auto py-8 max-w-4xl">
-        <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="container mx-auto max-w-4xl py-8">
+        <div className="flex min-h-[50vh] items-center justify-center">
           <p className="text-muted-foreground">User not found</p>
         </div>
       </div>
@@ -63,34 +62,32 @@ function UserProfile() {
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-4xl px-4">
+    <div className="container mx-auto max-w-4xl px-4 py-8">
       {/* User Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+      <div className="mb-8 flex items-center gap-4">
+        <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted">
           {user.avatar ? (
             <img
-              src={user.avatar}
               alt={user.name}
               className="h-full w-full object-cover"
+              src={user.avatar}
             />
           ) : (
             <User className="h-10 w-10 text-muted-foreground" />
           )}
         </div>
         <div>
-          <h1 className="text-2xl font-bold">{user.name}</h1>
-          {user.bio && (
-            <p className="text-muted-foreground">{user.bio}</p>
-          )}
+          <h1 className="font-bold text-2xl">{user.name}</h1>
+          {user.bio && <p className="text-muted-foreground">{user.bio}</p>}
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold">{totalFeedback}</div>
+              <div className="font-bold text-3xl">{totalFeedback}</div>
               <div className="text-muted-foreground text-sm">Feedback</div>
             </div>
           </CardContent>
@@ -98,7 +95,7 @@ function UserProfile() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold">{totalVotes}</div>
+              <div className="font-bold text-3xl">{totalVotes}</div>
               <div className="text-muted-foreground text-sm">Votes</div>
             </div>
           </CardContent>
@@ -106,7 +103,7 @@ function UserProfile() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold">{totalComments}</div>
+              <div className="font-bold text-3xl">{totalComments}</div>
               <div className="text-muted-foreground text-sm">Comments</div>
             </div>
           </CardContent>
@@ -117,7 +114,7 @@ function UserProfile() {
 
       {/* Recent Feedback */}
       <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Recent Feedback</h2>
+        <h2 className="font-semibold text-xl">Recent Feedback</h2>
 
         {publicFeedback.length === 0 ? (
           <Card>
@@ -134,34 +131,36 @@ function UserProfile() {
                     {/* Vote count */}
                     <div className="flex flex-col items-center text-muted-foreground">
                       <ChevronUp className="h-4 w-4" />
-                      <span className="text-sm font-medium">
+                      <span className="font-medium text-sm">
                         {feedback.voteCount}
                       </span>
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
                         <Link
-                          to="/$orgSlug/$boardSlug/$feedbackId"
+                          className="line-clamp-1 font-medium hover:text-primary"
                           params={{
                             orgSlug: feedback.board?.organizationId ?? "",
                             boardSlug: feedback.board?.slug ?? "",
                             feedbackId: feedback.id,
                           }}
-                          className="font-medium hover:text-primary line-clamp-1"
+                          to="/$orgSlug/$boardSlug/$feedbackId"
                         >
                           {feedback.title}
                         </Link>
-                        <StatusBadge status={feedback.status as FeedbackStatus} />
+                        <StatusBadge
+                          status={feedback.status as FeedbackStatus}
+                        />
                       </div>
 
-                      <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+                      <div className="mt-2 flex items-center gap-3 text-muted-foreground text-sm">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {new Date(feedback.createdAt).toLocaleDateString()}
                         </span>
                         {feedback.board && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge className="text-xs" variant="outline">
                             {feedback.board.name}
                           </Badge>
                         )}
@@ -185,7 +184,7 @@ function UserProfile() {
 
       {/* Recent Comments */}
       <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Recent Comments</h2>
+        <h2 className="font-semibold text-xl">Recent Comments</h2>
 
         {publicComments.length === 0 ? (
           <Card>
@@ -199,24 +198,25 @@ function UserProfile() {
               <Card key={comment.id}>
                 <CardContent className="py-4">
                   <div className="flex items-start gap-3">
-                    <MessageSquare className="h-4 w-4 text-muted-foreground mt-1" />
-                    <div className="flex-1 min-w-0">
+                    <MessageSquare className="mt-1 h-4 w-4 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
                       <div
-                        className="text-sm line-clamp-2"
+                        className="line-clamp-2 text-sm"
                         dangerouslySetInnerHTML={{ __html: comment.body }}
                       />
-                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                      <div className="mt-2 flex items-center gap-2 text-muted-foreground text-xs">
                         <span>
                           on{" "}
                           {comment.feedback && (
                             <Link
-                              to="/$orgSlug/$boardSlug/$feedbackId"
+                              className="hover:text-primary"
                               params={{
-                                orgSlug: comment.feedback.board?.organizationId ?? "",
+                                orgSlug:
+                                  comment.feedback.board?.organizationId ?? "",
                                 boardSlug: comment.feedback.board?.slug ?? "",
                                 feedbackId: comment.feedbackId,
                               }}
-                              className="hover:text-primary"
+                              to="/$orgSlug/$boardSlug/$feedbackId"
                             >
                               {comment.feedback.title}
                             </Link>

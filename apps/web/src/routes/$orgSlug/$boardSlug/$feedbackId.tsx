@@ -1,17 +1,17 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery, useZero } from "@rocicorp/zero/react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, Pin, Lock } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Separator } from "../../../components/ui/separator";
+import { ArrowLeft, Lock, Pin } from "lucide-react";
+import { MarkdownEditor } from "../../../components/editor-new/markdown-editor";
 import {
-  VoteButton,
+  CommentThread,
   StatusBadge,
   TagSelector,
-  CommentThread,
+  VoteButton,
 } from "../../../components/feedback";
 import { AddToRoadmap } from "../../../components/roadmap";
-import { TiptapRenderer } from "../../../components/editor/tiptap-editor";
+import { Button } from "../../../components/ui/button";
+import { Separator } from "../../../components/ui/separator";
 import { authClient } from "../../../lib/auth-client";
 import type { Schema } from "../../../schema";
 
@@ -71,19 +71,20 @@ function FeedbackDetail() {
 
   if (!feedback) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <p className="text-muted-foreground">Feedback not found</p>
       </div>
     );
   }
 
-  const selectedTagIds = feedback.feedbackTags?.map((ft) => ft.tag?.id ?? "").filter(Boolean) ?? [];
+  const selectedTagIds =
+    feedback.feedbackTags?.map((ft) => ft.tag?.id ?? "").filter(Boolean) ?? [];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       {/* Back link */}
-      <Button variant="ghost" asChild className="gap-2">
-        <Link to="/$orgSlug/$boardSlug" params={{ orgSlug, boardSlug }}>
+      <Button asChild className="gap-2" variant="ghost">
+        <Link params={{ orgSlug, boardSlug }} to="/$orgSlug/$boardSlug">
           <ArrowLeft className="h-4 w-4" />
           Back to {board?.name ?? "Board"}
         </Link>
@@ -95,36 +96,36 @@ function FeedbackDetail() {
         <div className="hidden md:block">
           <VoteButton
             feedbackId={feedback.id}
-            voteCount={feedback.voteCount ?? 0}
             size="lg"
+            voteCount={feedback.voteCount ?? 0}
           />
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 space-y-4">
+        <div className="min-w-0 flex-1 space-y-4">
           {/* Header */}
           <div>
-            <div className="flex items-center gap-2 flex-wrap mb-2">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <StatusBadge status={feedback.status ?? "open"} />
               {feedback.isPinned && (
-                <span className="flex items-center gap-1 text-xs text-primary">
+                <span className="flex items-center gap-1 text-primary text-xs">
                   <Pin className="h-3 w-3" />
                   Pinned
                 </span>
               )}
               {!feedback.isApproved && (
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1 text-muted-foreground text-xs">
                   <Lock className="h-3 w-3" />
                   Pending approval
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-bold">{feedback.title}</h1>
-            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+            <h1 className="font-bold text-2xl">{feedback.title}</h1>
+            <div className="mt-2 flex items-center gap-2 text-muted-foreground text-sm">
               <Link
-                to="/u/$userId"
-                params={{ userId: feedback.authorId }}
                 className="hover:text-foreground"
+                params={{ userId: feedback.authorId }}
+                to="/u/$userId"
               >
                 {feedback.author?.name ?? "Unknown User"}
               </Link>
@@ -145,60 +146,73 @@ function FeedbackDetail() {
           <div className="md:hidden">
             <VoteButton
               feedbackId={feedback.id}
-              voteCount={feedback.voteCount ?? 0}
               size="md"
+              voteCount={feedback.voteCount ?? 0}
             />
           </div>
 
           {/* Tags */}
           <TagSelector
+            editable={isOrgMember}
             feedbackId={feedback.id}
             organizationId={org?.id ?? ""}
             selectedTagIds={selectedTagIds}
-            editable={isOrgMember}
           />
 
           {/* Admin Actions */}
           {isOrgMember && (
             <div className="flex gap-2">
               <AddToRoadmap
-                feedbackId={feedback.id}
                 currentLane={feedback.roadmapLane}
+                feedbackId={feedback.id}
               />
             </div>
           )}
 
           {/* Description */}
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            <TiptapRenderer content={feedback.description} />
+            <MarkdownEditor
+              editable={false}
+              editorClassName="border-none shadow-none px-0 min-h-0 [&_.ProseMirror]:min-h-0"
+              showDragHandle={false}
+              showSlashMenu={false}
+              showToolbar={false}
+              value={feedback.description}
+            />
           </div>
 
           <Separator />
 
           {/* Admin notes (only for org members) */}
-          {isOrgMember && Array.isArray(adminNotes) && adminNotes.length > 0 && (
-            <div className="space-y-3 p-4 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-900 rounded-lg">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Lock className="h-4 w-4" />
-                Private Notes
-              </h3>
-              {(adminNotes as { id: string; body: string; createdAt: number; author?: { name: string } }[]).map((note) => (
-                <div key={note.id} className="text-sm">
-                  <div className="text-xs text-muted-foreground mb-1">
-                    {note.author?.name} •{" "}
-                    {formatDistanceToNow(note.createdAt, { addSuffix: true })}
+          {isOrgMember &&
+            Array.isArray(adminNotes) &&
+            adminNotes.length > 0 && (
+              <div className="space-y-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950/30">
+                <h3 className="flex items-center gap-2 font-semibold text-sm">
+                  <Lock className="h-4 w-4" />
+                  Private Notes
+                </h3>
+                {(
+                  adminNotes as {
+                    id: string;
+                    body: string;
+                    createdAt: number;
+                    author?: { name: string };
+                  }[]
+                ).map((note) => (
+                  <div className="text-sm" key={note.id}>
+                    <div className="mb-1 text-muted-foreground text-xs">
+                      {note.author?.name} •{" "}
+                      {formatDistanceToNow(note.createdAt, { addSuffix: true })}
+                    </div>
+                    <p>{note.body}</p>
                   </div>
-                  <p>{note.body}</p>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
           {/* Comments */}
-          <CommentThread
-            feedbackId={feedback.id}
-            isOrgMember={isOrgMember}
-          />
+          <CommentThread feedbackId={feedback.id} isOrgMember={isOrgMember} />
         </div>
       </div>
     </div>

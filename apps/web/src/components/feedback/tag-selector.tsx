@@ -1,16 +1,12 @@
+import { useQuery, useZero } from "@rocicorp/zero/react";
+import { Check, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { useZero, useQuery } from "@rocicorp/zero/react";
-import { X, Check, Plus } from "lucide-react";
+import { cn } from "../../lib/utils";
+import { randID } from "../../rand";
+import type { Schema, Tag } from "../../schema";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../ui/popover";
-import { cn } from "../../lib/utils";
-import type { Schema, Tag } from "../../schema";
-import { randID } from "../../rand";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 interface TagSelectorProps {
   feedbackId: string;
@@ -42,18 +38,18 @@ export function TagSelector({
 
   const toggleTag = async (tag: Tag) => {
     const isSelected = selectedTagIds.includes(tag.id);
-    
+
     if (isSelected) {
       // Remove tag
       const [feedbackTags] = await z.query.feedbackTag
         .where("feedbackId", "=", feedbackId)
         .where("tagId", "=", tag.id)
         .run();
-      
+
       if (feedbackTags) {
         await z.mutate.feedbackTag.delete({ id: feedbackTags.id });
       }
-      
+
       onChange?.(selectedTagIds.filter((id) => id !== tag.id));
     } else {
       // Add tag
@@ -62,7 +58,7 @@ export function TagSelector({
         feedbackId,
         tagId: tag.id,
       });
-      
+
       onChange?.([...selectedTagIds, tag.id]);
     }
   };
@@ -72,11 +68,11 @@ export function TagSelector({
       .where("feedbackId", "=", feedbackId)
       .where("tagId", "=", tagId)
       .run();
-    
+
     if (feedbackTags) {
       await z.mutate.feedbackTag.delete({ id: feedbackTags.id });
     }
-    
+
     onChange?.(selectedTagIds.filter((id) => id !== tagId));
   };
 
@@ -84,16 +80,16 @@ export function TagSelector({
     <div className={cn("flex flex-wrap gap-1", className)}>
       {selectedTags.map((tag) => (
         <Badge
-          key={tag.id}
-          variant="secondary"
-          style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
           className="gap-1"
+          key={tag.id}
+          style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
+          variant="secondary"
         >
           {tag.name}
           {editable && (
             <button
+              className="rounded-full p-0.5 hover:bg-black/10"
               onClick={() => removeTag(tag.id)}
-              className="hover:bg-black/10 rounded-full p-0.5"
             >
               <X className="h-3 w-3" />
             </button>
@@ -102,25 +98,25 @@ export function TagSelector({
       ))}
 
       {editable && (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover onOpenChange={setOpen} open={open}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 px-2 gap-1">
+            <Button className="h-6 gap-1 px-2" size="sm" variant="ghost">
               <Plus className="h-3 w-3" />
               <span className="text-xs">Add tag</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-2" align="start">
+          <PopoverContent align="start" className="w-48 p-2">
             <div className="space-y-1">
               {tags?.map((tag) => {
                 const isSelected = selectedTagIds.includes(tag.id);
                 return (
                   <button
-                    key={tag.id}
-                    onClick={() => toggleTag(tag)}
                     className={cn(
-                      "flex items-center justify-between w-full px-2 py-1.5 rounded text-sm hover:bg-accent",
+                      "flex w-full items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-accent",
                       isSelected && "bg-accent"
                     )}
+                    key={tag.id}
+                    onClick={() => toggleTag(tag)}
                   >
                     <div className="flex items-center gap-2">
                       <div
@@ -134,7 +130,7 @@ export function TagSelector({
                 );
               })}
               {(!tags || tags.length === 0) && (
-                <p className="text-xs text-muted-foreground text-center py-2">
+                <p className="py-2 text-center text-muted-foreground text-xs">
                   No tags available
                 </p>
               )}
@@ -163,8 +159,8 @@ export function TagList({
       {tags.map((tag) => (
         <Badge
           key={tag.id}
-          variant="secondary"
           style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
+          variant="secondary"
         >
           {tag.name}
         </Badge>

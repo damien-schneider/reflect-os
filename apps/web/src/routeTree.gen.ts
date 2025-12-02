@@ -27,7 +27,6 @@ import { Route as DashboardOrgSlugUsersRouteImport } from './routes/dashboard/$o
 import { Route as DashboardOrgSlugTagsRouteImport } from './routes/dashboard/$orgSlug/tags'
 import { Route as DashboardOrgSlugSettingsRouteImport } from './routes/dashboard/$orgSlug/settings'
 import { Route as DashboardOrgSlugChangelogRouteImport } from './routes/dashboard/$orgSlug/changelog'
-import { Route as DashboardOrgSlugBoardsRouteImport } from './routes/dashboard/$orgSlug/boards'
 import { Route as OrgSlugAdminUsersRouteImport } from './routes/$orgSlug/admin/users'
 import { Route as OrgSlugAdminTagsRouteImport } from './routes/$orgSlug/admin/tags'
 import { Route as OrgSlugAdminSettingsRouteImport } from './routes/$orgSlug/admin/settings'
@@ -35,7 +34,9 @@ import { Route as OrgSlugAdminBoardsRouteImport } from './routes/$orgSlug/admin/
 import { Route as OrgSlugBoardSlugNewRouteImport } from './routes/$orgSlug/$boardSlug/new'
 import { Route as OrgSlugBoardSlugFeedbackIdRouteImport } from './routes/$orgSlug/$boardSlug/$feedbackId'
 import { Route as DashboardOrgSlugBoardSlugRouteRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/route'
+import { Route as DashboardOrgSlugChangelogIndexRouteImport } from './routes/dashboard/$orgSlug/changelog/index'
 import { Route as DashboardOrgSlugBoardSlugIndexRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/index'
+import { Route as DashboardOrgSlugChangelogReleaseIdRouteImport } from './routes/dashboard/$orgSlug/changelog/$releaseId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -129,11 +130,6 @@ const DashboardOrgSlugChangelogRoute =
     path: '/changelog',
     getParentRoute: () => DashboardOrgSlugRouteRoute,
   } as any)
-const DashboardOrgSlugBoardsRoute = DashboardOrgSlugBoardsRouteImport.update({
-  id: '/boards',
-  path: '/boards',
-  getParentRoute: () => DashboardOrgSlugRouteRoute,
-} as any)
 const OrgSlugAdminUsersRoute = OrgSlugAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -171,11 +167,23 @@ const DashboardOrgSlugBoardSlugRouteRoute =
     path: '/$boardSlug',
     getParentRoute: () => DashboardOrgSlugRouteRoute,
   } as any)
+const DashboardOrgSlugChangelogIndexRoute =
+  DashboardOrgSlugChangelogIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardOrgSlugChangelogRoute,
+  } as any)
 const DashboardOrgSlugBoardSlugIndexRoute =
   DashboardOrgSlugBoardSlugIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => DashboardOrgSlugBoardSlugRouteRoute,
+  } as any)
+const DashboardOrgSlugChangelogReleaseIdRoute =
+  DashboardOrgSlugChangelogReleaseIdRouteImport.update({
+    id: '/$releaseId',
+    path: '/$releaseId',
+    getParentRoute: () => DashboardOrgSlugChangelogRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -198,14 +206,15 @@ export interface FileRoutesByFullPath {
   '/$orgSlug/admin/settings': typeof OrgSlugAdminSettingsRoute
   '/$orgSlug/admin/tags': typeof OrgSlugAdminTagsRoute
   '/$orgSlug/admin/users': typeof OrgSlugAdminUsersRoute
-  '/dashboard/$orgSlug/boards': typeof DashboardOrgSlugBoardsRoute
-  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogRoute
+  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogRouteWithChildren
   '/dashboard/$orgSlug/settings': typeof DashboardOrgSlugSettingsRoute
   '/dashboard/$orgSlug/tags': typeof DashboardOrgSlugTagsRoute
   '/dashboard/$orgSlug/users': typeof DashboardOrgSlugUsersRoute
   '/$orgSlug/$boardSlug/': typeof OrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/': typeof DashboardOrgSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
   '/dashboard/$orgSlug/$boardSlug/': typeof DashboardOrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/': typeof DashboardOrgSlugChangelogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -222,14 +231,14 @@ export interface FileRoutesByTo {
   '/$orgSlug/admin/settings': typeof OrgSlugAdminSettingsRoute
   '/$orgSlug/admin/tags': typeof OrgSlugAdminTagsRoute
   '/$orgSlug/admin/users': typeof OrgSlugAdminUsersRoute
-  '/dashboard/$orgSlug/boards': typeof DashboardOrgSlugBoardsRoute
-  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogRoute
   '/dashboard/$orgSlug/settings': typeof DashboardOrgSlugSettingsRoute
   '/dashboard/$orgSlug/tags': typeof DashboardOrgSlugTagsRoute
   '/dashboard/$orgSlug/users': typeof DashboardOrgSlugUsersRoute
   '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug': typeof DashboardOrgSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
   '/dashboard/$orgSlug/$boardSlug': typeof DashboardOrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -252,14 +261,15 @@ export interface FileRoutesById {
   '/$orgSlug/admin/settings': typeof OrgSlugAdminSettingsRoute
   '/$orgSlug/admin/tags': typeof OrgSlugAdminTagsRoute
   '/$orgSlug/admin/users': typeof OrgSlugAdminUsersRoute
-  '/dashboard/$orgSlug/boards': typeof DashboardOrgSlugBoardsRoute
-  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogRoute
+  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogRouteWithChildren
   '/dashboard/$orgSlug/settings': typeof DashboardOrgSlugSettingsRoute
   '/dashboard/$orgSlug/tags': typeof DashboardOrgSlugTagsRoute
   '/dashboard/$orgSlug/users': typeof DashboardOrgSlugUsersRoute
   '/$orgSlug/$boardSlug/': typeof OrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/': typeof DashboardOrgSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
   '/dashboard/$orgSlug/$boardSlug/': typeof DashboardOrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/': typeof DashboardOrgSlugChangelogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -283,14 +293,15 @@ export interface FileRouteTypes {
     | '/$orgSlug/admin/settings'
     | '/$orgSlug/admin/tags'
     | '/$orgSlug/admin/users'
-    | '/dashboard/$orgSlug/boards'
     | '/dashboard/$orgSlug/changelog'
     | '/dashboard/$orgSlug/settings'
     | '/dashboard/$orgSlug/tags'
     | '/dashboard/$orgSlug/users'
     | '/$orgSlug/$boardSlug/'
     | '/dashboard/$orgSlug/'
+    | '/dashboard/$orgSlug/changelog/$releaseId'
     | '/dashboard/$orgSlug/$boardSlug/'
+    | '/dashboard/$orgSlug/changelog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -307,14 +318,14 @@ export interface FileRouteTypes {
     | '/$orgSlug/admin/settings'
     | '/$orgSlug/admin/tags'
     | '/$orgSlug/admin/users'
-    | '/dashboard/$orgSlug/boards'
-    | '/dashboard/$orgSlug/changelog'
     | '/dashboard/$orgSlug/settings'
     | '/dashboard/$orgSlug/tags'
     | '/dashboard/$orgSlug/users'
     | '/$orgSlug/$boardSlug'
     | '/dashboard/$orgSlug'
+    | '/dashboard/$orgSlug/changelog/$releaseId'
     | '/dashboard/$orgSlug/$boardSlug'
+    | '/dashboard/$orgSlug/changelog'
   id:
     | '__root__'
     | '/'
@@ -336,14 +347,15 @@ export interface FileRouteTypes {
     | '/$orgSlug/admin/settings'
     | '/$orgSlug/admin/tags'
     | '/$orgSlug/admin/users'
-    | '/dashboard/$orgSlug/boards'
     | '/dashboard/$orgSlug/changelog'
     | '/dashboard/$orgSlug/settings'
     | '/dashboard/$orgSlug/tags'
     | '/dashboard/$orgSlug/users'
     | '/$orgSlug/$boardSlug/'
     | '/dashboard/$orgSlug/'
+    | '/dashboard/$orgSlug/changelog/$releaseId'
     | '/dashboard/$orgSlug/$boardSlug/'
+    | '/dashboard/$orgSlug/changelog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -482,13 +494,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOrgSlugChangelogRouteImport
       parentRoute: typeof DashboardOrgSlugRouteRoute
     }
-    '/dashboard/$orgSlug/boards': {
-      id: '/dashboard/$orgSlug/boards'
-      path: '/boards'
-      fullPath: '/dashboard/$orgSlug/boards'
-      preLoaderRoute: typeof DashboardOrgSlugBoardsRouteImport
-      parentRoute: typeof DashboardOrgSlugRouteRoute
-    }
     '/$orgSlug/admin/users': {
       id: '/$orgSlug/admin/users'
       path: '/users'
@@ -538,12 +543,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOrgSlugBoardSlugRouteRouteImport
       parentRoute: typeof DashboardOrgSlugRouteRoute
     }
+    '/dashboard/$orgSlug/changelog/': {
+      id: '/dashboard/$orgSlug/changelog/'
+      path: '/'
+      fullPath: '/dashboard/$orgSlug/changelog/'
+      preLoaderRoute: typeof DashboardOrgSlugChangelogIndexRouteImport
+      parentRoute: typeof DashboardOrgSlugChangelogRoute
+    }
     '/dashboard/$orgSlug/$boardSlug/': {
       id: '/dashboard/$orgSlug/$boardSlug/'
       path: '/'
       fullPath: '/dashboard/$orgSlug/$boardSlug/'
       preLoaderRoute: typeof DashboardOrgSlugBoardSlugIndexRouteImport
       parentRoute: typeof DashboardOrgSlugBoardSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/changelog/$releaseId': {
+      id: '/dashboard/$orgSlug/changelog/$releaseId'
+      path: '/$releaseId'
+      fullPath: '/dashboard/$orgSlug/changelog/$releaseId'
+      preLoaderRoute: typeof DashboardOrgSlugChangelogReleaseIdRouteImport
+      parentRoute: typeof DashboardOrgSlugChangelogRoute
     }
   }
 }
@@ -614,10 +633,26 @@ const DashboardOrgSlugBoardSlugRouteRouteWithChildren =
     DashboardOrgSlugBoardSlugRouteRouteChildren,
   )
 
+interface DashboardOrgSlugChangelogRouteChildren {
+  DashboardOrgSlugChangelogReleaseIdRoute: typeof DashboardOrgSlugChangelogReleaseIdRoute
+  DashboardOrgSlugChangelogIndexRoute: typeof DashboardOrgSlugChangelogIndexRoute
+}
+
+const DashboardOrgSlugChangelogRouteChildren: DashboardOrgSlugChangelogRouteChildren =
+  {
+    DashboardOrgSlugChangelogReleaseIdRoute:
+      DashboardOrgSlugChangelogReleaseIdRoute,
+    DashboardOrgSlugChangelogIndexRoute: DashboardOrgSlugChangelogIndexRoute,
+  }
+
+const DashboardOrgSlugChangelogRouteWithChildren =
+  DashboardOrgSlugChangelogRoute._addFileChildren(
+    DashboardOrgSlugChangelogRouteChildren,
+  )
+
 interface DashboardOrgSlugRouteRouteChildren {
   DashboardOrgSlugBoardSlugRouteRoute: typeof DashboardOrgSlugBoardSlugRouteRouteWithChildren
-  DashboardOrgSlugBoardsRoute: typeof DashboardOrgSlugBoardsRoute
-  DashboardOrgSlugChangelogRoute: typeof DashboardOrgSlugChangelogRoute
+  DashboardOrgSlugChangelogRoute: typeof DashboardOrgSlugChangelogRouteWithChildren
   DashboardOrgSlugSettingsRoute: typeof DashboardOrgSlugSettingsRoute
   DashboardOrgSlugTagsRoute: typeof DashboardOrgSlugTagsRoute
   DashboardOrgSlugUsersRoute: typeof DashboardOrgSlugUsersRoute
@@ -627,8 +662,7 @@ interface DashboardOrgSlugRouteRouteChildren {
 const DashboardOrgSlugRouteRouteChildren: DashboardOrgSlugRouteRouteChildren = {
   DashboardOrgSlugBoardSlugRouteRoute:
     DashboardOrgSlugBoardSlugRouteRouteWithChildren,
-  DashboardOrgSlugBoardsRoute: DashboardOrgSlugBoardsRoute,
-  DashboardOrgSlugChangelogRoute: DashboardOrgSlugChangelogRoute,
+  DashboardOrgSlugChangelogRoute: DashboardOrgSlugChangelogRouteWithChildren,
   DashboardOrgSlugSettingsRoute: DashboardOrgSlugSettingsRoute,
   DashboardOrgSlugTagsRoute: DashboardOrgSlugTagsRoute,
   DashboardOrgSlugUsersRoute: DashboardOrgSlugUsersRoute,

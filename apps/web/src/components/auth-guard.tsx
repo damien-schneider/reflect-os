@@ -1,8 +1,7 @@
-import { ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { authClient } from "../lib/auth-client";
 import { Loader2 } from "lucide-react";
+import { type ReactNode, useEffect } from "react";
+import { authClient } from "../lib/auth-client";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -13,14 +12,14 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isPending && !session) {
+    if (!(isPending || session)) {
       navigate({ to: "/login" });
     }
   }, [session, isPending, navigate]);
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );

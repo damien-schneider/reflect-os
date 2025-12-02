@@ -20,7 +20,8 @@
       "@/*": ["./src/*"],
       "@repo/db": ["../../packages/db/src/index.ts"],
       "@repo/db/*": ["../../packages/db/src/*"]
-    }
+    },
+    "strictNullChecks": true
   },
-  "include": ["src", "api", "vite.config.ts", "drizzle-zero.config.ts", "../../packages/db/src"]
+  "include": ["src", "api", "vite.config.ts", "../../packages/db/src"]
 }

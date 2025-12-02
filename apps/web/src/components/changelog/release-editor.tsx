@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
 import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useEffect, useState } from "react";
+import { randID } from "../../rand";
+import type { Release, ReleaseItem, Schema } from "../../schema";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
 import { Switch } from "../ui/switch";
+import { Textarea } from "../ui/textarea";
 import { ChangelogItemSelector } from "./changelog-item-selector";
-import { randID } from "../../rand";
-import type { Schema, Release, ReleaseItem } from "../../schema";
 
 interface ReleaseEditorProps {
   organizationId: string;
@@ -16,8 +16,8 @@ interface ReleaseEditorProps {
   onSave?: () => void;
 }
 
-export function ReleaseEditor({ 
-  organizationId, 
+export function ReleaseEditor({
+  organizationId,
   release,
   onClose,
   onSave,
@@ -39,7 +39,8 @@ export function ReleaseEditor({
   );
 
   // Safely convert to array - only use items if actually editing
-  const releaseItems: ReleaseItem[] = isEditing && Array.isArray(releaseItemsData) ? releaseItemsData : [];
+  const releaseItems: ReleaseItem[] =
+    isEditing && Array.isArray(releaseItemsData) ? releaseItemsData : [];
 
   // Initialize selected items from existing release items
   useEffect(() => {
@@ -56,7 +57,7 @@ export function ReleaseEditor({
     try {
       const now = Date.now();
       const releaseId = release?.id ?? randID();
-      
+
       if (isEditing) {
         // Update existing release
         z.mutate.release.update({
@@ -116,9 +117,9 @@ export function ReleaseEditor({
         <Label htmlFor="title">Title *</Label>
         <Input
           id="title"
-          value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g., January 2025 Release"
+          value={title}
         />
       </div>
 
@@ -126,11 +127,11 @@ export function ReleaseEditor({
       <div className="space-y-2">
         <Label htmlFor="version">Version (optional)</Label>
         <Input
+          className="font-mono"
           id="version"
-          value={version}
           onChange={(e) => setVersion(e.target.value)}
           placeholder="e.g., v1.2.0"
-          className="font-mono"
+          value={version}
         />
       </div>
 
@@ -139,54 +140,55 @@ export function ReleaseEditor({
         <Label htmlFor="description">Description (optional)</Label>
         <Textarea
           id="description"
-          value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="A brief summary of this release..."
           rows={3}
+          value={description}
         />
       </div>
 
       {/* Publish Toggle */}
       <div className="flex items-center justify-between border-t pt-4">
         <div className="space-y-0.5">
-          <Label htmlFor="isPublished" className="text-sm font-normal">
+          <Label className="font-normal text-sm" htmlFor="isPublished">
             Publish Release
           </Label>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Published releases are visible to everyone
           </p>
         </div>
         <Switch
-          id="isPublished"
           checked={isPublished}
+          id="isPublished"
           onCheckedChange={setIsPublished}
         />
       </div>
 
       {/* Completed Items Selector */}
       <div className="border-t pt-4">
-        <Label className="text-base font-semibold mb-4 block">
+        <Label className="mb-4 block font-semibold text-base">
           Completed Items
         </Label>
         <ChangelogItemSelector
+          onSelectionChange={setSelectedFeedbackIds}
           organizationId={organizationId}
           selectedIds={selectedFeedbackIds}
-          onSelectionChange={setSelectedFeedbackIds}
         />
       </div>
 
       {/* Actions */}
       <div className="flex justify-end gap-2 border-t pt-4">
         {onClose && (
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} variant="outline">
             Cancel
           </Button>
         )}
-        <Button 
-          onClick={handleSubmit} 
-          disabled={isSubmitting || !title.trim()}
-        >
-          {isSubmitting ? "Saving..." : isEditing ? "Save Changes" : "Create Release"}
+        <Button disabled={isSubmitting || !title.trim()} onClick={handleSubmit}>
+          {isSubmitting
+            ? "Saving..."
+            : isEditing
+              ? "Save Changes"
+              : "Create Release"}
         </Button>
       </div>
     </div>

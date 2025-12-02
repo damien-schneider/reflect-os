@@ -1,11 +1,7 @@
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Monitor } from "lucide-react";
 import { Button } from "./ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const themes = ["light", "dark", "system"] as const;
 const themeIcons = {
@@ -21,7 +17,7 @@ const themeLabels = {
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  
+
   const currentTheme = (theme ?? "system") as keyof typeof themeIcons;
   const Icon = themeIcons[currentTheme] ?? Monitor;
   const label = themeLabels[currentTheme] ?? "System";
@@ -35,7 +31,7 @@ export function ThemeToggle() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" onClick={cycleTheme}>
+        <Button onClick={cycleTheme} size="icon" variant="ghost">
           <Icon className="h-4 w-4" />
         </Button>
       </TooltipTrigger>

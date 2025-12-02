@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Pin } from "lucide-react";
-import { VoteButton } from "./vote-button";
-import { StatusBadge } from "./status-badge";
-import { Badge } from "../ui/badge";
 import { cn } from "../../lib/utils";
 import type { Feedback, Tag } from "../../schema";
+import { Badge } from "../ui/badge";
+import { StatusBadge } from "./status-badge";
+import { VoteButton } from "./vote-button";
 
 interface FeedbackListItemProps {
   feedback: Feedback & {
@@ -23,12 +23,15 @@ export function FeedbackListItem({
   boardSlug,
   className,
 }: FeedbackListItemProps) {
-  const tags = feedback.feedbackTags?.map((ft) => ft.tag).filter((t): t is Tag => t !== null) ?? [];
+  const tags =
+    feedback.feedbackTags
+      ?.map((ft) => ft.tag)
+      .filter((t): t is Tag => t !== null) ?? [];
 
   return (
     <div
       className={cn(
-        "flex gap-4 p-4 border rounded-lg hover:bg-accent/50 transition-colors",
+        "flex gap-4 rounded-lg border p-4 transition-colors hover:bg-accent/50",
         feedback.isPinned && "border-primary/50 bg-primary/5",
         className
       )}
@@ -36,33 +39,35 @@ export function FeedbackListItem({
       {/* Vote button */}
       <VoteButton
         feedbackId={feedback.id}
-        voteCount={feedback.voteCount ?? 0}
         size="md"
+        voteCount={feedback.voteCount ?? 0}
       />
 
       {/* Content */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             {/* Title */}
             <Link
-              to="/$orgSlug/$boardSlug/$feedbackId"
-              params={{ orgSlug, boardSlug, feedbackId: feedback.id }}
               className="group"
+              params={{ orgSlug, boardSlug, feedbackId: feedback.id }}
+              to="/$orgSlug/$boardSlug/$feedbackId"
             >
-              <h3 className="font-semibold text-base group-hover:text-primary transition-colors line-clamp-2">
+              <h3 className="line-clamp-2 font-semibold text-base transition-colors group-hover:text-primary">
                 {feedback.isPinned && (
-                  <Pin className="inline h-4 w-4 mr-1 text-primary" />
+                  <Pin className="mr-1 inline h-4 w-4 text-primary" />
                 )}
                 {feedback.title}
               </h3>
             </Link>
 
             {/* Meta info */}
-            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+            <div className="mt-1 flex items-center gap-2 text-muted-foreground text-sm">
               <span>{feedback.author?.name ?? "Unknown"}</span>
               <span>•</span>
-              <span>{formatDistanceToNow(feedback.createdAt, { addSuffix: true })}</span>
+              <span>
+                {formatDistanceToNow(feedback.createdAt, { addSuffix: true })}
+              </span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />
@@ -72,13 +77,16 @@ export function FeedbackListItem({
 
             {/* Tags */}
             {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
+              <div className="mt-2 flex flex-wrap gap-1">
                 {tags.map((tag) => (
                   <Badge
-                    key={tag.id}
-                    variant="secondary"
-                    style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
                     className="text-xs"
+                    key={tag.id}
+                    style={{
+                      backgroundColor: `${tag.color}20`,
+                      color: tag.color,
+                    }}
+                    variant="secondary"
                   >
                     {tag.name}
                   </Badge>

@@ -1,6 +1,8 @@
-import { useState } from "react";
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { Plus, Check, Unlink } from "lucide-react";
+import { Check, Plus, Unlink } from "lucide-react";
+import { useState } from "react";
+import { LANE_OPTIONS, type RoadmapLane } from "../../lib/constants";
+import type { Schema } from "../../schema";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -10,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
@@ -17,9 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Label } from "../ui/label";
-import { type RoadmapLane, LANE_OPTIONS } from "../../lib/constants";
-import type { Schema } from "../../schema";
 
 interface AddToRoadmapProps {
   feedbackId: string;
@@ -43,8 +43,7 @@ export function AddToRoadmap({
 
   // Get existing feedback items on roadmap to calculate sort order
   const [existingFeedbacks] = useQuery(
-    z.query.feedback
-      .where("roadmapLane", "=", lane)
+    z.query.feedback.where("roadmapLane", "=", lane)
   );
 
   const handleAddToRoadmap = async () => {
@@ -104,20 +103,17 @@ export function AddToRoadmap({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button
-          variant={isOnRoadmap ? "secondary" : "outline"}
-          size="sm"
-        >
+        <Button size="sm" variant={isOnRoadmap ? "secondary" : "outline"}>
           {isOnRoadmap ? (
             <>
-              <Check className="h-4 w-4 mr-1" />
+              <Check className="mr-1 h-4 w-4" />
               On Roadmap
             </>
           ) : (
             <>
-              <Plus className="h-4 w-4 mr-1" />
+              <Plus className="mr-1 h-4 w-4" />
               Add to Roadmap
             </>
           )}
@@ -138,7 +134,10 @@ export function AddToRoadmap({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label>Lane</Label>
-            <Select value={lane} onValueChange={(v) => setLane(v as RoadmapLane)}>
+            <Select
+              onValueChange={(v) => setLane(v as RoadmapLane)}
+              value={lane}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -152,20 +151,20 @@ export function AddToRoadmap({
             </Select>
           </div>
 
-          <div className="flex gap-2 justify-end">
+          <div className="flex justify-end gap-2">
             {isOnRoadmap && (
               <Button
-                variant="destructive"
-                onClick={handleRemoveFromRoadmap}
                 disabled={isSubmitting}
+                onClick={handleRemoveFromRoadmap}
+                variant="destructive"
               >
-                <Unlink className="h-4 w-4 mr-1" />
+                <Unlink className="mr-1 h-4 w-4" />
                 Remove
               </Button>
             )}
             <Button
-              onClick={isOnRoadmap ? handleUpdateLane : handleAddToRoadmap}
               disabled={isSubmitting}
+              onClick={isOnRoadmap ? handleUpdateLane : handleAddToRoadmap}
             >
               {isOnRoadmap ? "Update Lane" : "Add to Roadmap"}
             </Button>

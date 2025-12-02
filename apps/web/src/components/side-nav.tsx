@@ -43,13 +43,76 @@ import {
 import { Separator } from "./ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
-interface SideNavProps {
+type SideNavProps = {
   isOpen: boolean;
   onToggle: () => void;
-}
+};
 
 export function SideNav({ isOpen, onToggle }: SideNavProps) {
   const isMobile = useIsMobile();
+
+  // Mobile: slide-out drawer
+  if (isMobile) {
+    return <MobileSideNav isOpen={isOpen} onToggle={onToggle} />;
+  }
+
+  // Desktop: fixed sidebar
+  return (
+    <aside className="sticky top-0 hidden h-screen w-64 flex-col border-r bg-background md:flex">
+      <SideNavContent onToggle={onToggle} showMobileCloseButton={false} />
+    </aside>
+  );
+}
+
+function MobileSideNav({
+  isOpen,
+  onToggle,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <>
+      {/* Mobile toggle button */}
+      <Button
+        className="fixed top-4 left-4 z-40 md:hidden"
+        onClick={onToggle}
+        size="icon"
+        variant="ghost"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
+      {/* Overlay */}
+      {isOpen ? (
+        <button
+          aria-label="Close navigation"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={onToggle}
+          type="button"
+        />
+      ) : null}
+
+      {/* Drawer */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 transform border-r bg-background transition-transform duration-200 ease-in-out md:hidden",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <SideNavContent onToggle={onToggle} showMobileCloseButton />
+      </aside>
+    </>
+  );
+}
+
+function SideNavContent({
+  onToggle,
+  showMobileCloseButton,
+}: {
+  onToggle: () => void;
+  showMobileCloseButton: boolean;
+}) {
   const { orgSlug, boardSlug } = useParams({ strict: false });
   const navigate = useNavigate();
   const routerState = useRouterState();
@@ -58,29 +121,23 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
   const { data: session } = authClient.useSession();
   const { data: organizations } = authClient.useListOrganizations();
 
-  // Check if we're on dashboard routes
-  // Navigation is displayed when on dashboard routes
   const isAccountPage = pathname === "/dashboard/account";
 
-  // Get current organization (or first one if not on org page)
   const currentOrg =
     organizations?.find((o) => o.slug === orgSlug) ?? organizations?.[0];
   const effectiveOrgSlug = orgSlug ?? currentOrg?.slug ?? "";
 
-  // Query organization from Zero to get full data including isPublic
   const [orgs] = useQuery(
     z.query.organization.where("id", "=", currentOrg?.id ?? "")
   );
   const orgData = orgs?.[0];
 
-  // Query boards for current organization
   const [boards] = useQuery(
     z.query.board
       .where("organizationId", "=", currentOrg?.id ?? "")
       .related("organization")
   );
 
-  // Query unread notifications count
   const [notifications] = useQuery(
     z.query.notification
       .where("userId", "=", session?.user?.id ?? "")
@@ -89,10 +146,99 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
 
   const unreadCount = notifications?.length ?? 0;
 
+  return (
+    <div className="flex h-full flex-col">
+      <SideNavHeader
+        onToggle={onToggle}
+        showMobileCloseButton={showMobileCloseButton}
+      />
+
+      <Separator />
+
+      <MainNavigation
+        boardSlug={boardSlug}
+        boards={boards ?? []}
+        currentOrgId={currentOrg?.id}
+        effectiveOrgSlug={effectiveOrgSlug}
+        isAccountPage={isAccountPage}
+        navigate={navigate}
+        pathname={pathname}
+        z={z}
+      />
+
+      <Separator />
+
+      {effectiveOrgSlug !== "" ? (
+        <PublicViewSection
+          boards={boards ?? []}
+          org={orgData}
+          orgSlug={effectiveOrgSlug}
+        />
+      ) : null}
+
+      <OrgSelector
+        currentOrg={currentOrg}
+        effectiveOrgSlug={effectiveOrgSlug}
+        navigate={navigate}
+        organizations={organizations ?? []}
+      />
+
+      <Separator />
+
+      <UserSection
+        isAccountPage={isAccountPage}
+        session={session}
+        unreadCount={unreadCount}
+      />
+    </div>
+  );
+}
+
+function SideNavHeader({
+  onToggle,
+  showMobileCloseButton,
+}: {
+  onToggle: () => void;
+  showMobileCloseButton: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between p-4">
+      <span className="font-semibold text-lg">Dashboard</span>
+      {showMobileCloseButton ? (
+        <Button onClick={onToggle} size="icon" type="button" variant="ghost">
+          <X className="h-5 w-5" />
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+type NavigateFunction = ReturnType<typeof useNavigate>;
+type ZeroInstance = ReturnType<typeof useZero<Schema>>;
+
+function MainNavigation({
+  effectiveOrgSlug,
+  boardSlug,
+  pathname,
+  isAccountPage,
+  boards,
+  currentOrgId,
+  navigate,
+  z,
+}: {
+  effectiveOrgSlug: string;
+  boardSlug: string | undefined;
+  pathname: string;
+  isAccountPage: boolean;
+  boards: Board[];
+  currentOrgId: string | undefined;
+  navigate: NavigateFunction;
+  z: ZeroInstance;
+}) {
   const [boardsExpanded, setBoardsExpanded] = useState(true);
 
   const handleCreateBoard = () => {
-    if (!currentOrg?.id) {
+    if (!currentOrgId) {
       return;
     }
     const boardId = randID();
@@ -103,7 +249,7 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
       slug,
       description: "",
       isPublic: false,
-      organizationId: currentOrg.id,
+      organizationId: currentOrgId,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -113,276 +259,286 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
     });
   };
 
-  const navContent = (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4">
-        <span className="font-semibold text-lg">Dashboard</span>
-        {isMobile && (
-          <Button onClick={onToggle} size="icon" variant="ghost">
-            <X className="h-5 w-5" />
-          </Button>
-        )}
-      </div>
-
-      <Separator />
-
-      {/* Main Navigation */}
+  if (effectiveOrgSlug === "") {
+    return (
       <nav className="flex-1 space-y-1 overflow-y-auto p-2">
-        {/* Show org navigation only when an org is available */}
-        {effectiveOrgSlug ? (
-          <>
-            {/* Dashboard */}
-            <Link
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 font-medium text-sm transition-colors",
-                "hover:bg-accent hover:text-accent-foreground",
-                !(boardSlug || isAccountPage) &&
-                  pathname === `/dashboard/${effectiveOrgSlug}` &&
-                  "bg-accent text-accent-foreground"
-              )}
-              params={{ orgSlug: effectiveOrgSlug }}
-              to="/dashboard/$orgSlug"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </Link>
-
-            {/* Boards Section */}
-            <div className="pt-4">
-              <button
-                className="flex w-full items-center gap-2 px-3 py-1 font-semibold text-muted-foreground text-xs uppercase tracking-wider hover:text-foreground"
-                onClick={() => setBoardsExpanded(!boardsExpanded)}
-              >
-                {boardsExpanded ? (
-                  <ChevronDown className="h-3 w-3" />
-                ) : (
-                  <ChevronRight className="h-3 w-3" />
-                )}
-                <Layers className="h-3 w-3" />
-                Boards
-              </button>
-              {boardsExpanded && (
-                <div className="mt-1 space-y-1">
-                  {(boards ?? []).map((board) => (
-                    <BoardNavItem
-                      board={board}
-                      isActive={boardSlug === board.slug}
-                      key={board.id}
-                      orgSlug={effectiveOrgSlug}
-                    />
-                  ))}
-                  {(boards ?? []).length === 0 && (
-                    <p className="px-3 py-2 text-muted-foreground text-xs">
-                      No boards yet
-                    </p>
-                  )}
-                  <button
-                    className="flex items-center gap-2 px-3 py-1.5 text-muted-foreground text-xs hover:text-foreground"
-                    onClick={handleCreateBoard}
-                    type="button"
-                  >
-                    <Plus className="h-3 w-3" />
-                    Add board
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Admin Section */}
-            <div className="pt-6">
-              <div className="px-3 py-1 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
-                Admin
-              </div>
-              <div className="mt-1 space-y-1">
-                <Link
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                  params={{ orgSlug: effectiveOrgSlug }}
-                  to="/dashboard/$orgSlug/tags"
-                >
-                  <Tags className="h-4 w-4" />
-                  Tags
-                </Link>
-                <Link
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                  params={{ orgSlug: effectiveOrgSlug }}
-                  to="/dashboard/$orgSlug/changelog"
-                >
-                  <FileText className="h-4 w-4" />
-                  Changelog
-                </Link>
-                <Link
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                  params={{ orgSlug: effectiveOrgSlug }}
-                  to="/dashboard/$orgSlug/users"
-                >
-                  <Users className="h-4 w-4" />
-                  Users
-                </Link>
-                <Link
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                  params={{ orgSlug: effectiveOrgSlug }}
-                  to="/dashboard/$orgSlug/settings"
-                >
-                  <Settings className="h-4 w-4" />
-                  Settings
-                </Link>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="px-3 py-4 text-muted-foreground text-sm">
-            <p>No organizations yet.</p>
-            <Link
-              className="text-primary hover:underline"
-              to="/dashboard/account"
-            >
-              Create one
-            </Link>
-          </div>
-        )}
-      </nav>
-
-      <Separator />
-
-      {/* Public View Section - above org selector */}
-      {effectiveOrgSlug && (
-        <PublicViewSection
-          boards={boards ?? []}
-          org={orgData}
-          orgSlug={effectiveOrgSlug}
-        />
-      )}
-
-      {/* Organization Selector */}
-      <div className="p-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              className="w-full justify-start gap-2 font-medium"
-              variant="ghost"
-            >
-              <Building2 className="h-4 w-4" />
-              <span className="flex-1 truncate text-left">
-                {currentOrg?.name ?? "Select Org"}
-              </span>
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            {organizations?.map((org) => (
-              <DropdownMenuItem
-                className={cn(org.slug === effectiveOrgSlug && "bg-accent")}
-                key={org.id}
-                onClick={() =>
-                  navigate({
-                    to: "/dashboard/$orgSlug",
-                    params: { orgSlug: org.slug },
-                  })
-                }
-              >
-                {org.name}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => navigate({ to: "/dashboard/account" })}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Organization Settings
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <Separator />
-
-      {/* User Section */}
-      <div className="p-4">
-        <div className="flex items-center justify-between">
+        <div className="px-3 py-4 text-muted-foreground text-sm">
+          <p>No organizations yet.</p>
           <Link
-            className={cn(
-              "flex h-auto items-center gap-2 rounded-md p-0 transition-colors",
-              "hover:bg-accent hover:text-accent-foreground",
-              isAccountPage && "bg-accent text-accent-foreground"
-            )}
+            className="text-primary hover:underline"
             to="/dashboard/account"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-              <User className="h-4 w-4" />
-            </div>
-            <div className="text-left">
-              <p className="max-w-[100px] truncate font-medium text-sm">
-                {session?.user?.name ?? "User"}
-              </p>
-            </div>
+            Create one
           </Link>
+        </div>
+      </nav>
+    );
+  }
 
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button className="relative" size="icon" variant="ghost">
-                  <Bell className="h-4 w-4" />
-                  {unreadCount > 0 && (
-                    <Badge
-                      className="-top-1 -right-1 absolute flex h-4 w-4 items-center justify-center p-0 text-[10px]"
-                      variant="destructive"
-                    >
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </Badge>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Notifications</TooltipContent>
-            </Tooltip>
+  return (
+    <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+      {/* Dashboard */}
+      <Link
+        className={cn(
+          "flex items-center gap-3 rounded-md px-3 py-2 font-medium text-sm transition-colors",
+          "hover:bg-accent hover:text-accent-foreground",
+          !(boardSlug || isAccountPage) &&
+            pathname === `/dashboard/${effectiveOrgSlug}`
+            ? "bg-accent text-accent-foreground"
+            : undefined
+        )}
+        params={{ orgSlug: effectiveOrgSlug }}
+        to="/dashboard/$orgSlug"
+      >
+        <LayoutDashboard className="h-4 w-4" />
+        Dashboard
+      </Link>
 
-            <ThemeToggle />
+      {/* Boards Section */}
+      <BoardsSection
+        boardSlug={boardSlug}
+        boards={boards}
+        boardsExpanded={boardsExpanded}
+        effectiveOrgSlug={effectiveOrgSlug}
+        onCreateBoard={handleCreateBoard}
+        onToggleExpanded={() => setBoardsExpanded(!boardsExpanded)}
+      />
+
+      {/* Admin Section */}
+      <AdminSection effectiveOrgSlug={effectiveOrgSlug} />
+    </nav>
+  );
+}
+
+function BoardsSection({
+  boardsExpanded,
+  onToggleExpanded,
+  boards,
+  boardSlug,
+  effectiveOrgSlug,
+  onCreateBoard,
+}: {
+  boardsExpanded: boolean;
+  onToggleExpanded: () => void;
+  boards: Board[];
+  boardSlug: string | undefined;
+  effectiveOrgSlug: string;
+  onCreateBoard: () => void;
+}) {
+  return (
+    <div className="pt-4">
+      <button
+        className="flex w-full items-center gap-2 px-3 py-1 font-semibold text-muted-foreground text-xs uppercase tracking-wider hover:text-foreground"
+        onClick={onToggleExpanded}
+        type="button"
+      >
+        {boardsExpanded ? (
+          <ChevronDown className="h-3 w-3" />
+        ) : (
+          <ChevronRight className="h-3 w-3" />
+        )}
+        <Layers className="h-3 w-3" />
+        Boards
+      </button>
+      {boardsExpanded ? (
+        <div className="mt-1 space-y-1">
+          {boards.map((board) => (
+            <BoardNavItem
+              board={board}
+              isActive={boardSlug === board.slug}
+              key={board.id}
+              orgSlug={effectiveOrgSlug}
+            />
+          ))}
+          {boards.length === 0 ? (
+            <p className="px-3 py-2 text-muted-foreground text-xs">
+              No boards yet
+            </p>
+          ) : null}
+          <button
+            className="flex items-center gap-2 px-3 py-1.5 text-muted-foreground text-xs hover:text-foreground"
+            onClick={onCreateBoard}
+            type="button"
+          >
+            <Plus className="h-3 w-3" />
+            Add board
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function AdminSection({ effectiveOrgSlug }: { effectiveOrgSlug: string }) {
+  return (
+    <div className="pt-6">
+      <div className="px-3 py-1 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+        Admin
+      </div>
+      <div className="mt-1 space-y-1">
+        <Link
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+          params={{ orgSlug: effectiveOrgSlug }}
+          to="/dashboard/$orgSlug/tags"
+        >
+          <Tags className="h-4 w-4" />
+          Tags
+        </Link>
+        <Link
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+          params={{ orgSlug: effectiveOrgSlug }}
+          to="/dashboard/$orgSlug/changelog"
+        >
+          <FileText className="h-4 w-4" />
+          Changelog
+        </Link>
+        <Link
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+          params={{ orgSlug: effectiveOrgSlug }}
+          to="/dashboard/$orgSlug/users"
+        >
+          <Users className="h-4 w-4" />
+          Users
+        </Link>
+        <Link
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+          params={{ orgSlug: effectiveOrgSlug }}
+          to="/dashboard/$orgSlug/settings"
+        >
+          <Settings className="h-4 w-4" />
+          Settings
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+type AuthOrganization = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+function OrgSelector({
+  currentOrg,
+  organizations,
+  effectiveOrgSlug,
+  navigate,
+}: {
+  currentOrg: AuthOrganization | undefined;
+  organizations: AuthOrganization[];
+  effectiveOrgSlug: string;
+  navigate: NavigateFunction;
+}) {
+  return (
+    <div className="p-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            className="w-full justify-start gap-2 font-medium"
+            variant="ghost"
+          >
+            <Building2 className="h-4 w-4" />
+            <span className="flex-1 truncate text-left">
+              {currentOrg?.name ?? "Select Org"}
+            </span>
+            <ChevronDown className="h-4 w-4 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56">
+          {organizations.map((org) => (
+            <DropdownMenuItem
+              className={cn(
+                org.slug === effectiveOrgSlug ? "bg-accent" : undefined
+              )}
+              key={org.id}
+              onClick={() =>
+                navigate({
+                  to: "/dashboard/$orgSlug",
+                  params: { orgSlug: org.slug },
+                })
+              }
+            >
+              {org.name}
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => navigate({ to: "/dashboard/account" })}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Organization Settings
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
+type SessionData = {
+  user?: {
+    id: string;
+    name?: string | null;
+  } | null;
+};
+
+function UserSection({
+  session,
+  isAccountPage,
+  unreadCount,
+}: {
+  session: SessionData | null;
+  isAccountPage: boolean;
+  unreadCount: number;
+}) {
+  return (
+    <div className="p-4">
+      <div className="flex items-center justify-between">
+        <Link
+          className={cn(
+            "flex h-auto items-center gap-2 rounded-md p-0 transition-colors",
+            "hover:bg-accent hover:text-accent-foreground",
+            isAccountPage ? "bg-accent text-accent-foreground" : undefined
+          )}
+          to="/dashboard/account"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+            <User className="h-4 w-4" />
           </div>
+          <div className="text-left">
+            <p className="max-w-[100px] truncate font-medium text-sm">
+              {session?.user?.name ?? "User"}
+            </p>
+          </div>
+        </Link>
+
+        <div className="flex items-center gap-1">
+          <NotificationButton unreadCount={unreadCount} />
+          <ThemeToggle />
         </div>
       </div>
     </div>
   );
+}
 
-  // Mobile: slide-out drawer
-  if (isMobile) {
-    return (
-      <>
-        {/* Mobile toggle button */}
-        <Button
-          className="fixed top-4 left-4 z-40 md:hidden"
-          onClick={onToggle}
-          size="icon"
-          variant="ghost"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-
-        {/* Overlay */}
-        {isOpen && (
-          <div
-            className="fixed inset-0 z-40 bg-black/50 md:hidden"
-            onClick={onToggle}
-          />
-        )}
-
-        {/* Drawer */}
-        <aside
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 w-64 transform border-r bg-background transition-transform duration-200 ease-in-out md:hidden",
-            isOpen ? "translate-x-0" : "-translate-x-full"
-          )}
-        >
-          {navContent}
-        </aside>
-      </>
-    );
-  }
-
-  // Desktop: fixed sidebar
+function NotificationButton({ unreadCount }: { unreadCount: number }) {
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 flex-col border-r bg-background md:flex">
-      {navContent}
-    </aside>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button className="relative" size="icon" variant="ghost">
+          <Bell className="h-4 w-4" />
+          {unreadCount > 0 ? (
+            <Badge
+              className="-top-1 -right-1 absolute flex h-4 w-4 items-center justify-center p-0 text-[10px]"
+              variant="destructive"
+            >
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </Badge>
+          ) : null}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Notifications</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -400,13 +556,13 @@ function BoardNavItem({
       className={cn(
         "flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors",
         "hover:bg-accent hover:text-accent-foreground",
-        isActive && "bg-accent text-accent-foreground"
+        isActive ? "bg-accent text-accent-foreground" : undefined
       )}
       params={{ orgSlug, boardSlug: board.slug }}
       to="/dashboard/$orgSlug/$boardSlug"
     >
       <span className="truncate">{board.name}</span>
-      {!board.isPublic && (
+      {board.isPublic ? null : (
         <Badge className="px-1 text-[10px]" variant="outline">
           Private
         </Badge>

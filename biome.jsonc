@@ -1,7 +1,15 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": [
-    "ultracite/core",
-    "ultracite/react"
-  ]
+  "extends": ["ultracite/core", "ultracite/react"],
+  "linter": {
+    "rules": {
+      "nursery": {
+        // Disable noLeakedRender as it has many false positives with:
+        // - cn() function calls (string manipulation, not JSX rendering)
+        // - JSX prop expressions (values, not children)
+        // - String/number expressions that are safe to render
+        "noLeakedRender": "off"
+      }
+    }
+  }
 }

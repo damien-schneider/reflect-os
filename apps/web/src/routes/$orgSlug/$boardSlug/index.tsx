@@ -2,6 +2,7 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { List, Map, Plus } from "lucide-react";
 import { useState } from "react";
+import { AdminFloatingBar } from "../../../components/admin-floating-bar";
 import {
   FeedbackFilters,
   FeedbackListItem,
@@ -28,6 +29,10 @@ function BoardIndex() {
   };
   const z = useZero<Schema>();
   const { data: session } = authClient.useSession();
+
+  // Check if user is a member of this organization (for admin bar)
+  const { data: authOrganizations } = authClient.useListOrganizations();
+  const isOrgMember = authOrganizations?.some((o) => o.slug === orgSlug);
 
   // View state: "list" or "roadmap"
   const [viewMode, setViewMode] = useState<"list" | "roadmap">("list");
@@ -281,6 +286,17 @@ function BoardIndex() {
             </div>
           )}
         </>
+      )}
+
+      {/* Admin floating bar for org members viewing public page */}
+      {isOrgMember === true && (
+        <AdminFloatingBar
+          dashboardLink={{
+            to: "/dashboard/$orgSlug/$boardSlug",
+            params: { orgSlug, boardSlug },
+          }}
+          message="You're viewing the public page"
+        />
       )}
     </div>
   );

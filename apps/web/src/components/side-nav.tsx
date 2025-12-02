@@ -117,43 +117,7 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              className="h-auto gap-2 p-0 font-semibold text-lg hover:bg-transparent"
-              variant="ghost"
-            >
-              <Building2 className="h-5 w-5" />
-              <span className="max-w-[140px] truncate">
-                {currentOrg?.name ?? "Select Org"}
-              </span>
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            {organizations?.map((org) => (
-              <DropdownMenuItem
-                className={cn(org.slug === effectiveOrgSlug && "bg-accent")}
-                key={org.id}
-                onClick={() =>
-                  navigate({
-                    to: "/dashboard/$orgSlug",
-                    params: { orgSlug: org.slug },
-                  })
-                }
-              >
-                {org.name}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => navigate({ to: "/dashboard/account" })}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Organization Settings
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <span className="font-semibold text-lg">Dashboard</span>
         {isMobile && (
           <Button onClick={onToggle} size="icon" variant="ghost">
             <X className="h-5 w-5" />
@@ -183,13 +147,6 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
             </Link>
-
-            {/* Public View Section */}
-            <PublicViewSection
-              boards={boards ?? []}
-              org={orgData}
-              orgSlug={effectiveOrgSlug}
-            />
 
             {/* Boards Section */}
             <div className="pt-4">
@@ -285,6 +242,58 @@ export function SideNav({ isOpen, onToggle }: SideNavProps) {
           </div>
         )}
       </nav>
+
+      <Separator />
+
+      {/* Public View Section - above org selector */}
+      {effectiveOrgSlug && (
+        <PublicViewSection
+          boards={boards ?? []}
+          org={orgData}
+          orgSlug={effectiveOrgSlug}
+        />
+      )}
+
+      {/* Organization Selector */}
+      <div className="p-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className="w-full justify-start gap-2 font-medium"
+              variant="ghost"
+            >
+              <Building2 className="h-4 w-4" />
+              <span className="flex-1 truncate text-left">
+                {currentOrg?.name ?? "Select Org"}
+              </span>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            {organizations?.map((org) => (
+              <DropdownMenuItem
+                className={cn(org.slug === effectiveOrgSlug && "bg-accent")}
+                key={org.id}
+                onClick={() =>
+                  navigate({
+                    to: "/dashboard/$orgSlug",
+                    params: { orgSlug: org.slug },
+                  })
+                }
+              >
+                {org.name}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => navigate({ to: "/dashboard/account" })}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Organization Settings
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <Separator />
 

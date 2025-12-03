@@ -118,7 +118,7 @@ export function CommentThread({
       {userId ? (
         <div className="space-y-3 border-t pt-4">
           <MarkdownEditor
-            className="min-h-[80px]"
+            className="min-h-20"
             onChange={setNewComment}
             placeholder="Write a comment... Press '/' for commands"
             showDragHandle={false}
@@ -223,7 +223,7 @@ function CommentItem({
     <div className={cn("space-y-3", depth > 0 && "ml-8 border-l-2 pl-4")}>
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
           <span className="font-medium text-sm">
             {comment.author?.name?.charAt(0).toUpperCase() ?? "?"}
           </span>

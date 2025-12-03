@@ -13,7 +13,7 @@ import {
   Quote,
   Type,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const SLASH_COMMAND_REGEX = /\/(\w*)$/;
@@ -131,6 +131,14 @@ export function SlashMenu({ editor }: SlashMenuProps) {
   const [range, setRange] = useState<Range | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Use refs for values needed in the keyboard handler to avoid stale closures
+  const stateRef = useRef({
+    isOpen: false,
+    selectedIndex: 0,
+    range: null as Range | null,
+    filteredItems: [] as SlashMenuItem[],
+  });
+
   const filteredItems = SLASH_MENU_ITEMS.filter((item) => {
     const searchTerms = [item.title, ...(item.aliases || [])].map((s) =>
       s.toLowerCase()
@@ -138,41 +146,82 @@ export function SlashMenu({ editor }: SlashMenuProps) {
     return searchTerms.some((term) => term.includes(query.toLowerCase()));
   });
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (!isOpen) {
-        return;
-      }
-
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < filteredItems.length - 1 ? prev + 1 : 0
-        );
-      } else if (event.key === "ArrowUp") {
-        event.preventDefault();
-        setSelectedIndex((prev) =>
-          prev > 0 ? prev - 1 : filteredItems.length - 1
-        );
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        const item = filteredItems[selectedIndex];
-        if (item && range) {
-          item.command(editor, range);
-          setIsOpen(false);
-        }
-      } else if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    },
-    [isOpen, filteredItems, selectedIndex, range, editor]
-  );
-
+  // Keep refs in sync with state
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
+    stateRef.current.isOpen = isOpen;
+    stateRef.current.selectedIndex = selectedIndex;
+    stateRef.current.range = range;
+    stateRef.current.filteredItems = filteredItems;
+  }, [isOpen, selectedIndex, range, filteredItems]);
 
+  // Handle keyboard events through ProseMirror's handleKeyDown
+  // This intercepts keys BEFORE they're processed by the editor
+  useEffect(() => {
+    const handleSlashMenuKeyDown = (event: KeyboardEvent): boolean => {
+      const {
+        isOpen: menuOpen,
+        selectedIndex: idx,
+        range: currentRange,
+        filteredItems: items,
+      } = stateRef.current;
+
+      if (!menuOpen || items.length === 0) {
+        return false;
+      }
+
+      switch (event.key) {
+        case "ArrowDown":
+          event.preventDefault();
+          setSelectedIndex((prev) => (prev < items.length - 1 ? prev + 1 : 0));
+          return true;
+        case "ArrowUp":
+          event.preventDefault();
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : items.length - 1));
+          return true;
+        case "Enter": {
+          event.preventDefault();
+          const item = items[idx];
+          if (item && currentRange) {
+            item.command(editor, currentRange);
+            setIsOpen(false);
+          }
+          return true;
+        }
+        case "Escape":
+          event.preventDefault();
+          setIsOpen(false);
+          return true;
+        default:
+          return false;
+      }
+    };
+
+    // Add the handler to ProseMirror's props
+    const originalHandleKeyDown = editor.view.props.handleKeyDown;
+
+    editor.view.setProps({
+      handleKeyDown: (view, event) => {
+        // First, try our slash menu handler
+        if (handleSlashMenuKeyDown(event)) {
+          return true;
+        }
+        // If not handled, call the original handler
+        if (originalHandleKeyDown) {
+          return originalHandleKeyDown(view, event);
+        }
+        return false;
+      },
+    });
+
+    return () => {
+      // Restore original handler on cleanup
+      editor.view.setProps({
+        handleKeyDown: originalHandleKeyDown,
+      });
+    };
+  }, [editor]);
+
+  // Listen for editor updates to detect slash commands
   useEffect(() => {
     const handleUpdate = () => {
       const { state } = editor;
@@ -227,10 +276,9 @@ export function SlashMenu({ editor }: SlashMenuProps) {
     };
   }, [editor]);
 
-  // Reset index when filtered items change
+  // Reset index when query changes
   useEffect(() => {
     setSelectedIndex(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only reset on query change, not on filteredItems
   }, []);
 
   // Scroll selected item into view

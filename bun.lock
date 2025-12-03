@@ -16,7 +16,7 @@
         "dotenv-cli": "^11.0.0",
         "husky": "^9.1.7",
         "turbo": "^2.5.4",
-        "ultracite": "^6.3.8",
+        "ultracite": "6.3.8",
       },
     },
     "apps/docker": {
@@ -83,6 +83,7 @@
         "@vitejs/plugin-react": "^4.3.1",
         "autoprefixer": "^10.4.22",
         "babel-plugin-react-compiler": "^1.0.0",
+        "bun-types": "^1.3.3",
         "concurrently": "^9.2.1",
         "dotenv": "^16.4.5",
         "dotenv-cli": "^11.0.0",
@@ -991,6 +992,8 @@
     "buffer": ["buffer@4.9.2", "", { "dependencies": { "base64-js": "^1.0.2", "ieee754": "^1.1.4", "isarray": "^1.0.0" } }, "sha512-xq+q3SRMOxGivLhBNaUdC64hDTQwejJ+H0T/NB1XMtTVEwNTrfFF3gAxiyW0Bu/xWEGhjVKgUcMhCrUy2+uCWg=="],
 
     "buffer-from": ["buffer-from@1.1.2", "", {}, "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="],
+
+    "bun-types": ["bun-types@1.3.3", "", { "dependencies": { "@types/node": "*" } }, "sha512-z3Xwlg7j2l9JY27x5Qn3Wlyos8YAp0kKRlrePAOjgjMGS5IG6E7Jnlx736vH9UVI4wUICwwhC9anYL++XeOgTQ=="],
 
     "bytes": ["bytes@3.1.2", "", {}, "sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg=="],
 

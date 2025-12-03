@@ -1,13 +1,9 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { List, Map as MapIcon, Plus } from "lucide-react";
-import { useAuthDialog } from "@/components/auth-dialog-provider";
-import { RoadmapKanban } from "@/features/roadmap/components/roadmap-kanban";
 import { AdminFloatingBar } from "@/components/admin-floating-bar";
+import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { Button } from "@/components/ui/button";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FeedbackFilters } from "@/features/feedback/components/feedback-filters";
 import { FeedbackListItem } from "@/features/feedback/components/feedback-list-item";
 import {
@@ -16,6 +12,7 @@ import {
   useFeedbackFilters,
   useSession,
 } from "@/features/feedback/hooks/use-feedback-filters";
+import { RoadmapKanban } from "@/features/roadmap/components/roadmap-kanban";
 import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/$orgSlug/$boardSlug/")({
@@ -107,7 +104,7 @@ function BoardIndex() {
 
 type BoardData = {
   name?: string;
-  description?: string;
+  description?: string | null;
 };
 
 type SessionData = {
@@ -169,8 +166,12 @@ type FeedbackItem = ReturnType<
 type Tag = {
   id: string;
   name: string;
-  color?: string | null;
-  isRoadmapLane?: boolean;
+  color: string;
+  organizationId: string;
+  isDoneStatus: boolean | null;
+  isRoadmapLane: boolean | null;
+  laneOrder: number | null;
+  createdAt: number;
 };
 
 function ListView({

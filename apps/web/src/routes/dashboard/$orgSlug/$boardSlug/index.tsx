@@ -15,15 +15,11 @@ import {
   Settings,
 } from "lucide-react";
 import { useState } from "react";
-import { BoardActions } from "@/features/board/components/board-actions";
-import { SlugEditDialog } from "@/features/board/components/slug-edit-dialog";
-import { RoadmapKanban } from "@/features/roadmap/components/roadmap-kanban";
 import { EditableTitle } from "@/components/editable-title";
 import { Button } from "@/components/ui/button";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { BoardActions } from "@/features/board/components/board-actions";
+import { SlugEditDialog } from "@/features/board/components/slug-edit-dialog";
 import { FeedbackFilters } from "@/features/feedback/components/feedback-filters";
 import { FeedbackListItem } from "@/features/feedback/components/feedback-list-item";
 import {
@@ -31,6 +27,7 @@ import {
   useFeedbackData,
   useFeedbackFilters,
 } from "@/features/feedback/hooks/use-feedback-filters";
+import { RoadmapKanban } from "@/features/roadmap/components/roadmap-kanban";
 import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/$boardSlug/")({
@@ -189,10 +186,18 @@ function NewBoardBanner() {
 
 type BoardType = {
   id: string;
+  organizationId: string;
   slug: string;
   name: string;
-  description: string;
-  isPublic?: boolean | null;
+  description: string | null;
+  isPublic: boolean | null;
+  settings: {
+    allowAnonymousVoting?: boolean;
+    requireApproval?: boolean;
+    defaultStatus?: string;
+  } | null;
+  createdAt: number;
+  updatedAt: number;
 };
 
 type OrgType = {
@@ -354,8 +359,12 @@ function DashboardListView({
 type TagType = {
   id: string;
   name: string;
-  color?: string | null;
-  isRoadmapLane?: boolean | null;
+  color: string;
+  organizationId: string;
+  isDoneStatus: boolean | null;
+  isRoadmapLane: boolean | null;
+  laneOrder: number | null;
+  createdAt: number;
 };
 
 function DashboardRoadmapView({

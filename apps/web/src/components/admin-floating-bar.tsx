@@ -1,14 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { Link, type LinkProps } from "@tanstack/react-router";
 import { PencilLine, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 type AdminFloatingBarProps = {
   /** The link to the dashboard edit page */
-  dashboardLink: {
-    to: string;
-    params: Record<string, string>;
-  };
+  dashboardLink: Pick<LinkProps, "to" | "params">;
   /** Optional message to display */
   message?: string;
 };
@@ -39,9 +36,7 @@ export function AdminFloatingBar({
         </div>
         <div className="flex items-center gap-2">
           <Button asChild size="sm">
-            <Link params={dashboardLink.params} to={dashboardLink.to as never}>
-              Edit in Dashboard
-            </Link>
+            <Link {...dashboardLink}>Edit in Dashboard</Link>
           </Button>
           <Button
             aria-label="Dismiss"

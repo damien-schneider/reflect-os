@@ -8,694 +8,695 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as OrgSlugBoardSlugFeedbackIdRouteImport } from "./routes/$orgSlug/$boardSlug/$feedbackId";
-import { Route as OrgSlugBoardSlugIndexRouteImport } from "./routes/$orgSlug/$boardSlug/index";
-import { Route as OrgSlugBoardSlugNewRouteImport } from "./routes/$orgSlug/$boardSlug/new";
-import { Route as OrgSlugBoardSlugRouteRouteImport } from "./routes/$orgSlug/$boardSlug/route";
-import { Route as OrgSlugAdminBoardsRouteImport } from "./routes/$orgSlug/admin/boards";
-import { Route as OrgSlugAdminRouteRouteImport } from "./routes/$orgSlug/admin/route";
-import { Route as OrgSlugAdminSettingsRouteImport } from "./routes/$orgSlug/admin/settings";
-import { Route as OrgSlugAdminTagsRouteImport } from "./routes/$orgSlug/admin/tags";
-import { Route as OrgSlugAdminUsersRouteImport } from "./routes/$orgSlug/admin/users";
-import { Route as OrgSlugChangelogRouteImport } from "./routes/$orgSlug/changelog";
-import { Route as OrgSlugIndexRouteImport } from "./routes/$orgSlug/index";
-import { Route as OrgSlugRouteRouteImport } from "./routes/$orgSlug/route";
-import { Route as DashboardOrgSlugBoardSlugIndexRouteImport } from "./routes/dashboard/$orgSlug/$boardSlug/index";
-import { Route as DashboardOrgSlugBoardSlugRouteRouteImport } from "./routes/dashboard/$orgSlug/$boardSlug/route";
-import { Route as DashboardOrgSlugChangelogRouteImport } from "./routes/dashboard/$orgSlug/changelog";
-import { Route as DashboardOrgSlugChangelogReleaseIdRouteImport } from "./routes/dashboard/$orgSlug/changelog/$releaseId";
-import { Route as DashboardOrgSlugChangelogIndexRouteImport } from "./routes/dashboard/$orgSlug/changelog/index";
-import { Route as DashboardOrgSlugIndexRouteImport } from "./routes/dashboard/$orgSlug/index";
-import { Route as DashboardOrgSlugRouteRouteImport } from "./routes/dashboard/$orgSlug/route";
-import { Route as DashboardOrgSlugSettingsRouteImport } from "./routes/dashboard/$orgSlug/settings";
-import { Route as DashboardOrgSlugTagsRouteImport } from "./routes/dashboard/$orgSlug/tags";
-import { Route as DashboardOrgSlugUsersRouteImport } from "./routes/dashboard/$orgSlug/users";
-import { Route as DashboardAccountRouteImport } from "./routes/dashboard/account";
-import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
-import { Route as DashboardRouteRouteImport } from "./routes/dashboard/route";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as LoginRouteImport } from "./routes/login";
-import { Route as UUserIdRouteImport } from "./routes/u.$userId";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as OrgSlugRouteRouteImport } from './routes/$orgSlug/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as OrgSlugIndexRouteImport } from './routes/$orgSlug/index'
+import { Route as UUserIdRouteImport } from './routes/u.$userId'
+import { Route as DashboardAccountRouteImport } from './routes/dashboard/account'
+import { Route as OrgSlugChangelogRouteImport } from './routes/$orgSlug/changelog'
+import { Route as DashboardOrgSlugRouteRouteImport } from './routes/dashboard/$orgSlug/route'
+import { Route as OrgSlugAdminRouteRouteImport } from './routes/$orgSlug/admin/route'
+import { Route as OrgSlugBoardSlugRouteRouteImport } from './routes/$orgSlug/$boardSlug/route'
+import { Route as DashboardOrgSlugIndexRouteImport } from './routes/dashboard/$orgSlug/index'
+import { Route as OrgSlugBoardSlugIndexRouteImport } from './routes/$orgSlug/$boardSlug/index'
+import { Route as DashboardOrgSlugUsersRouteImport } from './routes/dashboard/$orgSlug/users'
+import { Route as DashboardOrgSlugTagsRouteImport } from './routes/dashboard/$orgSlug/tags'
+import { Route as DashboardOrgSlugSettingsRouteImport } from './routes/dashboard/$orgSlug/settings'
+import { Route as DashboardOrgSlugChangelogRouteImport } from './routes/dashboard/$orgSlug/changelog'
+import { Route as OrgSlugAdminUsersRouteImport } from './routes/$orgSlug/admin/users'
+import { Route as OrgSlugAdminTagsRouteImport } from './routes/$orgSlug/admin/tags'
+import { Route as OrgSlugAdminSettingsRouteImport } from './routes/$orgSlug/admin/settings'
+import { Route as OrgSlugAdminBoardsRouteImport } from './routes/$orgSlug/admin/boards'
+import { Route as OrgSlugBoardSlugNewRouteImport } from './routes/$orgSlug/$boardSlug/new'
+import { Route as OrgSlugBoardSlugFeedbackIdRouteImport } from './routes/$orgSlug/$boardSlug/$feedbackId'
+import { Route as DashboardOrgSlugBoardSlugRouteRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/route'
+import { Route as DashboardOrgSlugChangelogIndexRouteImport } from './routes/dashboard/$orgSlug/changelog/index'
+import { Route as DashboardOrgSlugBoardSlugIndexRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/index'
+import { Route as DashboardOrgSlugChangelogReleaseIdRouteImport } from './routes/dashboard/$orgSlug/changelog/$releaseId'
 
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
-  id: "/dashboard",
-  path: "/dashboard",
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const OrgSlugRouteRoute = OrgSlugRouteRouteImport.update({
-  id: "/$orgSlug",
-  path: "/$orgSlug",
+  id: '/$orgSlug',
+  path: '/$orgSlug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => DashboardRouteRoute,
-} as any);
+} as any)
 const OrgSlugIndexRoute = OrgSlugIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => OrgSlugRouteRoute,
-} as any);
+} as any)
 const UUserIdRoute = UUserIdRouteImport.update({
-  id: "/u/$userId",
-  path: "/u/$userId",
+  id: '/u/$userId',
+  path: '/u/$userId',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DashboardAccountRoute = DashboardAccountRouteImport.update({
-  id: "/account",
-  path: "/account",
+  id: '/account',
+  path: '/account',
   getParentRoute: () => DashboardRouteRoute,
-} as any);
+} as any)
 const OrgSlugChangelogRoute = OrgSlugChangelogRouteImport.update({
-  id: "/changelog",
-  path: "/changelog",
+  id: '/changelog',
+  path: '/changelog',
   getParentRoute: () => OrgSlugRouteRoute,
-} as any);
+} as any)
 const DashboardOrgSlugRouteRoute = DashboardOrgSlugRouteRouteImport.update({
-  id: "/$orgSlug",
-  path: "/$orgSlug",
+  id: '/$orgSlug',
+  path: '/$orgSlug',
   getParentRoute: () => DashboardRouteRoute,
-} as any);
+} as any)
 const OrgSlugAdminRouteRoute = OrgSlugAdminRouteRouteImport.update({
-  id: "/admin",
-  path: "/admin",
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => OrgSlugRouteRoute,
-} as any);
+} as any)
 const OrgSlugBoardSlugRouteRoute = OrgSlugBoardSlugRouteRouteImport.update({
-  id: "/$boardSlug",
-  path: "/$boardSlug",
+  id: '/$boardSlug',
+  path: '/$boardSlug',
   getParentRoute: () => OrgSlugRouteRoute,
-} as any);
+} as any)
 const DashboardOrgSlugIndexRoute = DashboardOrgSlugIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => DashboardOrgSlugRouteRoute,
-} as any);
+} as any)
 const OrgSlugBoardSlugIndexRoute = OrgSlugBoardSlugIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => OrgSlugBoardSlugRouteRoute,
-} as any);
+} as any)
 const DashboardOrgSlugUsersRoute = DashboardOrgSlugUsersRouteImport.update({
-  id: "/users",
-  path: "/users",
+  id: '/users',
+  path: '/users',
   getParentRoute: () => DashboardOrgSlugRouteRoute,
-} as any);
+} as any)
 const DashboardOrgSlugTagsRoute = DashboardOrgSlugTagsRouteImport.update({
-  id: "/tags",
-  path: "/tags",
+  id: '/tags',
+  path: '/tags',
   getParentRoute: () => DashboardOrgSlugRouteRoute,
-} as any);
+} as any)
 const DashboardOrgSlugSettingsRoute =
   DashboardOrgSlugSettingsRouteImport.update({
-    id: "/settings",
-    path: "/settings",
+    id: '/settings',
+    path: '/settings',
     getParentRoute: () => DashboardOrgSlugRouteRoute,
-  } as any);
+  } as any)
 const DashboardOrgSlugChangelogRoute =
   DashboardOrgSlugChangelogRouteImport.update({
-    id: "/changelog",
-    path: "/changelog",
+    id: '/changelog',
+    path: '/changelog',
     getParentRoute: () => DashboardOrgSlugRouteRoute,
-  } as any);
+  } as any)
 const OrgSlugAdminUsersRoute = OrgSlugAdminUsersRouteImport.update({
-  id: "/users",
-  path: "/users",
+  id: '/users',
+  path: '/users',
   getParentRoute: () => OrgSlugAdminRouteRoute,
-} as any);
+} as any)
 const OrgSlugAdminTagsRoute = OrgSlugAdminTagsRouteImport.update({
-  id: "/tags",
-  path: "/tags",
+  id: '/tags',
+  path: '/tags',
   getParentRoute: () => OrgSlugAdminRouteRoute,
-} as any);
+} as any)
 const OrgSlugAdminSettingsRoute = OrgSlugAdminSettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => OrgSlugAdminRouteRoute,
-} as any);
+} as any)
 const OrgSlugAdminBoardsRoute = OrgSlugAdminBoardsRouteImport.update({
-  id: "/boards",
-  path: "/boards",
+  id: '/boards',
+  path: '/boards',
   getParentRoute: () => OrgSlugAdminRouteRoute,
-} as any);
+} as any)
 const OrgSlugBoardSlugNewRoute = OrgSlugBoardSlugNewRouteImport.update({
-  id: "/new",
-  path: "/new",
+  id: '/new',
+  path: '/new',
   getParentRoute: () => OrgSlugBoardSlugRouteRoute,
-} as any);
+} as any)
 const OrgSlugBoardSlugFeedbackIdRoute =
   OrgSlugBoardSlugFeedbackIdRouteImport.update({
-    id: "/$feedbackId",
-    path: "/$feedbackId",
+    id: '/$feedbackId',
+    path: '/$feedbackId',
     getParentRoute: () => OrgSlugBoardSlugRouteRoute,
-  } as any);
+  } as any)
 const DashboardOrgSlugBoardSlugRouteRoute =
   DashboardOrgSlugBoardSlugRouteRouteImport.update({
-    id: "/$boardSlug",
-    path: "/$boardSlug",
+    id: '/$boardSlug',
+    path: '/$boardSlug',
     getParentRoute: () => DashboardOrgSlugRouteRoute,
-  } as any);
+  } as any)
 const DashboardOrgSlugChangelogIndexRoute =
   DashboardOrgSlugChangelogIndexRouteImport.update({
-    id: "/",
-    path: "/",
+    id: '/',
+    path: '/',
     getParentRoute: () => DashboardOrgSlugChangelogRoute,
-  } as any);
+  } as any)
 const DashboardOrgSlugBoardSlugIndexRoute =
   DashboardOrgSlugBoardSlugIndexRouteImport.update({
-    id: "/",
-    path: "/",
+    id: '/',
+    path: '/',
     getParentRoute: () => DashboardOrgSlugBoardSlugRouteRoute,
-  } as any);
+  } as any)
 const DashboardOrgSlugChangelogReleaseIdRoute =
   DashboardOrgSlugChangelogReleaseIdRouteImport.update({
-    id: "/$releaseId",
-    path: "/$releaseId",
+    id: '/$releaseId',
+    path: '/$releaseId',
     getParentRoute: () => DashboardOrgSlugChangelogRoute,
-  } as any);
+  } as any)
 
-export type FileRoutesByFullPath = {
-  "/": typeof IndexRoute;
-  "/$orgSlug": typeof OrgSlugRouteRouteWithChildren;
-  "/dashboard": typeof DashboardRouteRouteWithChildren;
-  "/login": typeof LoginRoute;
-  "/$orgSlug/$boardSlug": typeof OrgSlugBoardSlugRouteRouteWithChildren;
-  "/$orgSlug/admin": typeof OrgSlugAdminRouteRouteWithChildren;
-  "/dashboard/$orgSlug": typeof DashboardOrgSlugRouteRouteWithChildren;
-  "/$orgSlug/changelog": typeof OrgSlugChangelogRoute;
-  "/dashboard/account": typeof DashboardAccountRoute;
-  "/u/$userId": typeof UUserIdRoute;
-  "/$orgSlug/": typeof OrgSlugIndexRoute;
-  "/dashboard/": typeof DashboardIndexRoute;
-  "/dashboard/$orgSlug/$boardSlug": typeof DashboardOrgSlugBoardSlugRouteRouteWithChildren;
-  "/$orgSlug/$boardSlug/$feedbackId": typeof OrgSlugBoardSlugFeedbackIdRoute;
-  "/$orgSlug/$boardSlug/new": typeof OrgSlugBoardSlugNewRoute;
-  "/$orgSlug/admin/boards": typeof OrgSlugAdminBoardsRoute;
-  "/$orgSlug/admin/settings": typeof OrgSlugAdminSettingsRoute;
-  "/$orgSlug/admin/tags": typeof OrgSlugAdminTagsRoute;
-  "/$orgSlug/admin/users": typeof OrgSlugAdminUsersRoute;
-  "/dashboard/$orgSlug/changelog": typeof DashboardOrgSlugChangelogRouteWithChildren;
-  "/dashboard/$orgSlug/settings": typeof DashboardOrgSlugSettingsRoute;
-  "/dashboard/$orgSlug/tags": typeof DashboardOrgSlugTagsRoute;
-  "/dashboard/$orgSlug/users": typeof DashboardOrgSlugUsersRoute;
-  "/$orgSlug/$boardSlug/": typeof OrgSlugBoardSlugIndexRoute;
-  "/dashboard/$orgSlug/": typeof DashboardOrgSlugIndexRoute;
-  "/dashboard/$orgSlug/changelog/$releaseId": typeof DashboardOrgSlugChangelogReleaseIdRoute;
-  "/dashboard/$orgSlug/$boardSlug/": typeof DashboardOrgSlugBoardSlugIndexRoute;
-  "/dashboard/$orgSlug/changelog/": typeof DashboardOrgSlugChangelogIndexRoute;
-};
-export type FileRoutesByTo = {
-  "/": typeof IndexRoute;
-  "/login": typeof LoginRoute;
-  "/$orgSlug/admin": typeof OrgSlugAdminRouteRouteWithChildren;
-  "/$orgSlug/changelog": typeof OrgSlugChangelogRoute;
-  "/dashboard/account": typeof DashboardAccountRoute;
-  "/u/$userId": typeof UUserIdRoute;
-  "/$orgSlug": typeof OrgSlugIndexRoute;
-  "/dashboard": typeof DashboardIndexRoute;
-  "/$orgSlug/$boardSlug/$feedbackId": typeof OrgSlugBoardSlugFeedbackIdRoute;
-  "/$orgSlug/$boardSlug/new": typeof OrgSlugBoardSlugNewRoute;
-  "/$orgSlug/admin/boards": typeof OrgSlugAdminBoardsRoute;
-  "/$orgSlug/admin/settings": typeof OrgSlugAdminSettingsRoute;
-  "/$orgSlug/admin/tags": typeof OrgSlugAdminTagsRoute;
-  "/$orgSlug/admin/users": typeof OrgSlugAdminUsersRoute;
-  "/dashboard/$orgSlug/settings": typeof DashboardOrgSlugSettingsRoute;
-  "/dashboard/$orgSlug/tags": typeof DashboardOrgSlugTagsRoute;
-  "/dashboard/$orgSlug/users": typeof DashboardOrgSlugUsersRoute;
-  "/$orgSlug/$boardSlug": typeof OrgSlugBoardSlugIndexRoute;
-  "/dashboard/$orgSlug": typeof DashboardOrgSlugIndexRoute;
-  "/dashboard/$orgSlug/changelog/$releaseId": typeof DashboardOrgSlugChangelogReleaseIdRoute;
-  "/dashboard/$orgSlug/$boardSlug": typeof DashboardOrgSlugBoardSlugIndexRoute;
-  "/dashboard/$orgSlug/changelog": typeof DashboardOrgSlugChangelogIndexRoute;
-};
-export type FileRoutesById = {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/$orgSlug": typeof OrgSlugRouteRouteWithChildren;
-  "/dashboard": typeof DashboardRouteRouteWithChildren;
-  "/login": typeof LoginRoute;
-  "/$orgSlug/$boardSlug": typeof OrgSlugBoardSlugRouteRouteWithChildren;
-  "/$orgSlug/admin": typeof OrgSlugAdminRouteRouteWithChildren;
-  "/dashboard/$orgSlug": typeof DashboardOrgSlugRouteRouteWithChildren;
-  "/$orgSlug/changelog": typeof OrgSlugChangelogRoute;
-  "/dashboard/account": typeof DashboardAccountRoute;
-  "/u/$userId": typeof UUserIdRoute;
-  "/$orgSlug/": typeof OrgSlugIndexRoute;
-  "/dashboard/": typeof DashboardIndexRoute;
-  "/dashboard/$orgSlug/$boardSlug": typeof DashboardOrgSlugBoardSlugRouteRouteWithChildren;
-  "/$orgSlug/$boardSlug/$feedbackId": typeof OrgSlugBoardSlugFeedbackIdRoute;
-  "/$orgSlug/$boardSlug/new": typeof OrgSlugBoardSlugNewRoute;
-  "/$orgSlug/admin/boards": typeof OrgSlugAdminBoardsRoute;
-  "/$orgSlug/admin/settings": typeof OrgSlugAdminSettingsRoute;
-  "/$orgSlug/admin/tags": typeof OrgSlugAdminTagsRoute;
-  "/$orgSlug/admin/users": typeof OrgSlugAdminUsersRoute;
-  "/dashboard/$orgSlug/changelog": typeof DashboardOrgSlugChangelogRouteWithChildren;
-  "/dashboard/$orgSlug/settings": typeof DashboardOrgSlugSettingsRoute;
-  "/dashboard/$orgSlug/tags": typeof DashboardOrgSlugTagsRoute;
-  "/dashboard/$orgSlug/users": typeof DashboardOrgSlugUsersRoute;
-  "/$orgSlug/$boardSlug/": typeof OrgSlugBoardSlugIndexRoute;
-  "/dashboard/$orgSlug/": typeof DashboardOrgSlugIndexRoute;
-  "/dashboard/$orgSlug/changelog/$releaseId": typeof DashboardOrgSlugChangelogReleaseIdRoute;
-  "/dashboard/$orgSlug/$boardSlug/": typeof DashboardOrgSlugBoardSlugIndexRoute;
-  "/dashboard/$orgSlug/changelog/": typeof DashboardOrgSlugChangelogIndexRoute;
-};
-export type FileRouteTypes = {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/$orgSlug': typeof OrgSlugRouteRouteWithChildren
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/login': typeof LoginRoute
+  '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugRouteRouteWithChildren
+  '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
+  '/dashboard/$orgSlug': typeof DashboardOrgSlugRouteRouteWithChildren
+  '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
+  '/dashboard/account': typeof DashboardAccountRoute
+  '/u/$userId': typeof UUserIdRoute
+  '/$orgSlug/': typeof OrgSlugIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/$orgSlug/$boardSlug': typeof DashboardOrgSlugBoardSlugRouteRouteWithChildren
+  '/$orgSlug/$boardSlug/$feedbackId': typeof OrgSlugBoardSlugFeedbackIdRoute
+  '/$orgSlug/$boardSlug/new': typeof OrgSlugBoardSlugNewRoute
+  '/$orgSlug/admin/boards': typeof OrgSlugAdminBoardsRoute
+  '/$orgSlug/admin/settings': typeof OrgSlugAdminSettingsRoute
+  '/$orgSlug/admin/tags': typeof OrgSlugAdminTagsRoute
+  '/$orgSlug/admin/users': typeof OrgSlugAdminUsersRoute
+  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogRouteWithChildren
+  '/dashboard/$orgSlug/settings': typeof DashboardOrgSlugSettingsRoute
+  '/dashboard/$orgSlug/tags': typeof DashboardOrgSlugTagsRoute
+  '/dashboard/$orgSlug/users': typeof DashboardOrgSlugUsersRoute
+  '/$orgSlug/$boardSlug/': typeof OrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug/': typeof DashboardOrgSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
+  '/dashboard/$orgSlug/$boardSlug/': typeof DashboardOrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/': typeof DashboardOrgSlugChangelogIndexRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
+  '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
+  '/dashboard/account': typeof DashboardAccountRoute
+  '/u/$userId': typeof UUserIdRoute
+  '/$orgSlug': typeof OrgSlugIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/$orgSlug/$boardSlug/$feedbackId': typeof OrgSlugBoardSlugFeedbackIdRoute
+  '/$orgSlug/$boardSlug/new': typeof OrgSlugBoardSlugNewRoute
+  '/$orgSlug/admin/boards': typeof OrgSlugAdminBoardsRoute
+  '/$orgSlug/admin/settings': typeof OrgSlugAdminSettingsRoute
+  '/$orgSlug/admin/tags': typeof OrgSlugAdminTagsRoute
+  '/$orgSlug/admin/users': typeof OrgSlugAdminUsersRoute
+  '/dashboard/$orgSlug/settings': typeof DashboardOrgSlugSettingsRoute
+  '/dashboard/$orgSlug/tags': typeof DashboardOrgSlugTagsRoute
+  '/dashboard/$orgSlug/users': typeof DashboardOrgSlugUsersRoute
+  '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug': typeof DashboardOrgSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
+  '/dashboard/$orgSlug/$boardSlug': typeof DashboardOrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogIndexRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/$orgSlug': typeof OrgSlugRouteRouteWithChildren
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/login': typeof LoginRoute
+  '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugRouteRouteWithChildren
+  '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
+  '/dashboard/$orgSlug': typeof DashboardOrgSlugRouteRouteWithChildren
+  '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
+  '/dashboard/account': typeof DashboardAccountRoute
+  '/u/$userId': typeof UUserIdRoute
+  '/$orgSlug/': typeof OrgSlugIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/$orgSlug/$boardSlug': typeof DashboardOrgSlugBoardSlugRouteRouteWithChildren
+  '/$orgSlug/$boardSlug/$feedbackId': typeof OrgSlugBoardSlugFeedbackIdRoute
+  '/$orgSlug/$boardSlug/new': typeof OrgSlugBoardSlugNewRoute
+  '/$orgSlug/admin/boards': typeof OrgSlugAdminBoardsRoute
+  '/$orgSlug/admin/settings': typeof OrgSlugAdminSettingsRoute
+  '/$orgSlug/admin/tags': typeof OrgSlugAdminTagsRoute
+  '/$orgSlug/admin/users': typeof OrgSlugAdminUsersRoute
+  '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogRouteWithChildren
+  '/dashboard/$orgSlug/settings': typeof DashboardOrgSlugSettingsRoute
+  '/dashboard/$orgSlug/tags': typeof DashboardOrgSlugTagsRoute
+  '/dashboard/$orgSlug/users': typeof DashboardOrgSlugUsersRoute
+  '/$orgSlug/$boardSlug/': typeof OrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug/': typeof DashboardOrgSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
+  '/dashboard/$orgSlug/$boardSlug/': typeof DashboardOrgSlugBoardSlugIndexRoute
+  '/dashboard/$orgSlug/changelog/': typeof DashboardOrgSlugChangelogIndexRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/$orgSlug"
-    | "/dashboard"
-    | "/login"
-    | "/$orgSlug/$boardSlug"
-    | "/$orgSlug/admin"
-    | "/dashboard/$orgSlug"
-    | "/$orgSlug/changelog"
-    | "/dashboard/account"
-    | "/u/$userId"
-    | "/$orgSlug/"
-    | "/dashboard/"
-    | "/dashboard/$orgSlug/$boardSlug"
-    | "/$orgSlug/$boardSlug/$feedbackId"
-    | "/$orgSlug/$boardSlug/new"
-    | "/$orgSlug/admin/boards"
-    | "/$orgSlug/admin/settings"
-    | "/$orgSlug/admin/tags"
-    | "/$orgSlug/admin/users"
-    | "/dashboard/$orgSlug/changelog"
-    | "/dashboard/$orgSlug/settings"
-    | "/dashboard/$orgSlug/tags"
-    | "/dashboard/$orgSlug/users"
-    | "/$orgSlug/$boardSlug/"
-    | "/dashboard/$orgSlug/"
-    | "/dashboard/$orgSlug/changelog/$releaseId"
-    | "/dashboard/$orgSlug/$boardSlug/"
-    | "/dashboard/$orgSlug/changelog/";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/$orgSlug'
+    | '/dashboard'
+    | '/login'
+    | '/$orgSlug/$boardSlug'
+    | '/$orgSlug/admin'
+    | '/dashboard/$orgSlug'
+    | '/$orgSlug/changelog'
+    | '/dashboard/account'
+    | '/u/$userId'
+    | '/$orgSlug/'
+    | '/dashboard/'
+    | '/dashboard/$orgSlug/$boardSlug'
+    | '/$orgSlug/$boardSlug/$feedbackId'
+    | '/$orgSlug/$boardSlug/new'
+    | '/$orgSlug/admin/boards'
+    | '/$orgSlug/admin/settings'
+    | '/$orgSlug/admin/tags'
+    | '/$orgSlug/admin/users'
+    | '/dashboard/$orgSlug/changelog'
+    | '/dashboard/$orgSlug/settings'
+    | '/dashboard/$orgSlug/tags'
+    | '/dashboard/$orgSlug/users'
+    | '/$orgSlug/$boardSlug/'
+    | '/dashboard/$orgSlug/'
+    | '/dashboard/$orgSlug/changelog/$releaseId'
+    | '/dashboard/$orgSlug/$boardSlug/'
+    | '/dashboard/$orgSlug/changelog/'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/login"
-    | "/$orgSlug/admin"
-    | "/$orgSlug/changelog"
-    | "/dashboard/account"
-    | "/u/$userId"
-    | "/$orgSlug"
-    | "/dashboard"
-    | "/$orgSlug/$boardSlug/$feedbackId"
-    | "/$orgSlug/$boardSlug/new"
-    | "/$orgSlug/admin/boards"
-    | "/$orgSlug/admin/settings"
-    | "/$orgSlug/admin/tags"
-    | "/$orgSlug/admin/users"
-    | "/dashboard/$orgSlug/settings"
-    | "/dashboard/$orgSlug/tags"
-    | "/dashboard/$orgSlug/users"
-    | "/$orgSlug/$boardSlug"
-    | "/dashboard/$orgSlug"
-    | "/dashboard/$orgSlug/changelog/$releaseId"
-    | "/dashboard/$orgSlug/$boardSlug"
-    | "/dashboard/$orgSlug/changelog";
+    | '/'
+    | '/login'
+    | '/$orgSlug/admin'
+    | '/$orgSlug/changelog'
+    | '/dashboard/account'
+    | '/u/$userId'
+    | '/$orgSlug'
+    | '/dashboard'
+    | '/$orgSlug/$boardSlug/$feedbackId'
+    | '/$orgSlug/$boardSlug/new'
+    | '/$orgSlug/admin/boards'
+    | '/$orgSlug/admin/settings'
+    | '/$orgSlug/admin/tags'
+    | '/$orgSlug/admin/users'
+    | '/dashboard/$orgSlug/settings'
+    | '/dashboard/$orgSlug/tags'
+    | '/dashboard/$orgSlug/users'
+    | '/$orgSlug/$boardSlug'
+    | '/dashboard/$orgSlug'
+    | '/dashboard/$orgSlug/changelog/$releaseId'
+    | '/dashboard/$orgSlug/$boardSlug'
+    | '/dashboard/$orgSlug/changelog'
   id:
-    | "__root__"
-    | "/"
-    | "/$orgSlug"
-    | "/dashboard"
-    | "/login"
-    | "/$orgSlug/$boardSlug"
-    | "/$orgSlug/admin"
-    | "/dashboard/$orgSlug"
-    | "/$orgSlug/changelog"
-    | "/dashboard/account"
-    | "/u/$userId"
-    | "/$orgSlug/"
-    | "/dashboard/"
-    | "/dashboard/$orgSlug/$boardSlug"
-    | "/$orgSlug/$boardSlug/$feedbackId"
-    | "/$orgSlug/$boardSlug/new"
-    | "/$orgSlug/admin/boards"
-    | "/$orgSlug/admin/settings"
-    | "/$orgSlug/admin/tags"
-    | "/$orgSlug/admin/users"
-    | "/dashboard/$orgSlug/changelog"
-    | "/dashboard/$orgSlug/settings"
-    | "/dashboard/$orgSlug/tags"
-    | "/dashboard/$orgSlug/users"
-    | "/$orgSlug/$boardSlug/"
-    | "/dashboard/$orgSlug/"
-    | "/dashboard/$orgSlug/changelog/$releaseId"
-    | "/dashboard/$orgSlug/$boardSlug/"
-    | "/dashboard/$orgSlug/changelog/";
-  fileRoutesById: FileRoutesById;
-};
-export type RootRouteChildren = {
-  IndexRoute: typeof IndexRoute;
-  OrgSlugRouteRoute: typeof OrgSlugRouteRouteWithChildren;
-  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren;
-  LoginRoute: typeof LoginRoute;
-  UUserIdRoute: typeof UUserIdRoute;
-};
-
-declare module "@tanstack/react-router" {
-  type FileRoutesByPath = {
-    "/login": {
-      id: "/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof LoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/dashboard": {
-      id: "/dashboard";
-      path: "/dashboard";
-      fullPath: "/dashboard";
-      preLoaderRoute: typeof DashboardRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/$orgSlug": {
-      id: "/$orgSlug";
-      path: "/$orgSlug";
-      fullPath: "/$orgSlug";
-      preLoaderRoute: typeof OrgSlugRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/dashboard/": {
-      id: "/dashboard/";
-      path: "/";
-      fullPath: "/dashboard/";
-      preLoaderRoute: typeof DashboardIndexRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/$orgSlug/": {
-      id: "/$orgSlug/";
-      path: "/";
-      fullPath: "/$orgSlug/";
-      preLoaderRoute: typeof OrgSlugIndexRouteImport;
-      parentRoute: typeof OrgSlugRouteRoute;
-    };
-    "/u/$userId": {
-      id: "/u/$userId";
-      path: "/u/$userId";
-      fullPath: "/u/$userId";
-      preLoaderRoute: typeof UUserIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/dashboard/account": {
-      id: "/dashboard/account";
-      path: "/account";
-      fullPath: "/dashboard/account";
-      preLoaderRoute: typeof DashboardAccountRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/$orgSlug/changelog": {
-      id: "/$orgSlug/changelog";
-      path: "/changelog";
-      fullPath: "/$orgSlug/changelog";
-      preLoaderRoute: typeof OrgSlugChangelogRouteImport;
-      parentRoute: typeof OrgSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug": {
-      id: "/dashboard/$orgSlug";
-      path: "/$orgSlug";
-      fullPath: "/dashboard/$orgSlug";
-      preLoaderRoute: typeof DashboardOrgSlugRouteRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/$orgSlug/admin": {
-      id: "/$orgSlug/admin";
-      path: "/admin";
-      fullPath: "/$orgSlug/admin";
-      preLoaderRoute: typeof OrgSlugAdminRouteRouteImport;
-      parentRoute: typeof OrgSlugRouteRoute;
-    };
-    "/$orgSlug/$boardSlug": {
-      id: "/$orgSlug/$boardSlug";
-      path: "/$boardSlug";
-      fullPath: "/$orgSlug/$boardSlug";
-      preLoaderRoute: typeof OrgSlugBoardSlugRouteRouteImport;
-      parentRoute: typeof OrgSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug/": {
-      id: "/dashboard/$orgSlug/";
-      path: "/";
-      fullPath: "/dashboard/$orgSlug/";
-      preLoaderRoute: typeof DashboardOrgSlugIndexRouteImport;
-      parentRoute: typeof DashboardOrgSlugRouteRoute;
-    };
-    "/$orgSlug/$boardSlug/": {
-      id: "/$orgSlug/$boardSlug/";
-      path: "/";
-      fullPath: "/$orgSlug/$boardSlug/";
-      preLoaderRoute: typeof OrgSlugBoardSlugIndexRouteImport;
-      parentRoute: typeof OrgSlugBoardSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug/users": {
-      id: "/dashboard/$orgSlug/users";
-      path: "/users";
-      fullPath: "/dashboard/$orgSlug/users";
-      preLoaderRoute: typeof DashboardOrgSlugUsersRouteImport;
-      parentRoute: typeof DashboardOrgSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug/tags": {
-      id: "/dashboard/$orgSlug/tags";
-      path: "/tags";
-      fullPath: "/dashboard/$orgSlug/tags";
-      preLoaderRoute: typeof DashboardOrgSlugTagsRouteImport;
-      parentRoute: typeof DashboardOrgSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug/settings": {
-      id: "/dashboard/$orgSlug/settings";
-      path: "/settings";
-      fullPath: "/dashboard/$orgSlug/settings";
-      preLoaderRoute: typeof DashboardOrgSlugSettingsRouteImport;
-      parentRoute: typeof DashboardOrgSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug/changelog": {
-      id: "/dashboard/$orgSlug/changelog";
-      path: "/changelog";
-      fullPath: "/dashboard/$orgSlug/changelog";
-      preLoaderRoute: typeof DashboardOrgSlugChangelogRouteImport;
-      parentRoute: typeof DashboardOrgSlugRouteRoute;
-    };
-    "/$orgSlug/admin/users": {
-      id: "/$orgSlug/admin/users";
-      path: "/users";
-      fullPath: "/$orgSlug/admin/users";
-      preLoaderRoute: typeof OrgSlugAdminUsersRouteImport;
-      parentRoute: typeof OrgSlugAdminRouteRoute;
-    };
-    "/$orgSlug/admin/tags": {
-      id: "/$orgSlug/admin/tags";
-      path: "/tags";
-      fullPath: "/$orgSlug/admin/tags";
-      preLoaderRoute: typeof OrgSlugAdminTagsRouteImport;
-      parentRoute: typeof OrgSlugAdminRouteRoute;
-    };
-    "/$orgSlug/admin/settings": {
-      id: "/$orgSlug/admin/settings";
-      path: "/settings";
-      fullPath: "/$orgSlug/admin/settings";
-      preLoaderRoute: typeof OrgSlugAdminSettingsRouteImport;
-      parentRoute: typeof OrgSlugAdminRouteRoute;
-    };
-    "/$orgSlug/admin/boards": {
-      id: "/$orgSlug/admin/boards";
-      path: "/boards";
-      fullPath: "/$orgSlug/admin/boards";
-      preLoaderRoute: typeof OrgSlugAdminBoardsRouteImport;
-      parentRoute: typeof OrgSlugAdminRouteRoute;
-    };
-    "/$orgSlug/$boardSlug/new": {
-      id: "/$orgSlug/$boardSlug/new";
-      path: "/new";
-      fullPath: "/$orgSlug/$boardSlug/new";
-      preLoaderRoute: typeof OrgSlugBoardSlugNewRouteImport;
-      parentRoute: typeof OrgSlugBoardSlugRouteRoute;
-    };
-    "/$orgSlug/$boardSlug/$feedbackId": {
-      id: "/$orgSlug/$boardSlug/$feedbackId";
-      path: "/$feedbackId";
-      fullPath: "/$orgSlug/$boardSlug/$feedbackId";
-      preLoaderRoute: typeof OrgSlugBoardSlugFeedbackIdRouteImport;
-      parentRoute: typeof OrgSlugBoardSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug/$boardSlug": {
-      id: "/dashboard/$orgSlug/$boardSlug";
-      path: "/$boardSlug";
-      fullPath: "/dashboard/$orgSlug/$boardSlug";
-      preLoaderRoute: typeof DashboardOrgSlugBoardSlugRouteRouteImport;
-      parentRoute: typeof DashboardOrgSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug/changelog/": {
-      id: "/dashboard/$orgSlug/changelog/";
-      path: "/";
-      fullPath: "/dashboard/$orgSlug/changelog/";
-      preLoaderRoute: typeof DashboardOrgSlugChangelogIndexRouteImport;
-      parentRoute: typeof DashboardOrgSlugChangelogRoute;
-    };
-    "/dashboard/$orgSlug/$boardSlug/": {
-      id: "/dashboard/$orgSlug/$boardSlug/";
-      path: "/";
-      fullPath: "/dashboard/$orgSlug/$boardSlug/";
-      preLoaderRoute: typeof DashboardOrgSlugBoardSlugIndexRouteImport;
-      parentRoute: typeof DashboardOrgSlugBoardSlugRouteRoute;
-    };
-    "/dashboard/$orgSlug/changelog/$releaseId": {
-      id: "/dashboard/$orgSlug/changelog/$releaseId";
-      path: "/$releaseId";
-      fullPath: "/dashboard/$orgSlug/changelog/$releaseId";
-      preLoaderRoute: typeof DashboardOrgSlugChangelogReleaseIdRouteImport;
-      parentRoute: typeof DashboardOrgSlugChangelogRoute;
-    };
-  };
+    | '__root__'
+    | '/'
+    | '/$orgSlug'
+    | '/dashboard'
+    | '/login'
+    | '/$orgSlug/$boardSlug'
+    | '/$orgSlug/admin'
+    | '/dashboard/$orgSlug'
+    | '/$orgSlug/changelog'
+    | '/dashboard/account'
+    | '/u/$userId'
+    | '/$orgSlug/'
+    | '/dashboard/'
+    | '/dashboard/$orgSlug/$boardSlug'
+    | '/$orgSlug/$boardSlug/$feedbackId'
+    | '/$orgSlug/$boardSlug/new'
+    | '/$orgSlug/admin/boards'
+    | '/$orgSlug/admin/settings'
+    | '/$orgSlug/admin/tags'
+    | '/$orgSlug/admin/users'
+    | '/dashboard/$orgSlug/changelog'
+    | '/dashboard/$orgSlug/settings'
+    | '/dashboard/$orgSlug/tags'
+    | '/dashboard/$orgSlug/users'
+    | '/$orgSlug/$boardSlug/'
+    | '/dashboard/$orgSlug/'
+    | '/dashboard/$orgSlug/changelog/$releaseId'
+    | '/dashboard/$orgSlug/$boardSlug/'
+    | '/dashboard/$orgSlug/changelog/'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  OrgSlugRouteRoute: typeof OrgSlugRouteRouteWithChildren
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  UUserIdRoute: typeof UUserIdRoute
 }
 
-type OrgSlugBoardSlugRouteRouteChildren = {
-  OrgSlugBoardSlugFeedbackIdRoute: typeof OrgSlugBoardSlugFeedbackIdRoute;
-  OrgSlugBoardSlugNewRoute: typeof OrgSlugBoardSlugNewRoute;
-  OrgSlugBoardSlugIndexRoute: typeof OrgSlugBoardSlugIndexRoute;
-};
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$orgSlug': {
+      id: '/$orgSlug'
+      path: '/$orgSlug'
+      fullPath: '/$orgSlug'
+      preLoaderRoute: typeof OrgSlugRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/$orgSlug/': {
+      id: '/$orgSlug/'
+      path: '/'
+      fullPath: '/$orgSlug/'
+      preLoaderRoute: typeof OrgSlugIndexRouteImport
+      parentRoute: typeof OrgSlugRouteRoute
+    }
+    '/u/$userId': {
+      id: '/u/$userId'
+      path: '/u/$userId'
+      fullPath: '/u/$userId'
+      preLoaderRoute: typeof UUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/account': {
+      id: '/dashboard/account'
+      path: '/account'
+      fullPath: '/dashboard/account'
+      preLoaderRoute: typeof DashboardAccountRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/$orgSlug/changelog': {
+      id: '/$orgSlug/changelog'
+      path: '/changelog'
+      fullPath: '/$orgSlug/changelog'
+      preLoaderRoute: typeof OrgSlugChangelogRouteImport
+      parentRoute: typeof OrgSlugRouteRoute
+    }
+    '/dashboard/$orgSlug': {
+      id: '/dashboard/$orgSlug'
+      path: '/$orgSlug'
+      fullPath: '/dashboard/$orgSlug'
+      preLoaderRoute: typeof DashboardOrgSlugRouteRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/$orgSlug/admin': {
+      id: '/$orgSlug/admin'
+      path: '/admin'
+      fullPath: '/$orgSlug/admin'
+      preLoaderRoute: typeof OrgSlugAdminRouteRouteImport
+      parentRoute: typeof OrgSlugRouteRoute
+    }
+    '/$orgSlug/$boardSlug': {
+      id: '/$orgSlug/$boardSlug'
+      path: '/$boardSlug'
+      fullPath: '/$orgSlug/$boardSlug'
+      preLoaderRoute: typeof OrgSlugBoardSlugRouteRouteImport
+      parentRoute: typeof OrgSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/': {
+      id: '/dashboard/$orgSlug/'
+      path: '/'
+      fullPath: '/dashboard/$orgSlug/'
+      preLoaderRoute: typeof DashboardOrgSlugIndexRouteImport
+      parentRoute: typeof DashboardOrgSlugRouteRoute
+    }
+    '/$orgSlug/$boardSlug/': {
+      id: '/$orgSlug/$boardSlug/'
+      path: '/'
+      fullPath: '/$orgSlug/$boardSlug/'
+      preLoaderRoute: typeof OrgSlugBoardSlugIndexRouteImport
+      parentRoute: typeof OrgSlugBoardSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/users': {
+      id: '/dashboard/$orgSlug/users'
+      path: '/users'
+      fullPath: '/dashboard/$orgSlug/users'
+      preLoaderRoute: typeof DashboardOrgSlugUsersRouteImport
+      parentRoute: typeof DashboardOrgSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/tags': {
+      id: '/dashboard/$orgSlug/tags'
+      path: '/tags'
+      fullPath: '/dashboard/$orgSlug/tags'
+      preLoaderRoute: typeof DashboardOrgSlugTagsRouteImport
+      parentRoute: typeof DashboardOrgSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/settings': {
+      id: '/dashboard/$orgSlug/settings'
+      path: '/settings'
+      fullPath: '/dashboard/$orgSlug/settings'
+      preLoaderRoute: typeof DashboardOrgSlugSettingsRouteImport
+      parentRoute: typeof DashboardOrgSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/changelog': {
+      id: '/dashboard/$orgSlug/changelog'
+      path: '/changelog'
+      fullPath: '/dashboard/$orgSlug/changelog'
+      preLoaderRoute: typeof DashboardOrgSlugChangelogRouteImport
+      parentRoute: typeof DashboardOrgSlugRouteRoute
+    }
+    '/$orgSlug/admin/users': {
+      id: '/$orgSlug/admin/users'
+      path: '/users'
+      fullPath: '/$orgSlug/admin/users'
+      preLoaderRoute: typeof OrgSlugAdminUsersRouteImport
+      parentRoute: typeof OrgSlugAdminRouteRoute
+    }
+    '/$orgSlug/admin/tags': {
+      id: '/$orgSlug/admin/tags'
+      path: '/tags'
+      fullPath: '/$orgSlug/admin/tags'
+      preLoaderRoute: typeof OrgSlugAdminTagsRouteImport
+      parentRoute: typeof OrgSlugAdminRouteRoute
+    }
+    '/$orgSlug/admin/settings': {
+      id: '/$orgSlug/admin/settings'
+      path: '/settings'
+      fullPath: '/$orgSlug/admin/settings'
+      preLoaderRoute: typeof OrgSlugAdminSettingsRouteImport
+      parentRoute: typeof OrgSlugAdminRouteRoute
+    }
+    '/$orgSlug/admin/boards': {
+      id: '/$orgSlug/admin/boards'
+      path: '/boards'
+      fullPath: '/$orgSlug/admin/boards'
+      preLoaderRoute: typeof OrgSlugAdminBoardsRouteImport
+      parentRoute: typeof OrgSlugAdminRouteRoute
+    }
+    '/$orgSlug/$boardSlug/new': {
+      id: '/$orgSlug/$boardSlug/new'
+      path: '/new'
+      fullPath: '/$orgSlug/$boardSlug/new'
+      preLoaderRoute: typeof OrgSlugBoardSlugNewRouteImport
+      parentRoute: typeof OrgSlugBoardSlugRouteRoute
+    }
+    '/$orgSlug/$boardSlug/$feedbackId': {
+      id: '/$orgSlug/$boardSlug/$feedbackId'
+      path: '/$feedbackId'
+      fullPath: '/$orgSlug/$boardSlug/$feedbackId'
+      preLoaderRoute: typeof OrgSlugBoardSlugFeedbackIdRouteImport
+      parentRoute: typeof OrgSlugBoardSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/$boardSlug': {
+      id: '/dashboard/$orgSlug/$boardSlug'
+      path: '/$boardSlug'
+      fullPath: '/dashboard/$orgSlug/$boardSlug'
+      preLoaderRoute: typeof DashboardOrgSlugBoardSlugRouteRouteImport
+      parentRoute: typeof DashboardOrgSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/changelog/': {
+      id: '/dashboard/$orgSlug/changelog/'
+      path: '/'
+      fullPath: '/dashboard/$orgSlug/changelog/'
+      preLoaderRoute: typeof DashboardOrgSlugChangelogIndexRouteImport
+      parentRoute: typeof DashboardOrgSlugChangelogRoute
+    }
+    '/dashboard/$orgSlug/$boardSlug/': {
+      id: '/dashboard/$orgSlug/$boardSlug/'
+      path: '/'
+      fullPath: '/dashboard/$orgSlug/$boardSlug/'
+      preLoaderRoute: typeof DashboardOrgSlugBoardSlugIndexRouteImport
+      parentRoute: typeof DashboardOrgSlugBoardSlugRouteRoute
+    }
+    '/dashboard/$orgSlug/changelog/$releaseId': {
+      id: '/dashboard/$orgSlug/changelog/$releaseId'
+      path: '/$releaseId'
+      fullPath: '/dashboard/$orgSlug/changelog/$releaseId'
+      preLoaderRoute: typeof DashboardOrgSlugChangelogReleaseIdRouteImport
+      parentRoute: typeof DashboardOrgSlugChangelogRoute
+    }
+  }
+}
+
+interface OrgSlugBoardSlugRouteRouteChildren {
+  OrgSlugBoardSlugFeedbackIdRoute: typeof OrgSlugBoardSlugFeedbackIdRoute
+  OrgSlugBoardSlugNewRoute: typeof OrgSlugBoardSlugNewRoute
+  OrgSlugBoardSlugIndexRoute: typeof OrgSlugBoardSlugIndexRoute
+}
 
 const OrgSlugBoardSlugRouteRouteChildren: OrgSlugBoardSlugRouteRouteChildren = {
-  OrgSlugBoardSlugFeedbackIdRoute,
-  OrgSlugBoardSlugNewRoute,
-  OrgSlugBoardSlugIndexRoute,
-};
+  OrgSlugBoardSlugFeedbackIdRoute: OrgSlugBoardSlugFeedbackIdRoute,
+  OrgSlugBoardSlugNewRoute: OrgSlugBoardSlugNewRoute,
+  OrgSlugBoardSlugIndexRoute: OrgSlugBoardSlugIndexRoute,
+}
 
 const OrgSlugBoardSlugRouteRouteWithChildren =
   OrgSlugBoardSlugRouteRoute._addFileChildren(
-    OrgSlugBoardSlugRouteRouteChildren
-  );
+    OrgSlugBoardSlugRouteRouteChildren,
+  )
 
-type OrgSlugAdminRouteRouteChildren = {
-  OrgSlugAdminBoardsRoute: typeof OrgSlugAdminBoardsRoute;
-  OrgSlugAdminSettingsRoute: typeof OrgSlugAdminSettingsRoute;
-  OrgSlugAdminTagsRoute: typeof OrgSlugAdminTagsRoute;
-  OrgSlugAdminUsersRoute: typeof OrgSlugAdminUsersRoute;
-};
+interface OrgSlugAdminRouteRouteChildren {
+  OrgSlugAdminBoardsRoute: typeof OrgSlugAdminBoardsRoute
+  OrgSlugAdminSettingsRoute: typeof OrgSlugAdminSettingsRoute
+  OrgSlugAdminTagsRoute: typeof OrgSlugAdminTagsRoute
+  OrgSlugAdminUsersRoute: typeof OrgSlugAdminUsersRoute
+}
 
 const OrgSlugAdminRouteRouteChildren: OrgSlugAdminRouteRouteChildren = {
-  OrgSlugAdminBoardsRoute,
-  OrgSlugAdminSettingsRoute,
-  OrgSlugAdminTagsRoute,
-  OrgSlugAdminUsersRoute,
-};
+  OrgSlugAdminBoardsRoute: OrgSlugAdminBoardsRoute,
+  OrgSlugAdminSettingsRoute: OrgSlugAdminSettingsRoute,
+  OrgSlugAdminTagsRoute: OrgSlugAdminTagsRoute,
+  OrgSlugAdminUsersRoute: OrgSlugAdminUsersRoute,
+}
 
 const OrgSlugAdminRouteRouteWithChildren =
-  OrgSlugAdminRouteRoute._addFileChildren(OrgSlugAdminRouteRouteChildren);
+  OrgSlugAdminRouteRoute._addFileChildren(OrgSlugAdminRouteRouteChildren)
 
-type OrgSlugRouteRouteChildren = {
-  OrgSlugBoardSlugRouteRoute: typeof OrgSlugBoardSlugRouteRouteWithChildren;
-  OrgSlugAdminRouteRoute: typeof OrgSlugAdminRouteRouteWithChildren;
-  OrgSlugChangelogRoute: typeof OrgSlugChangelogRoute;
-  OrgSlugIndexRoute: typeof OrgSlugIndexRoute;
-};
+interface OrgSlugRouteRouteChildren {
+  OrgSlugBoardSlugRouteRoute: typeof OrgSlugBoardSlugRouteRouteWithChildren
+  OrgSlugAdminRouteRoute: typeof OrgSlugAdminRouteRouteWithChildren
+  OrgSlugChangelogRoute: typeof OrgSlugChangelogRoute
+  OrgSlugIndexRoute: typeof OrgSlugIndexRoute
+}
 
 const OrgSlugRouteRouteChildren: OrgSlugRouteRouteChildren = {
   OrgSlugBoardSlugRouteRoute: OrgSlugBoardSlugRouteRouteWithChildren,
   OrgSlugAdminRouteRoute: OrgSlugAdminRouteRouteWithChildren,
-  OrgSlugChangelogRoute,
-  OrgSlugIndexRoute,
-};
+  OrgSlugChangelogRoute: OrgSlugChangelogRoute,
+  OrgSlugIndexRoute: OrgSlugIndexRoute,
+}
 
 const OrgSlugRouteRouteWithChildren = OrgSlugRouteRoute._addFileChildren(
-  OrgSlugRouteRouteChildren
-);
+  OrgSlugRouteRouteChildren,
+)
 
-type DashboardOrgSlugBoardSlugRouteRouteChildren = {
-  DashboardOrgSlugBoardSlugIndexRoute: typeof DashboardOrgSlugBoardSlugIndexRoute;
-};
+interface DashboardOrgSlugBoardSlugRouteRouteChildren {
+  DashboardOrgSlugBoardSlugIndexRoute: typeof DashboardOrgSlugBoardSlugIndexRoute
+}
 
 const DashboardOrgSlugBoardSlugRouteRouteChildren: DashboardOrgSlugBoardSlugRouteRouteChildren =
   {
-    DashboardOrgSlugBoardSlugIndexRoute,
-  };
+    DashboardOrgSlugBoardSlugIndexRoute: DashboardOrgSlugBoardSlugIndexRoute,
+  }
 
 const DashboardOrgSlugBoardSlugRouteRouteWithChildren =
   DashboardOrgSlugBoardSlugRouteRoute._addFileChildren(
-    DashboardOrgSlugBoardSlugRouteRouteChildren
-  );
+    DashboardOrgSlugBoardSlugRouteRouteChildren,
+  )
 
-type DashboardOrgSlugChangelogRouteChildren = {
-  DashboardOrgSlugChangelogReleaseIdRoute: typeof DashboardOrgSlugChangelogReleaseIdRoute;
-  DashboardOrgSlugChangelogIndexRoute: typeof DashboardOrgSlugChangelogIndexRoute;
-};
+interface DashboardOrgSlugChangelogRouteChildren {
+  DashboardOrgSlugChangelogReleaseIdRoute: typeof DashboardOrgSlugChangelogReleaseIdRoute
+  DashboardOrgSlugChangelogIndexRoute: typeof DashboardOrgSlugChangelogIndexRoute
+}
 
 const DashboardOrgSlugChangelogRouteChildren: DashboardOrgSlugChangelogRouteChildren =
   {
-    DashboardOrgSlugChangelogReleaseIdRoute,
-    DashboardOrgSlugChangelogIndexRoute,
-  };
+    DashboardOrgSlugChangelogReleaseIdRoute:
+      DashboardOrgSlugChangelogReleaseIdRoute,
+    DashboardOrgSlugChangelogIndexRoute: DashboardOrgSlugChangelogIndexRoute,
+  }
 
 const DashboardOrgSlugChangelogRouteWithChildren =
   DashboardOrgSlugChangelogRoute._addFileChildren(
-    DashboardOrgSlugChangelogRouteChildren
-  );
+    DashboardOrgSlugChangelogRouteChildren,
+  )
 
-type DashboardOrgSlugRouteRouteChildren = {
-  DashboardOrgSlugBoardSlugRouteRoute: typeof DashboardOrgSlugBoardSlugRouteRouteWithChildren;
-  DashboardOrgSlugChangelogRoute: typeof DashboardOrgSlugChangelogRouteWithChildren;
-  DashboardOrgSlugSettingsRoute: typeof DashboardOrgSlugSettingsRoute;
-  DashboardOrgSlugTagsRoute: typeof DashboardOrgSlugTagsRoute;
-  DashboardOrgSlugUsersRoute: typeof DashboardOrgSlugUsersRoute;
-  DashboardOrgSlugIndexRoute: typeof DashboardOrgSlugIndexRoute;
-};
+interface DashboardOrgSlugRouteRouteChildren {
+  DashboardOrgSlugBoardSlugRouteRoute: typeof DashboardOrgSlugBoardSlugRouteRouteWithChildren
+  DashboardOrgSlugChangelogRoute: typeof DashboardOrgSlugChangelogRouteWithChildren
+  DashboardOrgSlugSettingsRoute: typeof DashboardOrgSlugSettingsRoute
+  DashboardOrgSlugTagsRoute: typeof DashboardOrgSlugTagsRoute
+  DashboardOrgSlugUsersRoute: typeof DashboardOrgSlugUsersRoute
+  DashboardOrgSlugIndexRoute: typeof DashboardOrgSlugIndexRoute
+}
 
 const DashboardOrgSlugRouteRouteChildren: DashboardOrgSlugRouteRouteChildren = {
   DashboardOrgSlugBoardSlugRouteRoute:
     DashboardOrgSlugBoardSlugRouteRouteWithChildren,
   DashboardOrgSlugChangelogRoute: DashboardOrgSlugChangelogRouteWithChildren,
-  DashboardOrgSlugSettingsRoute,
-  DashboardOrgSlugTagsRoute,
-  DashboardOrgSlugUsersRoute,
-  DashboardOrgSlugIndexRoute,
-};
+  DashboardOrgSlugSettingsRoute: DashboardOrgSlugSettingsRoute,
+  DashboardOrgSlugTagsRoute: DashboardOrgSlugTagsRoute,
+  DashboardOrgSlugUsersRoute: DashboardOrgSlugUsersRoute,
+  DashboardOrgSlugIndexRoute: DashboardOrgSlugIndexRoute,
+}
 
 const DashboardOrgSlugRouteRouteWithChildren =
   DashboardOrgSlugRouteRoute._addFileChildren(
-    DashboardOrgSlugRouteRouteChildren
-  );
+    DashboardOrgSlugRouteRouteChildren,
+  )
 
-type DashboardRouteRouteChildren = {
-  DashboardOrgSlugRouteRoute: typeof DashboardOrgSlugRouteRouteWithChildren;
-  DashboardAccountRoute: typeof DashboardAccountRoute;
-  DashboardIndexRoute: typeof DashboardIndexRoute;
-};
+interface DashboardRouteRouteChildren {
+  DashboardOrgSlugRouteRoute: typeof DashboardOrgSlugRouteRouteWithChildren
+  DashboardAccountRoute: typeof DashboardAccountRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardOrgSlugRouteRoute: DashboardOrgSlugRouteRouteWithChildren,
-  DashboardAccountRoute,
-  DashboardIndexRoute,
-};
+  DashboardAccountRoute: DashboardAccountRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
-  DashboardRouteRouteChildren
-);
+  DashboardRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute,
+  IndexRoute: IndexRoute,
   OrgSlugRouteRoute: OrgSlugRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
-  LoginRoute,
-  UUserIdRoute,
-};
+  LoginRoute: LoginRoute,
+  UUserIdRoute: UUserIdRoute,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

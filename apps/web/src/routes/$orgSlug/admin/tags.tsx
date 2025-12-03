@@ -2,6 +2,16 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/alert-dialog";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import {
@@ -52,6 +62,7 @@ function AdminTags() {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
+  const [tagToDelete, setTagToDelete] = useState<Tag | null>(null);
 
   // Form state
   const [name, setName] = useState("");
@@ -104,15 +115,12 @@ function AdminTags() {
     }
   };
 
-  const handleDelete = async (tag: Tag) => {
-    if (
-      !window.confirm(
-        `Delete "${tag.name}"? This will remove it from all feedback.`
-      )
-    ) {
+  const handleDelete = async () => {
+    if (!tagToDelete) {
       return;
     }
-    await z.mutate.tag.delete({ id: tag.id });
+    await z.mutate.tag.delete({ id: tagToDelete.id });
+    setTagToDelete(null);
   };
 
   return (
@@ -155,7 +163,7 @@ function AdminTags() {
               </Button>
               <Button
                 className="text-destructive hover:text-destructive"
-                onClick={() => handleDelete(tag)}
+                onClick={() => setTagToDelete(tag)}
                 size="icon"
                 variant="ghost"
               >
@@ -253,6 +261,35 @@ function AdminTags() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setTagToDelete(null);
+          }
+        }}
+        open={!!tagToDelete}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Tag</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete "{tagToDelete?.name}"? This will remove it from all
+              feedback.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

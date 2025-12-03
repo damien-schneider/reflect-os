@@ -2,6 +2,16 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { Globe, Layers, Lock, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/alert-dialog";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import {
@@ -41,6 +51,7 @@ function AdminBoards() {
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingBoard, setEditingBoard] = useState<Board | null>(null);
+  const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
 
   // Form state
   const [name, setName] = useState("");
@@ -105,11 +116,12 @@ function AdminBoards() {
     }
   };
 
-  const handleDelete = async (board: Board) => {
-    if (!window.confirm(`Delete "${board.name}"? This cannot be undone.`)) {
+  const handleDelete = async () => {
+    if (!boardToDelete) {
       return;
     }
-    await z.mutate.board.delete({ id: board.id });
+    await z.mutate.board.delete({ id: boardToDelete.id });
+    setBoardToDelete(null);
   };
 
   // Auto-generate slug from name
@@ -152,7 +164,7 @@ function AdminBoards() {
             <BoardCard
               board={board}
               key={board.id}
-              onDelete={() => handleDelete(board)}
+              onDelete={() => setBoardToDelete(board)}
               onEdit={() => openEditModal(board)}
             />
           ))}
@@ -261,6 +273,34 @@ function AdminBoards() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setBoardToDelete(null);
+          }
+        }}
+        open={!!boardToDelete}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Board</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete "{boardToDelete?.name}"? This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -158,7 +158,9 @@ export function SlashMenu({ editor }: SlashMenuProps) {
   // This intercepts keys BEFORE they're processed by the editor
   useEffect(() => {
     // Guard against destroyed editor
-    if (editor.isDestroyed) return;
+    if (editor.isDestroyed) {
+      return;
+    }
 
     const handleSlashMenuKeyDown = (event: KeyboardEvent): boolean => {
       const {
@@ -229,7 +231,9 @@ export function SlashMenu({ editor }: SlashMenuProps) {
   // Listen for editor updates to detect slash commands
   useEffect(() => {
     // Guard against destroyed editor
-    if (editor.isDestroyed) return;
+    if (editor.isDestroyed) {
+      return;
+    }
 
     const handleUpdate = () => {
       // Don't update if editor is destroyed

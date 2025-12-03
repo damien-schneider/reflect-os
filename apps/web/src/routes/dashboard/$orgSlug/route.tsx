@@ -7,8 +7,8 @@ import {
 } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { authClient } from "../../../lib/auth-client";
-import type { Schema } from "../../../schema";
+import { authClient } from "@/lib/auth-client";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug")({
   component: DashboardOrgLayout,

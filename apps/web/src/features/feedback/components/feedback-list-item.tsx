@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Pin } from "lucide-react";
-import { Badge } from "../../../components/ui/badge";
-import { cn } from "../../../lib/utils";
-import type { Feedback, Tag } from "../../../schema";
-import { StatusBadge } from "./status-badge";
-import { VoteButton } from "./vote-button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import type { Feedback, Tag } from "@/schema";
+import { StatusBadge } from "@/features/feedback/components/status-badge";
+import { VoteButton } from "@/features/feedback/components/vote-button";
 
 type FeedbackListItemProps = {
   feedback: Feedback & {

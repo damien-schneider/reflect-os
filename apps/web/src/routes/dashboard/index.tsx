@@ -2,9 +2,9 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Building2, Loader2, Plus, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "../../components/ui/button";
-import { authClient } from "../../lib/auth-client";
-import type { Schema } from "../../schema";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardIndex,

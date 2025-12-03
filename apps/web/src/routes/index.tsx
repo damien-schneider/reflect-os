@@ -2,10 +2,10 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Building2, Loader2, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AuthGuard } from "../components/auth-guard";
-import { Button } from "../components/ui/button";
-import { authClient } from "../lib/auth-client";
-import type { Schema } from "../schema";
+import { AuthGuard } from "@/components/auth-guard";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/")({
   component: () => (

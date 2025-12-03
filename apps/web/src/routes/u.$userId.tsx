@@ -1,12 +1,12 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, ChevronUp, MessageSquare, User } from "lucide-react";
-import { Badge } from "../components/ui/badge";
-import { Card, CardContent } from "../components/ui/card";
-import { Separator } from "../components/ui/separator";
-import { StatusBadge } from "../features/feedback/components/status-badge";
-import type { FeedbackStatus } from "../lib/constants";
-import type { Schema } from "../schema";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/features/feedback/components/status-badge";
+import type { FeedbackStatus } from "@/lib/constants";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/u/$userId")({
   component: UserProfile,

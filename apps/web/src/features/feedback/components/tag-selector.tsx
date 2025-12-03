@@ -1,16 +1,16 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { Check, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../../../components/ui/popover";
-import { cn } from "../../../lib/utils";
-import { randID } from "../../../rand";
-import type { Schema, Tag } from "../../../schema";
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { randID } from "@/rand";
+import type { Schema, Tag } from "@/schema";
 
 type TagSelectorProps = {
   feedbackId: string;

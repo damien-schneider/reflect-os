@@ -15,5 +15,5 @@
  *   - Clear error messages for missing/invalid variables
  */
 
-export { clientEnv } from "./client";
-export { serverEnv } from "./server";
+export { clientEnv } from "@/env/client";
+export { serverEnv } from "@/env/server";

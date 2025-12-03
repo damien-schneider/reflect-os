@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { PencilLine, X } from "lucide-react";
 import { useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 type AdminFloatingBarProps = {
   /** The link to the dashboard edit page */

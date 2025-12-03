@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { type ReactNode, useEffect } from "react";
-import { authClient } from "../lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 
 type AuthGuardProps = {
   children: ReactNode;

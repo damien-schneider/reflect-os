@@ -27,9 +27,9 @@ export {
   type Tag,
   type User,
   type Vote,
-} from "./zero-schema";
+} from "@/zero-schema";
 
-import { type Schema, schema } from "./zero-schema";
+import { type Schema, schema } from "@/zero-schema";
 
 // The contents of your decoded JWT.
 type AuthData = {

@@ -1,29 +1,29 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { Filter, Plus, Search, SortAsc, SortDesc, X } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../../../components/ui/popover";
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
-import { STATUS_OPTIONS } from "../../../lib/constants";
-import { cn } from "../../../lib/utils";
+} from "@/components/ui/select";
+import { STATUS_OPTIONS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import {
   useBoardData,
   useFeedbackFilters,
   useSession,
-} from "../hooks/use-feedback-filters";
-import type { SortOption } from "../store/atoms";
+} from "@/features/feedback/hooks/use-feedback-filters";
+import type { SortOption } from "@/features/feedback/store/atoms";
 
 type FeedbackFiltersProps = {
   className?: string;
@@ -252,4 +252,4 @@ export function FeedbackFilters({
 }
 
 // Re-export SortOption type from atoms
-export type { SortOption } from "../store/atoms";
+export type { SortOption } from "@/features/feedback/store/atoms";

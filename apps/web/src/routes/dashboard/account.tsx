@@ -8,8 +8,8 @@ import {
   Undo2,
 } from "lucide-react";
 import { useState } from "react";
-import { OrgDetailContent } from "../../components/organization";
-import { Button } from "../../components/ui/button";
+import { OrgDetailContent } from "@/components/organization";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -17,7 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../../components/ui/dialog";
+} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerClose,
@@ -25,21 +25,21 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from "../../components/ui/drawer";
-import { Input } from "../../components/ui/input";
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../components/ui/tooltip";
-import { useIsMobile } from "../../hooks/use-mobile";
+} from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   type Organization,
   useOrganizations,
   useOrgInvite,
   useOrgRename,
-} from "../../hooks/use-organization";
-import { authClient } from "../../lib/auth-client";
+} from "@/hooks/use-organization";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/dashboard/account")({
   component: MyAccount,

@@ -4,11 +4,11 @@ import { EditorContent } from "@tiptap/react";
 import { common, createLowlight } from "lowlight";
 import { useCallback, useRef, useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
-import { useMarkdownEditor } from "../hooks/use-markdown-editor";
-import { DragHandle } from "./drag-handle";
-import { SlashMenu } from "./slash-menu";
-import { EditorToolbar } from "./toolbar";
-import "./editor.css";
+import { useMarkdownEditor } from "@/features/editor/hooks/use-markdown-editor";
+import { DragHandle } from "@/features/editor/components/drag-handle";
+import { SlashMenu } from "@/features/editor/components/slash-menu";
+import { EditorToolbar } from "@/features/editor/components/toolbar";
+import "@/features/editor/components/editor.css";
 
 const lowlight = createLowlight(common);
 

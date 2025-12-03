@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Board, Schema } from "@/schema";
-import { BoardEditDialog } from "./board-edit-dialog";
+import { BoardEditDialog } from "@/features/board/components/board-edit-dialog";
 
 type BoardActionsProps = {
   board: Board;

@@ -1,16 +1,16 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { ChevronUp } from "lucide-react";
-import { useAuthDialog } from "../../../components/auth-dialog-provider";
-import { Button } from "../../../components/ui/button";
+import { useAuthDialog } from "@/components/auth-dialog-provider";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../../components/ui/tooltip";
-import { authClient } from "../../../lib/auth-client";
-import { cn } from "../../../lib/utils";
-import { randID } from "../../../rand";
-import type { Schema } from "../../../schema";
+} from "@/components/ui/tooltip";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { randID } from "@/rand";
+import type { Schema } from "@/schema";
 
 type VoteButtonProps = {
   feedbackId: string;

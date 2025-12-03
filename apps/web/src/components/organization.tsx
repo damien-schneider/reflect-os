@@ -9,12 +9,12 @@ import {
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
-import type { Organization } from "../hooks/use-organization";
-import { authClient } from "../lib/auth-client";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import type { Organization } from "@/hooks/use-organization";
+import { authClient } from "@/lib/auth-client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function MembersList({ orgId }: { orgId: string }) {
   const [members, setMembers] = useState<

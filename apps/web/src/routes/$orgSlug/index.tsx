@@ -1,10 +1,10 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowRight, Globe, Loader2, MessageSquare } from "lucide-react";
-import { AdminFloatingBar } from "../../components/admin-floating-bar";
-import { Button } from "../../components/ui/button";
-import { authClient } from "../../lib/auth-client";
-import type { Schema } from "../../schema";
+import { AdminFloatingBar } from "@/components/admin-floating-bar";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/$orgSlug/")({
   component: OrgDashboard,

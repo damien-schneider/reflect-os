@@ -8,9 +8,9 @@ import {
 } from "@tanstack/react-router";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "../../components/ui/button";
-import { authClient } from "../../lib/auth-client";
-import type { Schema } from "../../schema";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/$orgSlug")({
   component: OrgLayout,

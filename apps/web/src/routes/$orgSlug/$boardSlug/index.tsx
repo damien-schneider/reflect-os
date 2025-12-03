@@ -2,21 +2,21 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { List, Map as MapIcon, Plus } from "lucide-react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { RoadmapKanban } from "@/features/roadmap/components/roadmap-kanban";
-import { AdminFloatingBar } from "../../../components/admin-floating-bar";
-import { Button } from "../../../components/ui/button";
+import { AdminFloatingBar } from "@/components/admin-floating-bar";
+import { Button } from "@/components/ui/button";
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "../../../components/ui/toggle-group";
-import { FeedbackFilters } from "../../../features/feedback/components/feedback-filters";
-import { FeedbackListItem } from "../../../features/feedback/components/feedback-list-item";
+} from "@/components/ui/toggle-group";
+import { FeedbackFilters } from "@/features/feedback/components/feedback-filters";
+import { FeedbackListItem } from "@/features/feedback/components/feedback-list-item";
 import {
   useBoardData,
   useFeedbackData,
   useFeedbackFilters,
   useSession,
-} from "../../../features/feedback/hooks/use-feedback-filters";
-import { authClient } from "../../../lib/auth-client";
+} from "@/features/feedback/hooks/use-feedback-filters";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/$orgSlug/$boardSlug/")({
   component: BoardIndex,

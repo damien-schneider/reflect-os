@@ -18,18 +18,18 @@ import {
   Plus,
   TrendingUp,
 } from "lucide-react";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
-import { Separator } from "../../../components/ui/separator";
-import { Switch } from "../../../components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../../components/ui/tooltip";
-import { authClient } from "../../../lib/auth-client";
-import { randID } from "../../../rand";
-import type { Schema } from "../../../schema";
+} from "@/components/ui/tooltip";
+import { authClient } from "@/lib/auth-client";
+import { randID } from "@/rand";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/")({
   component: DashboardOrgIndex,

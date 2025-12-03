@@ -6,10 +6,10 @@ import {
   useParams,
 } from "@tanstack/react-router";
 import { ArrowLeft, LayoutGrid, Settings, Tags, Users } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { authClient } from "../../../lib/auth-client";
-import { cn } from "../../../lib/utils";
-import type { Schema } from "../../../schema";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/$orgSlug/admin")({
   component: AdminLayout,

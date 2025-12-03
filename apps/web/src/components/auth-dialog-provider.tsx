@@ -7,7 +7,7 @@ import {
   useContext,
   useState,
 } from "react";
-import { AuthDialog } from "./auth-dialog";
+import { AuthDialog } from "@/components/auth-dialog";
 
 // Context for managing auth dialog state globally
 type AuthDialogContextType = {

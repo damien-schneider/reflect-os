@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import type { FeedbackStatus } from "../../../lib/constants";
+import type { FeedbackStatus } from "@/lib/constants";
 
 export type SortOption = "newest" | "oldest" | "most_votes" | "most_comments";
 

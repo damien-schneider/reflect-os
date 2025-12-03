@@ -12,17 +12,15 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
+    "strictNullChecks": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@repo/db": ["../../packages/db/src/index.ts"],
       "@repo/db/*": ["../../packages/db/src/*"]
-    },
-    "strictNullChecks": true
+    }
   },
   "include": ["src", "api", "vite.config.ts", "../../packages/db/src"]
 }

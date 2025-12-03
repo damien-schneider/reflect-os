@@ -2,14 +2,14 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { ExternalLink, Globe, Lock, Save } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { Separator } from "../../../components/ui/separator";
-import { Switch } from "../../../components/ui/switch";
-import { Textarea } from "../../../components/ui/textarea";
-import type { Schema } from "../../../schema";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/$orgSlug/admin/settings")({
   component: AdminSettings,

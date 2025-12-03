@@ -2,9 +2,9 @@ import { ZeroProvider } from "@rocicorp/zero/react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { clientEnv } from "@/env/client";
-import { authClient } from "../lib/auth-client";
-import { schema } from "../schema";
-import { Button } from "./ui/button";
+import { authClient } from "@/lib/auth-client";
+import { schema } from "@/schema";
+import { Button } from "@/components/ui/button";
 
 type ZeroState = {
   status: "loading" | "ready" | "error";

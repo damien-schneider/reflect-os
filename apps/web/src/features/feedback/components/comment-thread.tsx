@@ -10,18 +10,18 @@ import {
 import { useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu";
-import { authClient } from "../../../lib/auth-client";
-import { cn } from "../../../lib/utils";
-import { randID } from "../../../rand";
-import type { Comment, Schema } from "../../../schema";
+} from "@/components/ui/dropdown-menu";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { randID } from "@/rand";
+import type { Comment, Schema } from "@/schema";
 
 type CommentWithRelations = Comment & {
   author?: { id: string; name: string } | null;

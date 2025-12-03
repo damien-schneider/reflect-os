@@ -8,12 +8,12 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { authClient } from "../../../lib/auth-client";
-import { randID } from "../../../rand";
-import type { Schema } from "../../../schema";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
+import { randID } from "@/rand";
+import type { Schema } from "@/schema";
 
 const MAX_VERIFY_ATTEMPTS = 10;
 const VERIFY_DELAY_MS = 300;

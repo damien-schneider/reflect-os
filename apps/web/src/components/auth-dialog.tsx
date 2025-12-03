@@ -2,10 +2,10 @@
 
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { authClient } from "../lib/auth-client";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
@@ -13,7 +13,7 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
-} from "./ui/responsive-dialog";
+} from "@/components/ui/responsive-dialog";
 
 type AuthDialogProps = {
   open: boolean;

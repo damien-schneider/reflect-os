@@ -1,6 +1,6 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
-import type { Schema } from "../../../schema";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/$orgSlug/$boardSlug")({
   component: BoardLayout,

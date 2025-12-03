@@ -1,7 +1,7 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { useMemo } from "react";
 import type { Board, Feedback, Release, Schema } from "@/schema";
-import { ReleaseCard } from "./release-card";
+import { ReleaseCard } from "@/features/changelog/components/release-card";
 
 type ReleaseListProps = {
   organizationId: string;

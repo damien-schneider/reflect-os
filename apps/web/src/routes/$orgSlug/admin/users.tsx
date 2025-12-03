@@ -2,8 +2,8 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { Ban, Shield, User, UserCheck } from "lucide-react";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -11,13 +11,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../../components/ui/table";
+} from "@/components/ui/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../../components/ui/tooltip";
-import type { Schema } from "../../../schema";
+} from "@/components/ui/tooltip";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/$orgSlug/admin/users")({
   component: AdminUsers,

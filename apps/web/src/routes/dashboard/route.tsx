@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SideNav } from "../../components/side-nav";
-import { authClient } from "../../lib/auth-client";
+import { SideNav } from "@/components/side-nav";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,

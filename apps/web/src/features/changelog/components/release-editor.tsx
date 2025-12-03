@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { randID } from "@/rand";
 import type { Release, ReleaseItem, Schema } from "@/schema";
-import { ChangelogItemSelector } from "./changelog-item-selector";
+import { ChangelogItemSelector } from "@/features/changelog/components/changelog-item-selector";
 
 type ReleaseEditorProps = {
   organizationId: string;

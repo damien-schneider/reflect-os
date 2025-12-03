@@ -18,8 +18,8 @@ import {
   type RoadmapLaneWithBacklog,
 } from "@/lib/constants";
 import type { Schema, Tag } from "@/schema";
-import { RoadmapItemCard } from "./roadmap-item-card";
-import { RoadmapLaneColumn } from "./roadmap-lane";
+import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
+import { RoadmapLaneColumn } from "@/features/roadmap/components/roadmap-lane";
 
 // Feedback item with roadmap fields
 export type RoadmapFeedbackItem = {

@@ -18,20 +18,20 @@ import { useState } from "react";
 import { BoardActions } from "@/features/board/components/board-actions";
 import { SlugEditDialog } from "@/features/board/components/slug-edit-dialog";
 import { RoadmapKanban } from "@/features/roadmap/components/roadmap-kanban";
-import { EditableTitle } from "../../../../components/editable-title";
-import { Button } from "../../../../components/ui/button";
+import { EditableTitle } from "@/components/editable-title";
+import { Button } from "@/components/ui/button";
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "../../../../components/ui/toggle-group";
-import { FeedbackFilters } from "../../../../features/feedback/components/feedback-filters";
-import { FeedbackListItem } from "../../../../features/feedback/components/feedback-list-item";
+} from "@/components/ui/toggle-group";
+import { FeedbackFilters } from "@/features/feedback/components/feedback-filters";
+import { FeedbackListItem } from "@/features/feedback/components/feedback-list-item";
 import {
   useBoardData,
   useFeedbackData,
   useFeedbackFilters,
-} from "../../../../features/feedback/hooks/use-feedback-filters";
-import type { Schema } from "../../../../schema";
+} from "@/features/feedback/hooks/use-feedback-filters";
+import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/$boardSlug/")({
   component: DashboardBoardIndex,

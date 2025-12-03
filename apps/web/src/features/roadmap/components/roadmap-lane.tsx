@@ -6,8 +6,8 @@ import {
 import { CheckCircle } from "lucide-react";
 import { LANE_CONFIG, type RoadmapLaneWithBacklog } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { RoadmapItemCard } from "./roadmap-item-card";
-import type { LaneConfig, RoadmapFeedbackItem } from "./roadmap-kanban";
+import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
+import type { LaneConfig, RoadmapFeedbackItem } from "@/features/roadmap/components/roadmap-kanban";
 
 type RoadmapLaneColumnProps = {
   lane: RoadmapLaneWithBacklog | string;

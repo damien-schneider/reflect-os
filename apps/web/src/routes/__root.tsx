@@ -1,8 +1,8 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { AuthDialogProvider } from "../components/auth-dialog-provider";
-import { ThemeProvider } from "../components/theme-provider";
-import { ZeroSetup } from "../components/zero-setup";
+import { AuthDialogProvider } from "@/components/auth-dialog-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ZeroSetup } from "@/components/zero-setup";
 
 export const Route = createRootRoute({
   component: RootLayout,

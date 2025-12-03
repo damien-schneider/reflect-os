@@ -99,7 +99,6 @@ function DashboardIndex() {
     zeroOrgSynced,
     syncTimedOut,
     syncStartTime,
-    syncAttempts,
   ]);
 
   // Retry sync check periodically if org exists in Better Auth but not in Zero yet

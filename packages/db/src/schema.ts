@@ -1,13 +1,13 @@
 import { relations } from "drizzle-orm";
 import {
-  pgTable,
-  text,
-  boolean,
-  timestamp,
   bigint,
+  boolean,
+  index,
   integer,
   jsonb,
-  index,
+  pgTable,
+  text,
+  timestamp,
   unique,
 } from "drizzle-orm/pg-core";
 
@@ -21,8 +21,12 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("emailVerified").notNull().default(false),
   image: text("image"),
-  createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updatedAt", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("createdAt", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   partner: boolean("partner").notNull().default(false),
   avatar: text("avatar"),
   bio: text("bio"),
@@ -39,7 +43,9 @@ export const session = pgTable(
     id: text("id").primaryKey(),
     expiresAt: timestamp("expiresAt", { withTimezone: true }).notNull(),
     token: text("token").notNull().unique(),
-    createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("createdAt", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     updatedAt: timestamp("updatedAt", { withTimezone: true }).notNull(),
     ipAddress: text("ipAddress"),
     userAgent: text("userAgent"),
@@ -63,11 +69,17 @@ export const account = pgTable(
     accessToken: text("accessToken"),
     refreshToken: text("refreshToken"),
     idToken: text("idToken"),
-    accessTokenExpiresAt: timestamp("accessTokenExpiresAt", { withTimezone: true }),
-    refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt", { withTimezone: true }),
+    accessTokenExpiresAt: timestamp("accessTokenExpiresAt", {
+      withTimezone: true,
+    }),
+    refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt", {
+      withTimezone: true,
+    }),
     scope: text("scope"),
     password: text("password"),
-    createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("createdAt", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     updatedAt: timestamp("updatedAt", { withTimezone: true }).notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)]
@@ -80,8 +92,12 @@ export const verification = pgTable(
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expiresAt", { withTimezone: true }).notNull(),
-    createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updatedAt", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("createdAt", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updatedAt", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)]
 );
@@ -95,7 +111,9 @@ export const organization = pgTable("organization", {
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   logo: text("logo"),
-  createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("createdAt", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   metadata: text("metadata"),
   primaryColor: text("primary_color"),
   customCss: text("custom_css"),
@@ -113,7 +131,9 @@ export const member = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     role: text("role").notNull(),
-    createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("createdAt", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     index("member_organizationId_idx").on(table.organizationId),
@@ -132,7 +152,9 @@ export const invitation = pgTable(
     role: text("role"),
     status: text("status").notNull(),
     expiresAt: timestamp("expiresAt", { withTimezone: true }).notNull(),
-    createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("createdAt", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     inviterId: text("inviterId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

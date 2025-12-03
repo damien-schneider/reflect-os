@@ -6,7 +6,7 @@ interface RepeatButtonProps extends React.ComponentProps<"button"> {
   /**
    * Return `true` / `void` to continue repeating, `false` to stop
    */
-  onTrigger: (originalEvent: DownEvent) => boolean | void;
+  onTrigger: (originalEvent: DownEvent) => boolean | undefined;
 }
 const INITIAL_HOLD_DELAY_MS = 300;
 const HOLD_INTERVAL_MS = 1000 / 60;

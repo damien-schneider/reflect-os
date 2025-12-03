@@ -27,7 +27,9 @@ export function MembersList({ orgId }: { orgId: string }) {
     authClient.organization
       .listMembers({ query: { organizationId: orgId } })
       .then((res) => {
-        if (res.data?.members) setMembers(res.data.members);
+        if (res.data?.members) {
+          setMembers(res.data.members);
+        }
       })
       .finally(() => setIsLoading(false));
   }, [orgId]);
@@ -59,7 +61,7 @@ export function MembersList({ orgId }: { orgId: string }) {
   );
 }
 
-interface OrgDetailContentProps {
+type OrgDetailContentProps = {
   selectedOrg: Organization | null;
   inviteError: string | null;
   inviteLoading: boolean;
@@ -70,7 +72,7 @@ interface OrgDetailContentProps {
   canShare: boolean;
   generateInviteLink: () => void;
   generatingLink: boolean;
-}
+};
 
 export function OrgDetailContent({
   selectedOrg,

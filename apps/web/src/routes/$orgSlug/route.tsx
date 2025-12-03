@@ -147,22 +147,34 @@ function OrgLayout() {
   useEffect(() => {
     // Wait for queries to complete
     // For members, use memberQueryStatus; for public orgs, we need org query
-    if (sessionPending || authOrgsPending) return;
+    if (sessionPending || authOrgsPending) {
+      return;
+    }
 
     // If user has auth membership, they have access (Zero might just be syncing)
-    if (hasAuthMembership) return;
+    if (hasAuthMembership) {
+      return;
+    }
 
     // Still waiting for Zero sync (for members)
-    if (needsSync && syncAttempts < MAX_SYNC_ATTEMPTS && !syncTimedOut) return;
+    if (needsSync && syncAttempts < MAX_SYNC_ATTEMPTS && !syncTimedOut) {
+      return;
+    }
 
     // Wait for org query to complete (for non-members accessing public orgs)
-    if (queryStatus !== "complete") return;
+    if (queryStatus !== "complete") {
+      return;
+    }
 
     // If org doesn't exist, let the child route handle the 404
-    if (!org) return;
+    if (!org) {
+      return;
+    }
 
     // If org is public, allow access
-    if (org.isPublic) return;
+    if (org.isPublic) {
+      return;
+    }
 
     // If user is not logged in, redirect to login
     if (!session) {

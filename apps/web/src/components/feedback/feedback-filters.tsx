@@ -17,7 +17,7 @@ import {
 
 export type SortOption = "newest" | "oldest" | "most_votes" | "most_comments";
 
-interface FeedbackFiltersProps {
+type FeedbackFiltersProps = {
   search: string;
   onSearchChange: (search: string) => void;
   selectedStatuses: FeedbackStatus[];
@@ -28,7 +28,7 @@ interface FeedbackFiltersProps {
   onSortChange: (sort: SortOption) => void;
   availableTags: Tag[];
   className?: string;
-}
+};
 
 export function FeedbackFilters({
   search,
@@ -211,7 +211,9 @@ export function FeedbackFilters({
           })}
           {selectedTagIds.map((tagId) => {
             const tag = availableTags.find((t) => t.id === tagId);
-            if (!tag) return null;
+            if (!tag) {
+              return null;
+            }
             return (
               <Badge
                 className="cursor-pointer gap-1"

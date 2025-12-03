@@ -1,26 +1,29 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { nanoid } from "nanoid";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { config } from "dotenv";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { nanoid } from "nanoid";
+import postgres from "postgres";
 import * as schema from "./schema";
 
 // Load environment variables from root .env
 config({ path: "../../.env" });
 
 // Get database URL from environment or use default local dev URL
-const DATABASE_URL = process.env.DATABASE_URL || process.env.ZERO_UPSTREAM_DB || "postgres://user:password@localhost:5430/postgres";
+const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  process.env.ZERO_UPSTREAM_DB ||
+  "postgres://user:password@localhost:5430/postgres";
 
 // Hash password using better-auth's exact scrypt format
 async function hashPassword(password: string): Promise<string> {
   const saltBytes = crypto.getRandomValues(new Uint8Array(16));
   const salt = Buffer.from(saltBytes).toString("hex");
   const key = await scryptAsync(password.normalize("NFKC"), salt, {
-    N: 16384,
+    N: 16_384,
     p: 1,
     r: 16,
     dkLen: 64,
-    maxmem: 128 * 16384 * 16 * 2,
+    maxmem: 128 * 16_384 * 16 * 2,
   });
   return `${salt}:${Buffer.from(key).toString("hex")}`;
 }
@@ -114,7 +117,9 @@ async function seed() {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    console.log(`  ✅ Created account for test@mail.com with password "password"`);
+    console.log(
+      `  ✅ Created account for test@mail.com with password "password"`
+    );
 
     // Create organization
     console.log("🏢 Creating organization...");
@@ -213,15 +218,82 @@ async function seed() {
       .insert(schema.tag)
       .values([
         // Regular tags
-        { id: "tag_ux", organizationId: "org_1", name: "UX", color: "#3b82f6", createdAt: now, isDoneStatus: false, isRoadmapLane: false },
-        { id: "tag_performance", organizationId: "org_1", name: "Performance", color: "#ef4444", createdAt: now, isDoneStatus: false, isRoadmapLane: false },
-        { id: "tag_api", organizationId: "org_1", name: "API", color: "#22c55e", createdAt: now, isDoneStatus: false, isRoadmapLane: false },
-        { id: "tag_mobile", organizationId: "org_1", name: "Mobile", color: "#f59e0b", createdAt: now, isDoneStatus: false, isRoadmapLane: false },
-        { id: "tag_security", organizationId: "org_1", name: "Security", color: "#8b5cf6", createdAt: now, isDoneStatus: false, isRoadmapLane: false },
+        {
+          id: "tag_ux",
+          organizationId: "org_1",
+          name: "UX",
+          color: "#3b82f6",
+          createdAt: now,
+          isDoneStatus: false,
+          isRoadmapLane: false,
+        },
+        {
+          id: "tag_performance",
+          organizationId: "org_1",
+          name: "Performance",
+          color: "#ef4444",
+          createdAt: now,
+          isDoneStatus: false,
+          isRoadmapLane: false,
+        },
+        {
+          id: "tag_api",
+          organizationId: "org_1",
+          name: "API",
+          color: "#22c55e",
+          createdAt: now,
+          isDoneStatus: false,
+          isRoadmapLane: false,
+        },
+        {
+          id: "tag_mobile",
+          organizationId: "org_1",
+          name: "Mobile",
+          color: "#f59e0b",
+          createdAt: now,
+          isDoneStatus: false,
+          isRoadmapLane: false,
+        },
+        {
+          id: "tag_security",
+          organizationId: "org_1",
+          name: "Security",
+          color: "#8b5cf6",
+          createdAt: now,
+          isDoneStatus: false,
+          isRoadmapLane: false,
+        },
         // Roadmap lane tags
-        { id: "tag_lane_planned", organizationId: "org_1", name: "Planned", color: "#6366f1", createdAt: now, isDoneStatus: false, isRoadmapLane: true, laneOrder: 1 },
-        { id: "tag_lane_in_progress", organizationId: "org_1", name: "In Progress", color: "#f59e0b", createdAt: now, isDoneStatus: false, isRoadmapLane: true, laneOrder: 2 },
-        { id: "tag_lane_done", organizationId: "org_1", name: "Done", color: "#22c55e", createdAt: now, isDoneStatus: true, isRoadmapLane: true, laneOrder: 3 },
+        {
+          id: "tag_lane_planned",
+          organizationId: "org_1",
+          name: "Planned",
+          color: "#6366f1",
+          createdAt: now,
+          isDoneStatus: false,
+          isRoadmapLane: true,
+          laneOrder: 1,
+        },
+        {
+          id: "tag_lane_in_progress",
+          organizationId: "org_1",
+          name: "In Progress",
+          color: "#f59e0b",
+          createdAt: now,
+          isDoneStatus: false,
+          isRoadmapLane: true,
+          laneOrder: 2,
+        },
+        {
+          id: "tag_lane_done",
+          organizationId: "org_1",
+          name: "Done",
+          color: "#22c55e",
+          createdAt: now,
+          isDoneStatus: true,
+          isRoadmapLane: true,
+          laneOrder: 3,
+        },
       ])
       .returning();
 
@@ -238,7 +310,17 @@ async function seed() {
           title: "Add dark mode support",
           description: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "It would be great to have a dark mode option for the app. This would help reduce eye strain during night usage." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "It would be great to have a dark mode option for the app. This would help reduce eye strain during night usage.",
+                  },
+                ],
+              },
+            ],
           }),
           status: "planned",
           authorId: "user_1",
@@ -248,8 +330,8 @@ async function seed() {
           isPinned: true,
           roadmapLane: "tag_lane_in_progress",
           roadmapOrder: 1,
-          createdAt: now - 86400000 * 7, // 7 days ago
-          updatedAt: now - 86400000 * 2,
+          createdAt: now - 86_400_000 * 7, // 7 days ago
+          updatedAt: now - 86_400_000 * 2,
         },
         {
           id: "feedback_2",
@@ -257,7 +339,17 @@ async function seed() {
           title: "Keyboard shortcuts for common actions",
           description: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "Please add keyboard shortcuts for navigation and common actions like creating new items, searching, etc." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Please add keyboard shortcuts for navigation and common actions like creating new items, searching, etc.",
+                  },
+                ],
+              },
+            ],
           }),
           status: "under_review",
           authorId: "user_2",
@@ -267,8 +359,8 @@ async function seed() {
           isPinned: false,
           roadmapLane: "tag_lane_planned",
           roadmapOrder: 1,
-          createdAt: now - 86400000 * 5,
-          updatedAt: now - 86400000 * 3,
+          createdAt: now - 86_400_000 * 5,
+          updatedAt: now - 86_400_000 * 3,
         },
         {
           id: "feedback_3",
@@ -276,7 +368,17 @@ async function seed() {
           title: "Mobile app for iOS and Android",
           description: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "A native mobile app would make it much easier to stay updated on the go." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "A native mobile app would make it much easier to stay updated on the go.",
+                  },
+                ],
+              },
+            ],
           }),
           status: "open",
           authorId: "user_1",
@@ -286,8 +388,8 @@ async function seed() {
           isPinned: false,
           roadmapLane: "tag_lane_planned",
           roadmapOrder: 2,
-          createdAt: now - 86400000 * 30,
-          updatedAt: now - 86400000 * 1,
+          createdAt: now - 86_400_000 * 30,
+          updatedAt: now - 86_400_000 * 1,
         },
         {
           id: "feedback_4",
@@ -295,7 +397,17 @@ async function seed() {
           title: "Login fails on Safari browser",
           description: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "When trying to log in using Safari, the page just refreshes without any error message." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "When trying to log in using Safari, the page just refreshes without any error message.",
+                  },
+                ],
+              },
+            ],
           }),
           status: "in_progress",
           authorId: "user_3",
@@ -303,8 +415,8 @@ async function seed() {
           commentCount: 2,
           isApproved: true,
           isPinned: false,
-          createdAt: now - 86400000 * 3,
-          updatedAt: now - 86400000 * 1,
+          createdAt: now - 86_400_000 * 3,
+          updatedAt: now - 86_400_000 * 1,
         },
         {
           id: "feedback_5",
@@ -312,7 +424,17 @@ async function seed() {
           title: "Export data to CSV",
           description: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "Allow users to export their feedback data to CSV format for reporting purposes." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Allow users to export their feedback data to CSV format for reporting purposes.",
+                  },
+                ],
+              },
+            ],
           }),
           status: "completed",
           authorId: "user_2",
@@ -322,9 +444,9 @@ async function seed() {
           isPinned: false,
           roadmapLane: "tag_lane_done",
           roadmapOrder: 1,
-          completedAt: now - 86400000 * 3, // Completed 3 days ago
-          createdAt: now - 86400000 * 20,
-          updatedAt: now - 86400000 * 3,
+          completedAt: now - 86_400_000 * 3, // Completed 3 days ago
+          createdAt: now - 86_400_000 * 20,
+          updatedAt: now - 86_400_000 * 3,
         },
       ])
       .returning();
@@ -336,13 +458,48 @@ async function seed() {
     const votes = await db
       .insert(schema.vote)
       .values([
-        { id: nanoid(), feedbackId: "feedback_1", userId: "user_1", createdAt: now - 86400000 * 6 },
-        { id: nanoid(), feedbackId: "feedback_1", userId: "user_2", createdAt: now - 86400000 * 5 },
-        { id: nanoid(), feedbackId: "feedback_1", userId: "user_admin", createdAt: now - 86400000 * 4 },
-        { id: nanoid(), feedbackId: "feedback_2", userId: "user_1", createdAt: now - 86400000 * 4 },
-        { id: nanoid(), feedbackId: "feedback_3", userId: "user_1", createdAt: now - 86400000 * 29 },
-        { id: nanoid(), feedbackId: "feedback_3", userId: "user_2", createdAt: now - 86400000 * 28 },
-        { id: nanoid(), feedbackId: "feedback_3", userId: "user_admin", createdAt: now - 86400000 * 27 },
+        {
+          id: nanoid(),
+          feedbackId: "feedback_1",
+          userId: "user_1",
+          createdAt: now - 86_400_000 * 6,
+        },
+        {
+          id: nanoid(),
+          feedbackId: "feedback_1",
+          userId: "user_2",
+          createdAt: now - 86_400_000 * 5,
+        },
+        {
+          id: nanoid(),
+          feedbackId: "feedback_1",
+          userId: "user_admin",
+          createdAt: now - 86_400_000 * 4,
+        },
+        {
+          id: nanoid(),
+          feedbackId: "feedback_2",
+          userId: "user_1",
+          createdAt: now - 86_400_000 * 4,
+        },
+        {
+          id: nanoid(),
+          feedbackId: "feedback_3",
+          userId: "user_1",
+          createdAt: now - 86_400_000 * 29,
+        },
+        {
+          id: nanoid(),
+          feedbackId: "feedback_3",
+          userId: "user_2",
+          createdAt: now - 86_400_000 * 28,
+        },
+        {
+          id: nanoid(),
+          feedbackId: "feedback_3",
+          userId: "user_admin",
+          createdAt: now - 86_400_000 * 27,
+        },
       ])
       .returning();
 
@@ -359,12 +516,22 @@ async function seed() {
           authorId: "user_admin",
           body: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "Great suggestion! We've added this to our roadmap for Q2." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Great suggestion! We've added this to our roadmap for Q2.",
+                  },
+                ],
+              },
+            ],
           }),
           isOfficial: true,
           parentId: null,
-          createdAt: now - 86400000 * 5,
-          updatedAt: now - 86400000 * 5,
+          createdAt: now - 86_400_000 * 5,
+          updatedAt: now - 86_400_000 * 5,
         },
         {
           id: "comment_2",
@@ -372,12 +539,19 @@ async function seed() {
           authorId: "user_2",
           body: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "Yes please! My eyes will thank you." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  { type: "text", text: "Yes please! My eyes will thank you." },
+                ],
+              },
+            ],
           }),
           isOfficial: false,
           parentId: null,
-          createdAt: now - 86400000 * 4,
-          updatedAt: now - 86400000 * 4,
+          createdAt: now - 86_400_000 * 4,
+          updatedAt: now - 86_400_000 * 4,
         },
         {
           id: "comment_3",
@@ -385,12 +559,19 @@ async function seed() {
           authorId: "user_1",
           body: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "Awesome! Can't wait for it." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  { type: "text", text: "Awesome! Can't wait for it." },
+                ],
+              },
+            ],
           }),
           isOfficial: false,
           parentId: "comment_1",
-          createdAt: now - 86400000 * 3,
-          updatedAt: now - 86400000 * 3,
+          createdAt: now - 86_400_000 * 3,
+          updatedAt: now - 86_400_000 * 3,
         },
         {
           id: "comment_4",
@@ -398,12 +579,22 @@ async function seed() {
           authorId: "user_admin",
           body: JSON.stringify({
             type: "doc",
-            content: [{ type: "paragraph", content: [{ type: "text", text: "Thanks for reporting! We're investigating this issue." }] }],
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Thanks for reporting! We're investigating this issue.",
+                  },
+                ],
+              },
+            ],
           }),
           isOfficial: true,
           parentId: null,
-          createdAt: now - 86400000 * 2,
-          updatedAt: now - 86400000 * 2,
+          createdAt: now - 86_400_000 * 2,
+          updatedAt: now - 86_400_000 * 2,
         },
       ])
       .returning();
@@ -422,7 +613,9 @@ async function seed() {
       ])
       .returning();
 
-    console.log(`  ✅ Created ${feedbackTags.length} feedback-tag associations`);
+    console.log(
+      `  ✅ Created ${feedbackTags.length} feedback-tag associations`
+    );
 
     // Create admin notes
     console.log("📝 Creating admin notes...");
@@ -434,8 +627,8 @@ async function seed() {
           feedbackId: "feedback_4",
           authorId: "user_admin",
           body: "This is a known Safari WebKit issue. Engineering is working on a workaround.",
-          createdAt: now - 86400000 * 2,
-          updatedAt: now - 86400000 * 2,
+          createdAt: now - 86_400_000 * 2,
+          updatedAt: now - 86_400_000 * 2,
         },
       ])
       .returning();

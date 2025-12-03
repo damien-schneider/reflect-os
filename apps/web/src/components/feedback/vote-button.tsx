@@ -8,12 +8,12 @@ import type { Schema } from "../../schema";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
-interface VoteButtonProps {
+type VoteButtonProps = {
   feedbackId: string;
   voteCount: number;
   size?: "sm" | "md" | "lg";
   className?: string;
-}
+};
 
 export function VoteButton({
   feedbackId,

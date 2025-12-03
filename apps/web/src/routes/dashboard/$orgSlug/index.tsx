@@ -69,7 +69,9 @@ function DashboardOrgIndex() {
 
   // Handle org visibility toggle
   const handleOrgVisibilityToggle = async (checked: boolean) => {
-    if (!org) return;
+    if (!org) {
+      return;
+    }
     await z.mutate.organization.update({
       id: org.id,
       isPublic: checked,

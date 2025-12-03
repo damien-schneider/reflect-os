@@ -79,7 +79,9 @@ function DashboardTags() {
   };
 
   const handleSubmit = async () => {
-    if (!(name.trim() && org)) return;
+    if (!(name.trim() && org)) {
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -129,8 +131,9 @@ function DashboardTags() {
   const handleDelete = async (tag: Tag) => {
     if (
       !confirm(`Delete "${tag.name}"? This will remove it from all feedback.`)
-    )
+    ) {
       return;
+    }
     await z.mutate.tag.delete({ id: tag.id });
   };
 
@@ -213,7 +216,9 @@ function DashboardTags() {
       <Dialog
         onOpenChange={(open) => {
           setShowModal(open);
-          if (!open) resetForm();
+          if (!open) {
+            resetForm();
+          }
         }}
         open={showModal}
       >

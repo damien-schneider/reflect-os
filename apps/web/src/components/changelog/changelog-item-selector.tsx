@@ -5,13 +5,13 @@ import { useMemo } from "react";
 import { cn } from "../../lib/utils";
 import type { Schema } from "../../schema";
 
-interface ChangelogItemSelectorProps {
+type ChangelogItemSelectorProps = {
   organizationId: string;
   selectedIds: string[];
   onSelectionChange: (ids: string[]) => void;
   /** Only show items completed after this date (for auto-population) */
   completedAfter?: number;
-}
+};
 
 export function ChangelogItemSelector({
   organizationId,
@@ -31,18 +31,26 @@ export function ChangelogItemSelector({
 
   // Filter to only completed items from this org's boards
   const completedItems = useMemo(() => {
-    if (!(allFeedback && boards)) return [];
+    if (!(allFeedback && boards)) {
+      return [];
+    }
 
     const boardIds = new Set(boards.map((b) => b.id));
 
     return allFeedback
       .filter((f) => {
         // Must be in one of the org's boards
-        if (!boardIds.has(f.boardId)) return false;
+        if (!boardIds.has(f.boardId)) {
+          return false;
+        }
         // Must have a completedAt date
-        if (!f.completedAt) return false;
+        if (!f.completedAt) {
+          return false;
+        }
         // Optionally filter by date
-        if (completedAfter && f.completedAt < completedAfter) return false;
+        if (completedAfter && f.completedAt < completedAfter) {
+          return false;
+        }
         return true;
       })
       .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
@@ -57,7 +65,9 @@ export function ChangelogItemSelector({
 
     for (const item of completedItems) {
       const board = boards?.find((b) => b.id === item.boardId);
-      if (!board) continue;
+      if (!board) {
+        continue;
+      }
 
       if (!groups[board.id]) {
         groups[board.id] = { board, items: [] };

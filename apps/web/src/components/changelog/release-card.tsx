@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "../ui/card";
 
-interface ReleaseCardProps {
+type ReleaseCardProps = {
   release: Release & {
     feedbacks?: readonly (Feedback & {
       board?: Board | null;
@@ -19,7 +19,7 @@ interface ReleaseCardProps {
   };
   orgSlug: string;
   showFullContent?: boolean;
-}
+};
 
 export function ReleaseCard({
   release,

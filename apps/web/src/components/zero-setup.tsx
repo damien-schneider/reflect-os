@@ -101,7 +101,9 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
       // For authenticated users, verify we can get a token before showing as ready
       try {
         const token = await fetchZeroToken();
-        if (isCancelled) return;
+        if (isCancelled) {
+          return;
+        }
 
         if (token) {
           setState({
@@ -116,7 +118,9 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (err) {
-        if (isCancelled) return;
+        if (isCancelled) {
+          return;
+        }
         const errorMessage =
           err instanceof Error ? err.message : "Unknown error";
         console.error("[ZeroSetup] ❌ Error verifying auth:", err);

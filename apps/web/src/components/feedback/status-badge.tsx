@@ -2,10 +2,10 @@ import { type FeedbackStatus, STATUS_CONFIG } from "../../lib/constants";
 import { cn } from "../../lib/utils";
 import { Badge } from "../ui/badge";
 
-interface StatusBadgeProps {
+type StatusBadgeProps = {
   status: FeedbackStatus | string;
   className?: string;
-}
+};
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const config = STATUS_CONFIG[status as FeedbackStatus] ?? {

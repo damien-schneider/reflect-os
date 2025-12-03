@@ -106,7 +106,7 @@ function AdminLayout() {
             )}
             key={item.href}
             params={{ orgSlug }}
-            to={("/$orgSlug/admin/" + item.href) as "/$orgSlug/admin/boards"}
+            to={`/$orgSlug/admin/${item.href}` as "/$orgSlug/admin/boards"}
           >
             <item.icon className="h-4 w-4" />
             {item.label}

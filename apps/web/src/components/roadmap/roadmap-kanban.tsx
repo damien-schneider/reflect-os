@@ -22,7 +22,7 @@ import { RoadmapItemCard } from "./roadmap-item-card";
 import { RoadmapLaneColumn } from "./roadmap-lane";
 
 // Feedback item with roadmap fields
-export interface RoadmapFeedbackItem {
+export type RoadmapFeedbackItem = {
   id: string;
   title: string;
   description: string;
@@ -31,19 +31,19 @@ export interface RoadmapFeedbackItem {
   roadmapLane: string | null;
   roadmapOrder: number;
   completedAt?: number | null;
-}
+};
 
 // Lane configuration from tags
-export interface LaneConfig {
+export type LaneConfig = {
   id: string;
   label: string;
   color: string;
   bgColor: string;
   isDoneStatus: boolean;
   laneOrder: number;
-}
+};
 
-interface RoadmapKanbanProps {
+type RoadmapKanbanProps = {
   items: readonly RoadmapFeedbackItem[];
   backlogItems?: readonly RoadmapFeedbackItem[];
   isAdmin?: boolean;
@@ -52,7 +52,7 @@ interface RoadmapKanbanProps {
   customLanes?: readonly Tag[];
   /** Organization ID for tag-based lanes */
   organizationId?: string;
-}
+};
 
 export function RoadmapKanban({
   items,
@@ -124,27 +124,27 @@ export function RoadmapKanban({
     };
 
     // Initialize lanes
-    laneConfigs.forEach((lane) => {
+    for (const lane of laneConfigs) {
       grouped[lane.id] = [];
-    });
+    }
 
     // Add backlog items
-    backlogItems.forEach((item) => {
+    for (const item of backlogItems) {
       grouped.backlog.push(item);
-    });
+    }
 
     // Add roadmap items to their lanes
-    items.forEach((item) => {
+    for (const item of items) {
       if (item.roadmapLane && item.roadmapLane in grouped) {
         grouped[item.roadmapLane].push(item);
       }
-    });
+    }
 
     // Sort by roadmapOrder within each lane (backlog sorted by title)
     grouped.backlog.sort((a, b) => a.title.localeCompare(b.title));
-    laneConfigs.forEach((lane) => {
+    for (const lane of laneConfigs) {
       grouped[lane.id]?.sort((a, b) => a.roadmapOrder - b.roadmapOrder);
-    });
+    }
 
     return grouped;
   }, [items, backlogItems, laneConfigs]);
@@ -161,10 +161,14 @@ export function RoadmapKanban({
     const { active, over } = event;
     setActiveItem(null);
 
-    if (!(over && isAdmin)) return;
+    if (!(over && isAdmin)) {
+      return;
+    }
 
-    const activeItem = allItems.find((i) => i.id === active.id);
-    if (!activeItem) return;
+    const draggedItem = allItems.find((i) => i.id === active.id);
+    if (!draggedItem) {
+      return;
+    }
 
     // Determine target lane
     let targetLane: string;
@@ -177,7 +181,9 @@ export function RoadmapKanban({
     } else {
       // Dropped on another item
       const overItem = allItems.find((i) => i.id === over.id);
-      if (!overItem) return;
+      if (!overItem) {
+        return;
+      }
 
       targetLane = overItem.roadmapLane ?? "backlog";
       const laneItems = itemsByLane[targetLane] ?? [];
@@ -187,7 +193,7 @@ export function RoadmapKanban({
     // If dropping into backlog, remove from roadmap
     if (targetLane === "backlog") {
       z.mutate.feedback.update({
-        id: activeItem.id,
+        id: draggedItem.id,
         roadmapLane: null,
         roadmapOrder: null,
         completedAt: null, // Clear completion date when moving to backlog
@@ -198,7 +204,7 @@ export function RoadmapKanban({
 
     // Calculate new sort order
     const laneItems = (itemsByLane[targetLane] ?? []).filter(
-      (i) => i.id !== activeItem.id
+      (i) => i.id !== draggedItem.id
     );
     let newSortOrder: number;
 
@@ -207,8 +213,7 @@ export function RoadmapKanban({
     } else if (targetIndex === 0) {
       newSortOrder = (laneItems[0]?.roadmapOrder ?? 1000) / 2;
     } else if (targetIndex >= laneItems.length) {
-      newSortOrder =
-        (laneItems[laneItems.length - 1]?.roadmapOrder ?? 0) + 1000;
+      newSortOrder = (laneItems.at(-1)?.roadmapOrder ?? 0) + 1000;
     } else {
       const prevOrder = laneItems[targetIndex - 1]?.roadmapOrder ?? 0;
       const nextOrder =
@@ -221,7 +226,7 @@ export function RoadmapKanban({
     const isDoneLane = targetLaneConfig?.isDoneStatus ?? false;
 
     // Get previous lane to check if we're moving from a done lane
-    const previousLane = activeItem.roadmapLane;
+    const previousLane = draggedItem.roadmapLane;
     const previousLaneConfig = laneConfigs.find((l) => l.id === previousLane);
     const wasInDoneLane = previousLaneConfig?.isDoneStatus ?? false;
 
@@ -233,14 +238,14 @@ export function RoadmapKanban({
       updatedAt: number;
       completedAt?: number | null;
     } = {
-      id: activeItem.id,
+      id: draggedItem.id,
       roadmapLane: targetLane,
       roadmapOrder: newSortOrder,
       updatedAt: Date.now(),
     };
 
     // Set completedAt when moving to a done lane (if not already set)
-    if (isDoneLane && !activeItem.completedAt) {
+    if (isDoneLane && !draggedItem.completedAt) {
       updateData.completedAt = Date.now();
     }
     // Clear completedAt when moving out of a done lane

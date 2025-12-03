@@ -42,7 +42,9 @@ function AdminSettings() {
   }
 
   const handleSave = async () => {
-    if (!org) return;
+    if (!org) {
+      return;
+    }
 
     setIsSaving(true);
     setSaved(false);

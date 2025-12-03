@@ -10,14 +10,19 @@ import { auth } from "./api/auth.js";
 
 // Initialize server environment
 const serverEnv = {
-  ZERO_UPSTREAM_DB: process.env.ZERO_UPSTREAM_DB!,
-  ZERO_AUTH_SECRET: process.env.ZERO_AUTH_SECRET!,
-  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET!,
-  BETTER_AUTH_URL: process.env.BETTER_AUTH_URL!,
+  ZERO_UPSTREAM_DB: process.env.ZERO_UPSTREAM_DB ?? "",
+  ZERO_AUTH_SECRET: process.env.ZERO_AUTH_SECRET ?? "",
+  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET ?? "",
+  BETTER_AUTH_URL: process.env.BETTER_AUTH_URL ?? "",
 };
 
 // Validate required environment variables
-const requiredEnvVars = ['ZERO_UPSTREAM_DB', 'ZERO_AUTH_SECRET', 'BETTER_AUTH_SECRET', 'BETTER_AUTH_URL'];
+const requiredEnvVars = [
+  "ZERO_UPSTREAM_DB",
+  "ZERO_AUTH_SECRET",
+  "BETTER_AUTH_SECRET",
+  "BETTER_AUTH_URL",
+];
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.error(`Missing required environment variable: ${envVar}`);
@@ -30,16 +35,19 @@ console.log(`Auth configuration:
   NODE_ENV: ${process.env.NODE_ENV}
 `);
 
-const PORT = parseInt(process.env.PORT || "3000", 10);
+const PORT = Number.parseInt(process.env.PORT || "3000", 10);
 
 // Create API app
 const apiApp = new Hono();
 
 // Enable CORS for API routes
-apiApp.use("/*", cors({
-  origin: serverEnv.BETTER_AUTH_URL,
-  credentials: true,
-}));
+apiApp.use(
+  "/*",
+  cors({
+    origin: serverEnv.BETTER_AUTH_URL,
+    credentials: true,
+  })
+);
 
 apiApp.on(["POST", "GET"], "/auth/**", async (c) => {
   try {

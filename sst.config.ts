@@ -1,6 +1,6 @@
 /* eslint-disable */
 /// <reference path="./.sst/platform/config.d.ts" />
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 
 export default $config({
   app(input) {
@@ -20,15 +20,15 @@ export default $config({
       .trim();
 
     // S3 Bucket
-    const replicationBucket = new sst.aws.Bucket(`replication-bucket`);
+    const replicationBucket = new sst.aws.Bucket("replication-bucket");
 
     // VPC Configuration
-    const vpc = new sst.aws.Vpc(`vpc`, {
+    const vpc = new sst.aws.Vpc("vpc", {
       az: 2,
     });
 
     // ECS Cluster
-    const cluster = new sst.aws.Cluster(`cluster`, {
+    const cluster = new sst.aws.Cluster("cluster", {
       vpc,
     });
 
@@ -47,7 +47,7 @@ export default $config({
     };
 
     // Replication Manager Service
-    const replicationManager = cluster.addService(`replication-manager`, {
+    const replicationManager = cluster.addService("replication-manager", {
       cpu: "0.5 vCPU",
       memory: "1 GB",
       architecture: "arm64",
@@ -81,7 +81,7 @@ export default $config({
 
     // View Syncer Service
     const viewSyncer = cluster.addService(
-      `view-syncer`,
+      "view-syncer",
       {
         cpu: "1 vCPU",
         memory: "2 GB",
@@ -161,7 +161,7 @@ export default $config({
     new command.local.Command(
       "zero-deploy-permissions",
       {
-        create: `npx zero-deploy-permissions -p ../../apps/web/src/schema.ts`,
+        create: "npx zero-deploy-permissions -p ../../apps/web/src/schema.ts",
         // Run the Command on every deploy ...
         triggers: [Date.now()],
         environment: {

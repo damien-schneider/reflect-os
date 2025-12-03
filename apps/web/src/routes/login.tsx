@@ -146,7 +146,9 @@ function Login() {
                 id="name"
                 onChange={(e) => {
                   setName(e.target.value);
-                  if (error) setError(null);
+                  if (error) {
+                    setError(null);
+                  }
                 }}
                 placeholder="Your name"
                 type="text"
@@ -163,7 +165,9 @@ function Login() {
               id="email"
               onChange={(e) => {
                 setEmail(e.target.value);
-                if (error) setError(null);
+                if (error) {
+                  setError(null);
+                }
               }}
               placeholder="you@example.com"
               type="email"
@@ -179,7 +183,9 @@ function Login() {
               id="password"
               onChange={(e) => {
                 setPassword(e.target.value);
-                if (error) setError(null);
+                if (error) {
+                  setError(null);
+                }
               }}
               placeholder="At least 6 characters"
               type="password"
@@ -193,8 +199,10 @@ function Login() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {isSignUp ? "Creating..." : "Signing in..."}
               </>
+            ) : isSignUp ? (
+              "Create Account"
             ) : (
-              <>{isSignUp ? "Create Account" : "Sign In"}</>
+              "Sign In"
             )}
           </Button>
         </form>

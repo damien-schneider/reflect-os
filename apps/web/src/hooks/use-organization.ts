@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { authClient } from "../lib/auth-client";
 
-export interface Organization {
+export type Organization = {
   id: string;
   name: string;
   slug: string;
-}
+};
 
 export function useOrganizations() {
   const { data: organizations, refetch } = authClient.useListOrganizations();
@@ -89,7 +89,9 @@ export function useOrganizations() {
   };
 
   const undoDelete = async () => {
-    if (!deletedOrg) return;
+    if (!deletedOrg) {
+      return;
+    }
     try {
       await authClient.organization.create({
         name: deletedOrg.name,
@@ -151,7 +153,9 @@ export function useOrgInvite(selectedOrg: Organization | null) {
   }, [copied]);
 
   const generateInviteLink = async () => {
-    if (!selectedOrg) return;
+    if (!selectedOrg) {
+      return;
+    }
 
     setInviteLoading(true);
     setInviteError(null);
@@ -180,13 +184,17 @@ export function useOrgInvite(selectedOrg: Organization | null) {
     : null;
 
   const copyInviteLink = () => {
-    if (!inviteLink) return;
+    if (!inviteLink) {
+      return;
+    }
     navigator.clipboard.writeText(inviteLink);
     setCopied(true);
   };
 
   const shareInviteLink = async () => {
-    if (!(inviteLink && selectedOrg)) return;
+    if (!(inviteLink && selectedOrg)) {
+      return;
+    }
 
     try {
       await navigator.share({
@@ -235,7 +243,9 @@ export function useOrgRename(
   };
 
   const saveRename = async () => {
-    if (!(selectedOrg && editNameValue.trim())) return;
+    if (!(selectedOrg && editNameValue.trim())) {
+      return;
+    }
 
     setRenameLoading(true);
     try {

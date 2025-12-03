@@ -69,10 +69,14 @@ function DashboardOrgLayout() {
   // Redirect if not a member of this org according to Better Auth
   useEffect(() => {
     // Wait for auth queries to complete
-    if (sessionPending || authOrgsPending) return;
+    if (sessionPending || authOrgsPending) {
+      return;
+    }
 
     // Prevent multiple redirects
-    if (hasRedirected.current) return;
+    if (hasRedirected.current) {
+      return;
+    }
 
     // If user doesn't have this org in Better Auth, redirect
     if (!hasAuthMembership) {

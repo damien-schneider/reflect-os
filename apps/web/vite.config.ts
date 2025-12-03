@@ -1,10 +1,10 @@
+import path from "node:path";
 import { getRequestListener } from "@hono/node-server";
+import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-vite-plugin";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
 import dotenv from "dotenv";
-import path from "path";
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
 
 // Load environment variables from root .env file in development
 if (process.env.NODE_ENV === "development") {
@@ -29,7 +29,7 @@ export default defineConfig({
     tailwindcss(),
     react({
       babel: {
-        plugins: ['babel-plugin-react-compiler'],
+        plugins: ["babel-plugin-react-compiler"],
       },
     }),
     {
@@ -40,9 +40,10 @@ export default defineConfig({
             return next();
           }
           const { app } = await import("./api/index.js");
-          getRequestListener(async (request) => {
-            return await app.fetch(request, {});
-          })(req, res);
+          getRequestListener(async (request) => await app.fetch(request, {}))(
+            req,
+            res
+          );
         });
       },
     },

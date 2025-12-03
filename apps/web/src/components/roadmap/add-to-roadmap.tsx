@@ -21,11 +21,11 @@ import {
   SelectValue,
 } from "../ui/select";
 
-interface AddToRoadmapProps {
+type AddToRoadmapProps = {
   feedbackId: string;
   currentLane?: string | null;
   onSuccess?: () => void;
-}
+};
 
 export function AddToRoadmap({
   feedbackId,

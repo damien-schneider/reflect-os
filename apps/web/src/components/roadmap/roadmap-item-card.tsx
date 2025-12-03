@@ -4,11 +4,11 @@ import { ChevronUp, ExternalLink, GripVertical } from "lucide-react";
 import { cn } from "../../lib/utils";
 import type { RoadmapFeedbackItem } from "./roadmap-kanban";
 
-interface RoadmapItemCardProps {
+type RoadmapItemCardProps = {
   item: RoadmapFeedbackItem;
   isAdmin?: boolean;
   isDragging?: boolean;
-}
+};
 
 export function RoadmapItemCard({
   item,

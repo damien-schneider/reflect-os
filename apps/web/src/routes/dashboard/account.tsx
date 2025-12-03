@@ -114,7 +114,9 @@ function MyAccount() {
   const closeOrgDetail = () => setSelectedOrg(null);
 
   const handleDelete = async () => {
-    if (!selectedOrg) return;
+    if (!selectedOrg) {
+      return;
+    }
     await deleteOrg(selectedOrg);
     setSelectedOrg(null);
   };
@@ -141,8 +143,12 @@ function MyAccount() {
       disabled={renameLoading}
       onChange={(e) => setEditNameValue(e.target.value)}
       onKeyDown={(e) => {
-        if (e.key === "Enter") saveRename();
-        if (e.key === "Escape") setIsEditingName(false);
+        if (e.key === "Enter") {
+          saveRename();
+        }
+        if (e.key === "Escape") {
+          setIsEditingName(false);
+        }
       }}
       type="text"
       value={editNameValue}
@@ -257,11 +263,17 @@ function MyAccount() {
                   disabled={isCreatingOrg}
                   onChange={(e) => {
                     setNewOrgName(e.target.value);
-                    if (createOrgError) setCreateOrgError(null);
+                    if (createOrgError) {
+                      setCreateOrgError(null);
+                    }
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") createOrg();
-                    if (e.key === "Escape") cancelCreate();
+                    if (e.key === "Enter") {
+                      createOrg();
+                    }
+                    if (e.key === "Escape") {
+                      cancelCreate();
+                    }
                   }}
                   placeholder="Organization name"
                   type="text"

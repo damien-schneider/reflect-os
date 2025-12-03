@@ -7,7 +7,7 @@ import { Badge } from "../ui/badge";
 import { StatusBadge } from "./status-badge";
 import { VoteButton } from "./vote-button";
 
-interface FeedbackListItemProps {
+type FeedbackListItemProps = {
   feedback: Feedback & {
     author?: { id: string; name: string } | null;
     feedbackTags?: readonly { tag: Tag | null | undefined }[];
@@ -15,7 +15,7 @@ interface FeedbackListItemProps {
   orgSlug: string;
   boardSlug: string;
   className?: string;
-}
+};
 
 export function FeedbackListItem({
   feedback,

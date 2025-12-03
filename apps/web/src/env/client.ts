@@ -3,7 +3,9 @@ import { z } from "zod";
 
 // Helper to normalize URLs - adds https:// if no protocol is present
 const normalizeUrl = (url: string | undefined): string | undefined => {
-  if (!url) return;
+  if (!url) {
+    return;
+  }
   // Skip placeholder values (will be replaced at runtime)
   if (url.startsWith("__") && url.endsWith("__")) {
     return url;

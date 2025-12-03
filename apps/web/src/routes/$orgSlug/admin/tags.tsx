@@ -72,7 +72,9 @@ function AdminTags() {
   };
 
   const handleSubmit = async () => {
-    if (!(name.trim() && org)) return;
+    if (!(name.trim() && org)) {
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -104,9 +106,12 @@ function AdminTags() {
 
   const handleDelete = async (tag: Tag) => {
     if (
-      !confirm(`Delete "${tag.name}"? This will remove it from all feedback.`)
-    )
+      !window.confirm(
+        `Delete "${tag.name}"? This will remove it from all feedback.`
+      )
+    ) {
       return;
+    }
     await z.mutate.tag.delete({ id: tag.id });
   };
 
@@ -170,7 +175,9 @@ function AdminTags() {
       <Dialog
         onOpenChange={(open) => {
           setShowModal(open);
-          if (!open) resetForm();
+          if (!open) {
+            resetForm();
+          }
         }}
         open={showModal}
       >

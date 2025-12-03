@@ -9,12 +9,12 @@ import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { ChangelogItemSelector } from "./changelog-item-selector";
 
-interface ReleaseEditorProps {
+type ReleaseEditorProps = {
   organizationId: string;
   release?: Release | null;
   onClose?: () => void;
   onSave?: () => void;
-}
+};
 
 export function ReleaseEditor({
   organizationId,
@@ -49,8 +49,10 @@ export function ReleaseEditor({
     }
   }, [releaseItems, selectedFeedbackIds.length]);
 
-  const handleSubmit = async () => {
-    if (!title.trim()) return;
+  const handleSubmit = () => {
+    if (!title.trim()) {
+      return;
+    }
 
     setIsSubmitting(true);
 

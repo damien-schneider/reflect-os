@@ -9,13 +9,13 @@ import { cn } from "../../lib/utils";
 import { RoadmapItemCard } from "./roadmap-item-card";
 import type { LaneConfig, RoadmapFeedbackItem } from "./roadmap-kanban";
 
-interface RoadmapLaneColumnProps {
+type RoadmapLaneColumnProps = {
   lane: RoadmapLaneWithBacklog | string;
   items: RoadmapFeedbackItem[];
   isAdmin?: boolean;
   /** Custom lane configuration - if not provided, uses default LANE_CONFIG */
   laneConfig?: LaneConfig;
-}
+};
 
 export function RoadmapLaneColumn({
   lane,

@@ -92,11 +92,20 @@ function ReleaseDetailPage() {
       setDescription((release.description as string) ?? "");
       setSelectedFeedbackIds(releaseItems.map((ri) => ri.feedbackId as string));
     }
-  }, [release?.id]); // Only sync on release change, not on every render
+  }, [
+    release?.id,
+    release.description,
+    release.title,
+    release.version,
+    release,
+    releaseItems.map,
+  ]); // Only sync on release change, not on every render
 
   // Auto-save handlers
   const saveTitle = useCallback(() => {
-    if (!(release && title.trim())) return;
+    if (!(release && title.trim())) {
+      return;
+    }
     z.mutate.release.update({
       id: release.id,
       title: title.trim(),
@@ -106,7 +115,9 @@ function ReleaseDetailPage() {
   }, [release, title, z]);
 
   const saveVersion = useCallback(() => {
-    if (!release) return;
+    if (!release) {
+      return;
+    }
     z.mutate.release.update({
       id: release.id,
       version: version.trim() || null,
@@ -117,7 +128,9 @@ function ReleaseDetailPage() {
 
   const saveDescription = useCallback(
     (markdown: string) => {
-      if (!release) return;
+      if (!release) {
+        return;
+      }
       setDescription(markdown);
       z.mutate.release.update({
         id: release.id,
@@ -129,7 +142,9 @@ function ReleaseDetailPage() {
   );
 
   const togglePublish = useCallback(() => {
-    if (!release) return;
+    if (!release) {
+      return;
+    }
     const now = Date.now();
     z.mutate.release.update({
       id: release.id,
@@ -139,8 +154,12 @@ function ReleaseDetailPage() {
   }, [release, z]);
 
   const handleDelete = useCallback(() => {
-    if (!release) return;
-    if (!confirm(`Delete "${release.title}"? This cannot be undone.`)) return;
+    if (!release) {
+      return;
+    }
+    if (!confirm(`Delete "${release.title}"? This cannot be undone.`)) {
+      return;
+    }
 
     // Delete release items first
     for (const item of releaseItems) {
@@ -158,9 +177,13 @@ function ReleaseDetailPage() {
   // Add a single item to the release
   const handleAddItem = useCallback(
     (feedbackId: string) => {
-      if (!release) return;
+      if (!release) {
+        return;
+      }
       // Skip if already added
-      if (selectedFeedbackIds.includes(feedbackId)) return;
+      if (selectedFeedbackIds.includes(feedbackId)) {
+        return;
+      }
 
       const now = Date.now();
       z.mutate.releaseItem.insert({
@@ -181,7 +204,9 @@ function ReleaseDetailPage() {
   // Add all available items to the release
   const handleAddAllItems = useCallback(
     (feedbackIds: string[]) => {
-      if (!release) return;
+      if (!release) {
+        return;
+      }
       const now = Date.now();
 
       // Only add items that aren't already selected
@@ -209,7 +234,9 @@ function ReleaseDetailPage() {
   // Remove an item from the release
   const handleRemoveItem = useCallback(
     (feedbackId: string) => {
-      if (!release) return;
+      if (!release) {
+        return;
+      }
       const item = releaseItems.find((ri) => ri.feedbackId === feedbackId);
       if (item) {
         z.mutate.releaseItem.delete({ id: item.id });
@@ -334,7 +361,9 @@ function ReleaseDetailPage() {
                   onBlur={saveVersion}
                   onChange={(e) => setVersion(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") saveVersion();
+                    if (e.key === "Enter") {
+                      saveVersion();
+                    }
                     if (e.key === "Escape") {
                       setVersion((release.version as string) ?? "");
                       setIsEditingVersion(false);
@@ -392,7 +421,9 @@ function ReleaseDetailPage() {
               onBlur={saveTitle}
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") saveTitle();
+                if (e.key === "Enter") {
+                  saveTitle();
+                }
                 if (e.key === "Escape") {
                   setTitle(release.title as string);
                   setIsEditingTitle(false);
@@ -430,13 +461,13 @@ function ReleaseDetailPage() {
 }
 
 // Completed Items Section with Combobox
-interface CompletedItemsSectionProps {
+type CompletedItemsSectionProps = {
   organizationId: string;
   selectedFeedbackIds: string[];
   onAddItem: (feedbackId: string) => void;
   onAddAllItems: (feedbackIds: string[]) => void;
   onRemoveItem: (feedbackId: string) => void;
-}
+};
 
 function CompletedItemsSection({
   organizationId,
@@ -458,7 +489,9 @@ function CompletedItemsSection({
 
   // Filter to only completed items from this org's boards
   const completedItems = useMemo(() => {
-    if (!(allFeedback && boards)) return [];
+    if (!(allFeedback && boards)) {
+      return [];
+    }
     const boardIds = new Set(boards.map((b) => b.id));
     return allFeedback
       .filter((f) => boardIds.has(f.boardId) && f.completedAt)

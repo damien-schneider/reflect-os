@@ -60,7 +60,9 @@ function AdminUsers() {
 
   const handleBanUser = async (userId: string, isBanned: boolean) => {
     const action = isBanned ? "unban" : "ban";
-    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+    if (!confirm(`Are you sure you want to ${action} this user?`)) {
+      return;
+    }
 
     await z.mutate.user.update({
       id: userId,

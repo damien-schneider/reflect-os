@@ -29,11 +29,11 @@ type CommentWithRelations = Comment & {
   })[];
 };
 
-interface CommentThreadProps {
+type CommentThreadProps = {
   feedbackId: string;
   isOrgMember?: boolean;
   className?: string;
-}
+};
 
 export function CommentThread({
   feedbackId,
@@ -57,7 +57,9 @@ export function CommentThread({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmitComment = async () => {
-    if (!(newComment.trim() && userId)) return;
+    if (!(newComment.trim() && userId)) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -149,7 +151,7 @@ export function CommentThread({
   );
 }
 
-interface CommentItemProps {
+type CommentItemProps = {
   comment: Comment & {
     author?: { id: string; name: string } | null;
     replies?: readonly (Comment & {
@@ -160,7 +162,7 @@ interface CommentItemProps {
   isOrgMember: boolean;
   currentUserId?: string;
   depth?: number;
-}
+};
 
 function CommentItem({
   comment,
@@ -202,7 +204,9 @@ function CommentItem({
   };
 
   const handleReply = async () => {
-    if (!(replyContent.trim() && currentUserId)) return;
+    if (!(replyContent.trim() && currentUserId)) {
+      return;
+    }
 
     await z.mutate.comment.insert({
       id: randID(),

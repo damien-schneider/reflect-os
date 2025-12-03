@@ -8,14 +8,14 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
-interface TagSelectorProps {
+type TagSelectorProps = {
   feedbackId: string;
   organizationId: string;
   selectedTagIds: string[];
   onChange?: (tagIds: string[]) => void;
   editable?: boolean;
   className?: string;
-}
+};
 
 export function TagSelector({
   feedbackId,
@@ -90,6 +90,7 @@ export function TagSelector({
             <button
               className="rounded-full p-0.5 hover:bg-black/10"
               onClick={() => removeTag(tag.id)}
+              type="button"
             >
               <X className="h-3 w-3" />
             </button>
@@ -117,6 +118,7 @@ export function TagSelector({
                     )}
                     key={tag.id}
                     onClick={() => toggleTag(tag)}
+                    type="button"
                   >
                     <div className="flex items-center gap-2">
                       <div

@@ -3,11 +3,11 @@ import { useMemo } from "react";
 import type { Board, Feedback, Release, Schema } from "../../schema";
 import { ReleaseCard } from "./release-card";
 
-interface ReleaseListProps {
+type ReleaseListProps = {
   organizationId: string;
   orgSlug: string;
   showDrafts?: boolean;
-}
+};
 
 type ReleaseWithFeedbacks = Release & {
   feedbacks: (Feedback & { board?: Board | null })[];
@@ -32,7 +32,9 @@ export function ReleaseList({
 
   // Transform releases to include feedbacks - memoized for performance
   const releasesWithFeedbacks = useMemo((): ReleaseWithFeedbacks[] => {
-    if (!(releases && Array.isArray(releases))) return [];
+    if (!(releases && Array.isArray(releases))) {
+      return [];
+    }
 
     // Filter out drafts if not showing them
     const filtered = showDrafts
@@ -45,7 +47,7 @@ export function ReleaseList({
         : [];
       const feedbacks = items
         .map((ri) => ri.feedback)
-        .filter((f): f is Feedback & { board?: Board | null } => f != null);
+        .filter((f): f is Feedback & { board?: Board | null } => f !== null);
 
       return {
         ...release,

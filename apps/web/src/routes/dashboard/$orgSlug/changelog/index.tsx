@@ -36,7 +36,9 @@ function DashboardChangelogIndex() {
 
   // Create a new draft release instantly and navigate to it
   const createNewRelease = async () => {
-    if (!org) return;
+    if (!org) {
+      return;
+    }
 
     const releaseId = randID();
     const now = Date.now();
@@ -60,13 +62,17 @@ function DashboardChangelogIndex() {
   };
 
   const handleDelete = (releaseId: string, releaseTitle: string) => {
-    if (!confirm(`Delete "${releaseTitle}"? This cannot be undone.`)) return;
+    if (!confirm(`Delete "${releaseTitle}"? This cannot be undone.`)) {
+      return;
+    }
     z.mutate.release.delete({ id: releaseId });
   };
 
   // Transform releases to include feedbacks count
   const releasesWithCounts = useMemo(() => {
-    if (!(releasesData && Array.isArray(releasesData) && org)) return [];
+    if (!(releasesData && Array.isArray(releasesData) && org)) {
+      return [];
+    }
 
     return releasesData.map((release) => ({
       ...release,

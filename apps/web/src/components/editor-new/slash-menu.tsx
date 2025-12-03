@@ -140,7 +140,9 @@ export function SlashMenu({ editor }: SlashMenuProps) {
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!isOpen) return;
+      if (!isOpen) {
+        return;
+      }
 
       if (event.key === "ArrowDown") {
         event.preventDefault();
@@ -229,7 +231,7 @@ export function SlashMenu({ editor }: SlashMenuProps) {
   useEffect(() => {
     setSelectedIndex(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Only reset on query change, not on filteredItems
-  }, [query]);
+  }, []);
 
   // Scroll selected item into view
   useEffect(() => {

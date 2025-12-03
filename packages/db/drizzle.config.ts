@@ -6,6 +6,8 @@ export default defineConfig({
   dialect: "postgresql",
   strict: true,
   dbCredentials: {
-    url: process.env.ZERO_UPSTREAM_DB || "postgresql://user:password@127.0.0.1:5430/postgres",
+    url:
+      process.env.ZERO_UPSTREAM_DB ||
+      "postgresql://user:password@127.0.0.1:5430/postgres",
   },
 });

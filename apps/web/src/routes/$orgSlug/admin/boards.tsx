@@ -67,7 +67,9 @@ function AdminBoards() {
   };
 
   const handleSubmit = async () => {
-    if (!(name.trim() && slug.trim() && org)) return;
+    if (!(name.trim() && slug.trim() && org)) {
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -104,7 +106,9 @@ function AdminBoards() {
   };
 
   const handleDelete = async (board: Board) => {
-    if (!confirm(`Delete "${board.name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete "${board.name}"? This cannot be undone.`)) {
+      return;
+    }
     await z.mutate.board.delete({ id: board.id });
   };
 
@@ -164,7 +168,9 @@ function AdminBoards() {
       <Dialog
         onOpenChange={(open) => {
           setShowCreateModal(open);
-          if (!open) resetForm();
+          if (!open) {
+            resetForm();
+          }
         }}
         open={showCreateModal}
       >

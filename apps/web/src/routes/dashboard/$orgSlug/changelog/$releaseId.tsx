@@ -68,8 +68,7 @@ function ReleaseDetailPage() {
       .where("id", "=", releaseId)
       .related("releaseItems", (q) => q.related("feedback"))
   );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const release = releases?.[0] as any;
+  const release = releases?.[0];
 
   // Local state for inline editing
   const [title, setTitle] = useState("");
@@ -377,7 +376,7 @@ function ReleaseDetailPage() {
                 </Button>
               </div>
             ) : (
-              <button
+              <Button
                 className="group flex items-center"
                 onClick={() => setIsEditingVersion(true)}
               >
@@ -396,7 +395,7 @@ function ReleaseDetailPage() {
                     + Add version
                   </Badge>
                 )}
-              </button>
+              </Button>
             )}
           </div>
 

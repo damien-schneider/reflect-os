@@ -1,4 +1,3 @@
-/* eslint-disable */
 /// <reference path="./.sst/platform/config.d.ts" />
 import { execSync } from "node:child_process";
 

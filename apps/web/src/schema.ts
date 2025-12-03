@@ -270,8 +270,12 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
     },
     feedback: {
       row: {
-        // Viewable if board is public or user is org member
-        select: [allowIfFeedbackBoardPublic, allowIfFeedbackBoardOrgMember],
+        // Viewable if board is public, user is org member, or user is the author
+        select: [
+          allowIfFeedbackBoardPublic,
+          allowIfFeedbackBoardOrgMember,
+          allowIfFeedbackAuthor,
+        ],
         insert: [allowIfLoggedIn],
         update: {
           // Allow author or org member to update (for editing feedback)

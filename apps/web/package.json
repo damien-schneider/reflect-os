@@ -41,6 +41,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "jose": "^5.9.6",
+    "jotai": "^2.15.2",
     "js-cookie": "^3.0.5",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.554.0",
@@ -52,7 +53,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.4.0",
-    "tiptap-markdown": "^0.9.0",
+    "@tiptap/markdown": "^3.11.1",
     "vaul": "^1.1.2",
     "zod": "^4.1.13"
   },

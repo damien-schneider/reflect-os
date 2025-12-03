@@ -3,9 +3,9 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Calendar, CheckCircle } from "lucide-react";
 import { useMemo } from "react";
-import { MarkdownEditor } from "@/components/editor-new/markdown-editor";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/$orgSlug/changelog")({

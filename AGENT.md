@@ -113,6 +113,8 @@
 
 This project uses [Zero](https://zero.rocicorp.dev/) by Rocicorp for real-time data sync. When working with Zero-related questions, always consult the official documentation:
 
+For any question about Zero, always read this before even think: https://zero.rocicorp.dev/llms.txt
+
 - **Schema**: https://zero.rocicorp.dev/docs/zero-schema
 - **Reading Data (ZQL)**: https://zero.rocicorp.dev/docs/reading-data
 - **Writing Data (Mutators)**: https://zero.rocicorp.dev/docs/writing-data
@@ -177,3 +179,64 @@ bun db:seed
 - Use Tanstack Query for specific data fetching and caching instead of custom solutions, and use tanstack DB for reusable queries.
 - Do not use useMemo or useCallback or memo() or forwardRef() since we are using React 19 + Compiler which optimizes re-renders automatically.
 - Avoid props drilling: When passing props through 3+ levels, use React Context or Jotai atoms instead; or restructure component hierarchy.
+
+### Feature-Based Architecture
+
+Organize code by feature in the `features/` directory, not in `components/`. The `components/` folder should only contain:
+
+- Generic, reusable UI components (e.g., `components/ui/`)
+- Layout components (e.g., `side-nav`, `admin-floating-bar`)
+
+Each feature folder follows this structure:
+
+```
+src/features/{feature-name}/
+├── components/     # Feature-specific components
+│   ├── feature-component.tsx
+│   └── sub-component.tsx
+├── hooks/          # Custom hooks for the feature
+│   └── use-feature.ts
+├── store/          # Jotai atoms for state management
+│   └── atoms.ts
+└── types.ts        # (optional) Shared types for the feature
+```
+
+**Important**: Do NOT use barrel files (index.ts with re-exports) as they slow down performance. Use direct imports instead:
+
+```tsx
+// ✅ Good - direct imports
+import { FeedbackFilters } from "@/features/feedback/components/feedback-filters";
+import { useFeedbackFilters } from "@/features/feedback/hooks/use-feedback-filters";
+import { feedbackSearchAtom } from "@/features/feedback/store/atoms";
+
+// ❌ Bad - barrel imports
+import { FeedbackFilters, useFeedbackFilters } from "@/features/feedback";
+```
+
+Guidelines:
+
+- Co-locate atoms with their consuming components inside `store/` folders
+- Use `atomWithStorage` from `jotai/utils` for persistent UI state (filters, sort preferences, view modes)
+- Use plain `atom` for ephemeral state (search queries, temporary selections)
+- Prefer custom hooks that encapsulate atom usage (e.g., `useFeedbackFilters()`) over directly using atoms in components
+- Custom hooks should use data directly from:
+  - Tanstack Router (route params via `useParams`)
+  - Zero client queries (via `useQuery`, `useZero`)
+  - Jotai atoms (via `useAtom`, `useAtomValue`, `useSetAtom`)
+
+### State Management Patterns
+
+- **Route-derived data**: Use `useParams({ strict: false })` from Tanstack Router to get route parameters directly in hooks
+- **Server data**: Use Zero client (`useZero<Schema>()` + `useQuery()`) for real-time synced data
+- **UI state**: Use Jotai atoms for filter/sort/view preferences
+- **Derived state**: Use derived atoms (`atom((get) => ...)`) for computed values like filter counts
+- **Persistent preferences**: Use `atomWithStorage` for user preferences that should survive page refreshes
+
+### Component Props Guidelines
+
+- Components that need route context should use hooks internally (`useParams`, `useBoardData`)
+- Components that need filter state should use hooks internally (`useFeedbackFilters`)
+- Only pass props for:
+  - Pure UI customization (className, variant)
+  - Feature toggles (showSubmitButton)
+  - Data that's genuinely external to the feature

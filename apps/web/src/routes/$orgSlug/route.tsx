@@ -147,7 +147,8 @@ function OrgLayout() {
   useEffect(() => {
     // Wait for queries to complete
     // For members, use memberQueryStatus; for public orgs, we need org query
-    if (sessionPending || authOrgsPending) {
+    // Only wait for authOrgsPending if user is logged in
+    if (sessionPending || (session && authOrgsPending)) {
       return;
     }
 
@@ -210,8 +211,10 @@ function OrgLayout() {
     window.location.reload();
   };
 
-  // Auth error state
-  const authError = sessionError || authOrgsError;
+  // Auth error state - only show for session errors when user is logged in
+  // Don't show auth errors for unauthenticated users trying to access public orgs
+  // authOrgsError is expected when user is not logged in
+  const authError = sessionError;
   if (authError) {
     console.error("[OrgLayout] ❌ Auth error:", authError);
     return (
@@ -285,9 +288,10 @@ function OrgLayout() {
 
   // Show loading while checking access or waiting for Zero sync
   // For members: wait for member sync. For public orgs: wait for org query
+  // Don't wait for authOrgsPending if user is not logged in (no session)
   const isLoading =
     sessionPending ||
-    authOrgsPending ||
+    (session && authOrgsPending) ||
     (hasAuthMembership && (memberQueryStatus !== "complete" || needsSync)) ||
     (!hasAuthMembership && queryStatus !== "complete");
 

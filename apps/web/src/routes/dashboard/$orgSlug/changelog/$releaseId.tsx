@@ -18,7 +18,6 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MarkdownEditor } from "@/components/editor-new/markdown-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +41,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import type { Organization, ReleaseItem, Schema } from "@/schema";
 
 export const Route = createFileRoute(

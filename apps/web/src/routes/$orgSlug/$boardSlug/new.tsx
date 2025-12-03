@@ -4,15 +4,19 @@ import {
   useNavigate,
   useParams,
 } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { MarkdownEditor } from "../../../components/editor-new/markdown-editor";
+import { useAuthDialog } from "@/components/auth-dialog-provider";
+import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { authClient } from "../../../lib/auth-client";
 import { randID } from "../../../rand";
 import type { Schema } from "../../../schema";
+
+const MAX_VERIFY_ATTEMPTS = 10;
+const VERIFY_DELAY_MS = 300;
 
 export const Route = createFileRoute("/$orgSlug/$boardSlug/new")({
   component: NewFeedback,
@@ -26,6 +30,7 @@ function NewFeedback() {
   const navigate = useNavigate();
   const z = useZero<Schema>();
   const { data: session } = authClient.useSession();
+  const { openAuthDialog } = useAuthDialog();
 
   // Get organization and board
   const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
@@ -69,6 +74,13 @@ function NewFeedback() {
       const feedbackId = randID();
       const requiresApproval = board.settings?.requireApproval ?? false;
 
+      console.log("[NewFeedback] Creating feedback:", {
+        feedbackId,
+        boardId: board.id,
+        authorId: session.user.id,
+        requiresApproval,
+      });
+
       await z.mutate.feedback.insert({
         id: feedbackId,
         boardId: board.id,
@@ -84,13 +96,52 @@ function NewFeedback() {
         updatedAt: Date.now(),
       });
 
+      console.log("[NewFeedback] Mutation completed, verifying creation...");
+
+      // Verify the feedback was actually created before navigating
+      let verified = false;
+      for (let i = 0; i < MAX_VERIFY_ATTEMPTS; i++) {
+        const [result] = await z.query.feedback
+          .where("id", "=", feedbackId)
+          .run();
+
+        if (result) {
+          console.log("[NewFeedback] ✅ Feedback verified:", result.id);
+          verified = true;
+          break;
+        }
+
+        console.log(
+          `[NewFeedback] Attempt ${i + 1}/${MAX_VERIFY_ATTEMPTS}: Feedback not found yet, waiting...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, VERIFY_DELAY_MS));
+      }
+
+      if (!verified) {
+        console.error(
+          "[NewFeedback] ❌ Feedback creation failed - could not verify after",
+          MAX_VERIFY_ATTEMPTS,
+          "attempts"
+        );
+        setError(
+          "Failed to create feedback. This may be a permission issue. Please try again or contact support."
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
       // Navigate to the new feedback
       navigate({
         to: "/$orgSlug/$boardSlug/$feedbackId",
         params: { orgSlug, boardSlug, feedbackId },
       });
-    } catch {
-      setError("Failed to submit feedback. Please try again.");
+    } catch (err) {
+      console.error("[NewFeedback] ❌ Error creating feedback:", err);
+      setError(
+        err instanceof Error
+          ? `Failed to submit feedback: ${err.message}`
+          : "Failed to submit feedback. Please try again."
+      );
       setIsSubmitting(false);
     }
   };
@@ -101,7 +152,7 @@ function NewFeedback() {
         <p className="mb-4 text-muted-foreground">
           You must be logged in to submit feedback.
         </p>
-        <Button onClick={() => navigate({ to: "/login" })}>Sign In</Button>
+        <Button onClick={openAuthDialog}>Sign In</Button>
       </div>
     );
   }
@@ -156,13 +207,22 @@ function NewFeedback() {
 
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
-          <MarkdownEditor
-            className="min-h-[200px]"
-            editable={!isSubmitting}
-            onChange={setDescription}
-            placeholder="Provide more details about your feedback... Press '/' for commands"
-            value={description}
-          />
+          {isSubmitting ? (
+            <div className="min-h-[200px] w-full rounded-lg border border-input bg-muted/50 px-4 py-3">
+              <p className="text-muted-foreground text-sm">
+                {description || "No description provided"}
+              </p>
+            </div>
+          ) : (
+            <MarkdownEditor
+              className="min-h-[200px]"
+              editable
+              onChange={setDescription}
+              placeholder="Provide more details about your feedback... Press '/' for commands"
+              showDragHandle={false}
+              value={description}
+            />
+          )}
         </div>
 
         <div className="flex justify-end gap-3">
@@ -180,7 +240,14 @@ function NewFeedback() {
             Cancel
           </Button>
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting ? "Submitting..." : "Submit Feedback"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Feedback"
+            )}
           </Button>
         </div>
       </form>

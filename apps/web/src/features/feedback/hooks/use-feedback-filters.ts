@@ -1,9 +1,6 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { useParams } from "@tanstack/react-router";
 import { useAtom, useAtomValue } from "jotai";
-import { authClient } from "@/lib/auth-client";
-import type { FeedbackStatus } from "@/lib/constants";
-import type { Schema } from "@/schema";
 import {
   feedbackSearchAtom,
   feedbackSortAtom,
@@ -13,6 +10,9 @@ import {
   filterCountAtom,
   hasActiveFiltersAtom,
 } from "@/features/feedback/store/atoms";
+import { authClient } from "@/lib/auth-client";
+import type { FeedbackStatus } from "@/lib/constants";
+import type { Schema } from "@/schema";
 
 /**
  * Hook for managing feedback filter state.

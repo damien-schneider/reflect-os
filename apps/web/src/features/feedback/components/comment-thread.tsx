@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
-import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { randID } from "@/rand";

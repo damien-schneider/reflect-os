@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ChevronUp, ExternalLink, GripVertical } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { RoadmapFeedbackItem } from "@/features/roadmap/components/roadmap-kanban";
+import { cn } from "@/lib/utils";
 
 type RoadmapItemCardProps = {
   item: RoadmapFeedbackItem;

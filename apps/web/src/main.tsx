@@ -16,6 +16,7 @@ const router = createRouter({ routeTree });
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
+  // biome-ignore lint/style/useConsistentTypeDefinitions: interface is required for module augmentation
   interface Register {
     router: typeof router;
   }

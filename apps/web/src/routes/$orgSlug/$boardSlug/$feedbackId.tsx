@@ -2,14 +2,14 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Lock, Pin } from "lucide-react";
-import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
-import { AddToRoadmap } from "@/features/roadmap/components/add-to-roadmap";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { CommentThread } from "@/features/feedback/components/comment-thread";
 import { StatusBadge } from "@/features/feedback/components/status-badge";
 import { TagSelector } from "@/features/feedback/components/tag-selector";
 import { VoteButton } from "@/features/feedback/components/vote-button";
+import { AddToRoadmap } from "@/features/roadmap/components/add-to-roadmap";
 import { authClient } from "@/lib/auth-client";
 import type { Schema } from "@/schema";
 

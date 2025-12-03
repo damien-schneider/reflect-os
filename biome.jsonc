@@ -1,6 +1,15 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/core", "ultracite/react"],
+  "files": {
+    "includes": [
+      "**/*",
+      "!bun.lock",
+      "!sst.config.ts",
+      "!.sst",
+      "!**/routeTree.gen.ts"
+    ]
+  },
   "linter": {
     "rules": {
       "nursery": {
@@ -9,6 +18,38 @@
         // - JSX prop expressions (values, not children)
         // - String/number expressions that are safe to render
         "noLeakedRender": "off"
+      },
+      "performance": {
+        // Barrel files are intentionally used for re-exporting schema types
+        "noBarrelFile": "off"
+      },
+      "complexity": {
+        // Allow higher complexity for route components that handle many states
+        "noExcessiveCognitiveComplexity": "off"
+      },
+      "suspicious": {
+        // confirm() is used for simple confirmation dialogs
+        "noAlert": "off"
+      },
+      "style": {
+        // Nested ternaries are readable for simple conditions like button text
+        "noNestedTernary": "off",
+        // TanStack Router generates files with specific naming convention
+        "useFilenamingConvention": "off"
+      },
+      "security": {
+        // dangerouslySetInnerHTML is used intentionally for user-provided CSS
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        // These are too strict for interactive UI components
+        "noNoninteractiveElementInteractions": "off",
+        "useKeyWithClickEvents": "off",
+        "noStaticElementInteractions": "off"
+      },
+      "correctness": {
+        // Image sizing is handled by CSS classes
+        "useImageSize": "off"
       }
     }
   }

@@ -12,14 +12,14 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useZero } from "@rocicorp/zero/react";
 import { useMemo, useState } from "react";
+import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
+import { RoadmapLaneColumn } from "@/features/roadmap/components/roadmap-lane";
 import {
   LANE_CONFIG,
   ROADMAP_LANES,
   type RoadmapLaneWithBacklog,
 } from "@/lib/constants";
 import type { Schema, Tag } from "@/schema";
-import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
-import { RoadmapLaneColumn } from "@/features/roadmap/components/roadmap-lane";
 
 // Feedback item with roadmap fields
 export type RoadmapFeedbackItem = {

@@ -111,10 +111,12 @@ function AdminSettings() {
                 <img
                   alt="Logo preview"
                   className="max-h-8 max-w-8 object-contain"
+                  height={32}
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = "none";
                   }}
                   src={logo}
+                  width={32}
                 />
               </div>
             )}

@@ -4,10 +4,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CheckCircle } from "lucide-react";
+import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
+import type {
+  LaneConfig,
+  RoadmapFeedbackItem,
+} from "@/features/roadmap/components/roadmap-kanban";
 import { LANE_CONFIG, type RoadmapLaneWithBacklog } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
-import type { LaneConfig, RoadmapFeedbackItem } from "@/features/roadmap/components/roadmap-kanban";
 
 type RoadmapLaneColumnProps = {
   lane: RoadmapLaneWithBacklog | string;

@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { nanoid } from "nanoid";
 import postgres from "postgres";
+// biome-ignore lint/performance/noNamespaceImport: Schema namespace is used extensively for table references
 import * as schema from "./schema";
 
 // Load environment variables from root .env

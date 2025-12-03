@@ -433,12 +433,13 @@ function ReleaseDetailPage() {
             />
           </div>
         ) : (
-          <h1
-            className="-mx-2 cursor-text rounded px-2 py-1 font-bold text-3xl transition-colors hover:bg-accent/50"
+          <button
+            className="-mx-2 cursor-text rounded px-2 py-1 text-left font-bold text-3xl transition-colors hover:bg-accent/50"
             onClick={() => setIsEditingTitle(true)}
+            type="button"
           >
             {title || "Untitled Release"}
-          </h1>
+          </button>
         )}
 
         {/* Description - Markdown editor */}

@@ -9,7 +9,6 @@ import {
   type ExpressionBuilder,
 } from "@rocicorp/zero";
 
-// Re-export native schema and types
 export {
   type AdminNote,
   type Board,

@@ -1,6 +1,12 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
-import { CheckCircle, Map, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  CheckCircle,
+  Map as MapIcon,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -170,7 +176,7 @@ function DashboardTags() {
                 <div className="mt-1 flex flex-wrap gap-1">
                   {tag.isRoadmapLane && (
                     <Badge className="py-0 text-xs" variant="outline">
-                      <Map className="mr-1 h-3 w-3" />
+                      <MapIcon className="mr-1 h-3 w-3" />
                       Lane
                     </Badge>
                   )}

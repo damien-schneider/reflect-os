@@ -70,7 +70,9 @@ function UserProfile() {
             <img
               alt={user.name}
               className="h-full w-full object-cover"
+              height={80}
               src={user.avatar}
+              width={80}
             />
           ) : (
             <User className="h-10 w-10 text-muted-foreground" />

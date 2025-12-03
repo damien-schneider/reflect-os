@@ -2,7 +2,6 @@
 
 import { createContext, type ReactNode, use } from "react";
 import { useMediaQuery } from "@/components/hooks/use-media-query";
-import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogClose,
@@ -23,6 +22,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
 
 type BaseProps = {
   children: ReactNode;

@@ -25,11 +25,6 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
-import { randID } from "@/rand";
-import type { Board, Organization, Schema } from "@/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,7 +36,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { randID } from "@/rand";
+import type { Board, Organization, Schema } from "@/schema";
 
 type SideNavProps = {
   isOpen: boolean;

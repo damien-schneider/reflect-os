@@ -20,8 +20,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Board, Schema } from "@/schema";
 import { BoardEditDialog } from "@/features/board/components/board-edit-dialog";
+import type { Board, Schema } from "@/schema";
 
 type BoardActionsProps = {
   board: Board;

@@ -154,12 +154,13 @@ function MyAccount() {
       value={editNameValue}
     />
   ) : (
-    <span
+    <button
       className="cursor-pointer transition-colors hover:text-muted-foreground"
       onClick={() => setIsEditingName(true)}
+      type="button"
     >
       {selectedOrg?.name}
-    </span>
+    </button>
   );
 
   // Footer content (shared)
@@ -226,6 +227,7 @@ function MyAccount() {
             <button
               className="flex items-center gap-2 py-2 text-muted-foreground text-sm hover:text-foreground"
               onClick={undoDelete}
+              type="button"
             >
               <Undo2 className="h-4 w-4" />
               Undo delete
@@ -242,6 +244,7 @@ function MyAccount() {
                   className="group flex w-full items-center justify-between rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/50"
                   key={org.id}
                   onClick={() => openOrgDetail(org)}
+                  type="button"
                 >
                   <span className="font-medium">{org.name}</span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />

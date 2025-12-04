@@ -48,6 +48,13 @@ const organizationTable = table("organization")
     primaryColor: string().optional().from("primary_color"),
     customCss: string().optional().from("custom_css"),
     isPublic: boolean().optional().from("is_public"),
+    changelogSettings: json<{
+      autoVersioning?: boolean;
+      versionIncrement?: "patch" | "minor" | "major";
+      versionPrefix?: string;
+    }>()
+      .optional()
+      .from("changelog_settings"),
   })
   .primaryKey("id");
 

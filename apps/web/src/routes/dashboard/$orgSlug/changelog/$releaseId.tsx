@@ -13,6 +13,7 @@ import {
   FileText,
   Globe,
   MoreHorizontal,
+  Pencil,
   Plus,
   Trash2,
   X,
@@ -41,7 +42,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
+import {
+  useNextVersion,
+  type VersionIncrement,
+} from "@/hooks/use-next-version";
 import type { Organization, ReleaseItem, Schema } from "@/schema";
 
 export const Route = createFileRoute(
@@ -75,7 +81,6 @@ function ReleaseDetailPage() {
   const [version, setVersion] = useState("");
   const [description, setDescription] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingVersion, setIsEditingVersion] = useState(false);
 
   // Get selected feedback IDs from release items
   const releaseItems: ReleaseItem[] = Array.isArray(release?.releaseItems)
@@ -122,7 +127,6 @@ function ReleaseDetailPage() {
       version: version.trim() || null,
       updatedAt: Date.now(),
     });
-    setIsEditingVersion(false);
   };
 
   const saveDescription = (markdown: string) => {
@@ -339,53 +343,14 @@ function ReleaseDetailPage() {
         {/* Properties section - above title like Notion */}
         <div className="space-y-3">
           {/* Version badge - click to edit */}
-          <div className="flex items-center gap-2">
-            {isEditingVersion ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  autoFocus
-                  className="h-8 w-32 font-mono text-sm"
-                  onBlur={saveVersion}
-                  onChange={(e) => setVersion(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      saveVersion();
-                    }
-                    if (e.key === "Escape") {
-                      setVersion((release.version as string) ?? "");
-                      setIsEditingVersion(false);
-                    }
-                  }}
-                  placeholder="v1.0.0"
-                  value={version}
-                />
-                <Button onClick={saveVersion} size="sm" variant="ghost">
-                  <Check className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <Button
-                className="group flex items-center"
-                onClick={() => setIsEditingVersion(true)}
-              >
-                {version ? (
-                  <Badge
-                    className="cursor-pointer font-mono hover:bg-accent"
-                    variant="outline"
-                  >
-                    {version}
-                  </Badge>
-                ) : (
-                  <Badge
-                    className="cursor-pointer text-muted-foreground hover:bg-accent"
-                    variant="outline"
-                  >
-                    + Add version
-                  </Badge>
-                )}
-              </Button>
-            )}
-          </div>
+          {org ? (
+            <VersionEditor
+              onSave={saveVersion}
+              organizationId={org.id}
+              setVersion={setVersion}
+              version={version}
+            />
+          ) : null}
 
           {/* Completed Items - Property row */}
           {org ? (
@@ -439,6 +404,170 @@ function ReleaseDetailPage() {
         value={description}
       />
     </div>
+  );
+}
+
+// Version Editor Component with auto-versioning support
+type VersionEditorProps = {
+  organizationId: string;
+  version: string;
+  setVersion: (version: string) => void;
+  onSave: () => void;
+};
+
+function VersionEditor({
+  organizationId,
+  version,
+  setVersion,
+  onSave,
+}: VersionEditorProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedIncrement, setSelectedIncrement] =
+    useState<VersionIncrement>("patch");
+
+  const {
+    autoVersioningEnabled,
+    defaultIncrement,
+    getNextVersion,
+    latestVersionString,
+  } = useNextVersion(organizationId);
+
+  // Sync selected increment with default from settings
+  useEffect(() => {
+    setSelectedIncrement(defaultIncrement);
+  }, [defaultIncrement]);
+
+  const handleSave = () => {
+    onSave();
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+
+  const applyVersion = (newVersion: string) => {
+    setVersion(newVersion);
+    onSave();
+    setIsEditing(false);
+  };
+
+  // If already has a version, show it with edit option
+  if (version && !isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <Badge
+          className="cursor-pointer font-mono hover:bg-accent"
+          onClick={() => setIsEditing(true)}
+          variant="outline"
+        >
+          {version}
+        </Badge>
+        <Button
+          className="h-6 w-6 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
+          onClick={() => setIsEditing(true)}
+          size="icon"
+          variant="ghost"
+        >
+          <Pencil className="h-3 w-3" />
+        </Button>
+      </div>
+    );
+  }
+
+  // Editing mode or no version yet
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <Input
+          autoFocus
+          className="h-8 w-32 font-mono text-sm"
+          onBlur={handleSave}
+          onChange={(e) => setVersion(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSave();
+            }
+            if (e.key === "Escape") {
+              handleCancel();
+            }
+          }}
+          placeholder="v1.0.0"
+          value={version}
+        />
+        <Button onClick={handleSave} size="sm" variant="ghost">
+          <Check className="h-4 w-4" />
+        </Button>
+        <Button onClick={handleCancel} size="sm" variant="ghost">
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
+  // No version - show add version UI
+  // If auto-versioning is enabled, show quick version buttons
+  if (autoVersioningEnabled) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-sm">Version:</span>
+          <ToggleGroup
+            onValueChange={(value) => {
+              if (value) {
+                setSelectedIncrement(value as VersionIncrement);
+              }
+            }}
+            type="single"
+            value={selectedIncrement}
+          >
+            <ToggleGroupItem size="sm" value="patch">
+              Patch
+            </ToggleGroupItem>
+            <ToggleGroupItem size="sm" value="minor">
+              Minor
+            </ToggleGroupItem>
+            <ToggleGroupItem size="sm" value="major">
+              Major
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <Button
+            className="gap-1.5 font-mono"
+            onClick={() => applyVersion(getNextVersion(selectedIncrement))}
+            size="sm"
+            variant="default"
+          >
+            <Check className="h-3 w-3" />
+            {getNextVersion(selectedIncrement)}
+          </Button>
+          <Button onClick={() => setIsEditing(true)} size="sm" variant="ghost">
+            <Pencil className="mr-1 h-3 w-3" />
+            Custom
+          </Button>
+        </div>
+        {latestVersionString && (
+          <p className="text-muted-foreground text-xs">
+            Latest: <span className="font-mono">{latestVersionString}</span>
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // Auto-versioning disabled - show simple add button
+  return (
+    <Button
+      className="group flex items-center"
+      onClick={() => setIsEditing(true)}
+      variant="ghost"
+    >
+      <Badge
+        className="cursor-pointer text-muted-foreground hover:bg-accent"
+        variant="outline"
+      >
+        + Add version
+      </Badge>
+    </Button>
   );
 }
 

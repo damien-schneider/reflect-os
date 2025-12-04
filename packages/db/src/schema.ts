@@ -118,6 +118,11 @@ export const organization = pgTable("organization", {
   primaryColor: text("primary_color"),
   customCss: text("custom_css"),
   isPublic: boolean("is_public").notNull().default(false),
+  changelogSettings: jsonb("changelog_settings").$type<{
+    autoVersioning?: boolean;
+    versionIncrement?: "patch" | "minor" | "major";
+    versionPrefix?: string;
+  }>(),
 });
 
 export const member = pgTable(

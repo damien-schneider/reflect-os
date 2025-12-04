@@ -124,7 +124,7 @@ function DashboardOrgLayout() {
       {/* Inject custom CSS if available */}
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
 
-      <div className="container mx-auto max-w-6xl p-4 md:p-6">
+      <div className="p-4 md:p-6">
         <Outlet />
       </div>
     </>

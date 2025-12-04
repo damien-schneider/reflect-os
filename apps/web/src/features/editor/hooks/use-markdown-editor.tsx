@@ -26,15 +26,14 @@ import { LinkPlugin } from "@platejs/link/react";
 import { toggleList } from "@platejs/list";
 import { ListPlugin } from "@platejs/list/react";
 import { deserializeMd, MarkdownPlugin, serializeMd } from "@platejs/markdown";
-import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { SlashInputPlugin, SlashPlugin } from "@platejs/slash-command/react";
 import { all, createLowlight } from "lowlight";
 import type { Value } from "platejs";
 import { KEYS } from "platejs";
 import { ParagraphPlugin, usePlateEditor } from "platejs/react";
 import { useMemo } from "react";
+import { BlockSelectionKit } from "@/components/editor/plugins/block-selection-kit";
 import { BlockDraggable } from "@/components/ui/block-draggable";
-import type { BlockSelection } from "@/components/ui/block-selection";
 import { BlockquoteElement } from "@/components/ui/blockquote-node";
 import {
   CodeBlockElement,
@@ -455,14 +454,7 @@ export function useMarkdownEditor({
       ListPlugin,
 
       // Block selection (required for DnD) with visual overlay
-      BlockSelectionPlugin.extend({
-        render: {
-          belowRootNodes: (props) => {
-            if (!props.className?.includes("slate-selectable")) return null;
-            return <BlockSelection {...props} />;
-          },
-        },
-      }),
+      ...BlockSelectionKit,
 
       // Drag and drop with Notion-style drag handles
       ...(enableDnd

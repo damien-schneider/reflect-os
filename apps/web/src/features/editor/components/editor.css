@@ -1,30 +1,23 @@
-/* Tiptap Markdown Editor Styles */
+/* Plate.js Markdown Editor Styles */
 
 /* Base editor styles */
-.ProseMirror {
+[data-slate-editor] {
   outline: none;
   min-height: 180px;
 }
 
 /* Placeholder */
-.ProseMirror p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  float: left;
+[data-slate-placeholder] {
   color: hsl(var(--muted-foreground)) !important;
   opacity: 0.6;
   pointer-events: none;
-  height: 0;
-}
-
-/* Ensure placeholder color isn't overridden by prose */
-.prose .ProseMirror p.is-editor-empty:first-child::before,
-.prose-sm .ProseMirror p.is-editor-empty:first-child::before {
-  color: hsl(var(--muted-foreground)) !important;
-  opacity: 0.6;
+  position: absolute;
+  top: 0;
+  width: 100%;
 }
 
 /* Headings */
-.ProseMirror h1 {
+[data-slate-editor] h1 {
   font-size: 2rem;
   font-weight: 700;
   line-height: 1.2;
@@ -32,7 +25,7 @@
   margin-bottom: 0.5rem;
 }
 
-.ProseMirror h2 {
+[data-slate-editor] h2 {
   font-size: 1.5rem;
   font-weight: 600;
   line-height: 1.3;
@@ -40,7 +33,7 @@
   margin-bottom: 0.5rem;
 }
 
-.ProseMirror h3 {
+[data-slate-editor] h3 {
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.4;
@@ -48,9 +41,9 @@
   margin-bottom: 0.5rem;
 }
 
-.ProseMirror h4,
-.ProseMirror h5,
-.ProseMirror h6 {
+[data-slate-editor] h4,
+[data-slate-editor] h5,
+[data-slate-editor] h6 {
   font-size: 1rem;
   font-weight: 600;
   margin-top: 0.75rem;
@@ -58,82 +51,47 @@
 }
 
 /* Paragraphs */
-.ProseMirror p {
+[data-slate-editor] p {
   margin-bottom: 0.5rem;
 }
 
 /* Links */
-.ProseMirror a {
+[data-slate-editor] a {
   color: hsl(var(--primary));
   text-decoration: underline;
   text-underline-offset: 4px;
   cursor: pointer;
 }
 
-.ProseMirror a:hover {
+[data-slate-editor] a:hover {
   color: hsl(var(--primary) / 0.8);
 }
 
 /* Lists */
-.ProseMirror ul,
-.ProseMirror ol {
+[data-slate-editor] ul,
+[data-slate-editor] ol {
   padding-left: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
-.ProseMirror ul {
+[data-slate-editor] ul {
   list-style-type: disc;
 }
 
-.ProseMirror ol {
+[data-slate-editor] ol {
   list-style-type: decimal;
 }
 
-.ProseMirror li {
+[data-slate-editor] li {
   margin-bottom: 0.25rem;
 }
 
-.ProseMirror li > p {
+[data-slate-editor] li > p {
   margin-bottom: 0;
 }
 
-/* Task lists */
-.ProseMirror ul[data-type="taskList"] {
-  list-style: none;
-  padding-left: 0;
-}
-
-.ProseMirror ul[data-type="taskList"] li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.ProseMirror ul[data-type="taskList"] li > label {
-  flex: 0 0 auto;
-  margin-top: 0.25rem;
-  user-select: none;
-}
-
-.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"] {
-  width: 1rem;
-  height: 1rem;
-  cursor: pointer;
-  accent-color: hsl(var(--primary));
-}
-
-.ProseMirror ul[data-type="taskList"] li > div {
-  flex: 1 1 auto;
-}
-
-.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
-  text-decoration: line-through;
-  color: hsl(var(--muted-foreground));
-}
-
 /* Blockquote */
-.ProseMirror blockquote {
+[data-slate-editor] blockquote {
   border-left: 3px solid hsl(var(--border));
   padding-left: 1rem;
   margin-left: 0;
@@ -143,7 +101,7 @@
 }
 
 /* Code */
-.ProseMirror code {
+[data-slate-editor] code {
   background-color: hsl(var(--muted));
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
@@ -153,7 +111,7 @@
   font-size: 0.875em;
 }
 
-.ProseMirror pre {
+[data-slate-editor] pre {
   background-color: hsl(var(--muted));
   padding: 1rem;
   border-radius: 0.5rem;
@@ -161,7 +119,7 @@
   margin-bottom: 0.5rem;
 }
 
-.ProseMirror pre code {
+[data-slate-editor] pre code {
   background: none;
   padding: 0;
   border-radius: 0;
@@ -170,168 +128,206 @@
 }
 
 /* Horizontal rule */
-.ProseMirror hr {
+[data-slate-editor] hr {
   border: none;
   border-top: 1px solid hsl(var(--border));
   margin: 1.5rem 0;
 }
 
 /* Images */
-.ProseMirror img {
+[data-slate-editor] img {
   max-width: 100%;
   height: auto;
   border-radius: 0.5rem;
 }
 
-/* Selection */
-.ProseMirror ::selection {
-  background-color: hsl(var(--primary) / 0.2);
+/* Selection - make it highly visible */
+[data-slate-editor] ::selection {
+  background-color: hsl(var(--primary) / 0.3);
 }
 
-/* Focus state for task list checkboxes */
-.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"]:focus {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+[data-slate-editor] *::selection {
+  background-color: hsl(var(--primary) / 0.3);
 }
 
-/* Code block with syntax highlighting */
-.ProseMirror pre code .hljs-comment,
-.ProseMirror pre code .hljs-quote {
+/* Plate.js specific selection styles */
+[data-slate-editor] [data-slate-leaf][data-slate-selection] {
+  background-color: hsl(var(--primary) / 0.3) !important;
+}
+
+/* Ensure selection is visible even when editor loses focus */
+[data-slate-editor]:not(:focus-within) ::selection {
+  background-color: hsl(var(--muted-foreground) / 0.2);
+}
+
+/* Selected block highlight */
+[data-slate-node="element"][data-slate-selected="true"] {
+  background-color: hsl(var(--primary) / 0.1);
+  border-radius: 0.25rem;
+}
+
+/* Dark mode selection adjustments */
+.dark [data-slate-editor] ::selection {
+  background-color: hsl(var(--primary) / 0.4);
+}
+
+.dark [data-slate-editor] *::selection {
+  background-color: hsl(var(--primary) / 0.4);
+}
+
+.dark [data-slate-editor] [data-slate-leaf][data-slate-selection] {
+  background-color: hsl(var(--primary) / 0.4) !important;
+}
+
+/* Code block with syntax highlighting - lowlight classes */
+[data-slate-editor] pre code .hljs-comment,
+[data-slate-editor] pre code .hljs-quote {
   color: #6a737d;
 }
 
-.ProseMirror pre code .hljs-keyword,
-.ProseMirror pre code .hljs-selector-tag,
-.ProseMirror pre code .hljs-addition {
+[data-slate-editor] pre code .hljs-keyword,
+[data-slate-editor] pre code .hljs-selector-tag,
+[data-slate-editor] pre code .hljs-addition {
   color: #d73a49;
 }
 
-.ProseMirror pre code .hljs-number,
-.ProseMirror pre code .hljs-string,
-.ProseMirror pre code .hljs-meta .hljs-meta-string,
-.ProseMirror pre code .hljs-literal,
-.ProseMirror pre code .hljs-doctag,
-.ProseMirror pre code .hljs-regexp {
+[data-slate-editor] pre code .hljs-number,
+[data-slate-editor] pre code .hljs-string,
+[data-slate-editor] pre code .hljs-meta .hljs-meta-string,
+[data-slate-editor] pre code .hljs-literal,
+[data-slate-editor] pre code .hljs-doctag,
+[data-slate-editor] pre code .hljs-regexp {
   color: #032f62;
 }
 
-.ProseMirror pre code .hljs-title,
-.ProseMirror pre code .hljs-section,
-.ProseMirror pre code .hljs-name,
-.ProseMirror pre code .hljs-selector-id,
-.ProseMirror pre code .hljs-selector-class {
+[data-slate-editor] pre code .hljs-title,
+[data-slate-editor] pre code .hljs-section,
+[data-slate-editor] pre code .hljs-name,
+[data-slate-editor] pre code .hljs-selector-id,
+[data-slate-editor] pre code .hljs-selector-class {
   color: #6f42c1;
 }
 
-.ProseMirror pre code .hljs-attribute,
-.ProseMirror pre code .hljs-attr,
-.ProseMirror pre code .hljs-variable,
-.ProseMirror pre code .hljs-template-variable,
-.ProseMirror pre code .hljs-class .hljs-title,
-.ProseMirror pre code .hljs-type {
+[data-slate-editor] pre code .hljs-attribute,
+[data-slate-editor] pre code .hljs-attr,
+[data-slate-editor] pre code .hljs-variable,
+[data-slate-editor] pre code .hljs-template-variable,
+[data-slate-editor] pre code .hljs-class .hljs-title,
+[data-slate-editor] pre code .hljs-type {
   color: #005cc5;
 }
 
-.ProseMirror pre code .hljs-symbol,
-.ProseMirror pre code .hljs-bullet,
-.ProseMirror pre code .hljs-subst,
-.ProseMirror pre code .hljs-meta,
-.ProseMirror pre code .hljs-meta .hljs-keyword,
-.ProseMirror pre code .hljs-selector-attr,
-.ProseMirror pre code .hljs-selector-pseudo,
-.ProseMirror pre code .hljs-link {
+[data-slate-editor] pre code .hljs-symbol,
+[data-slate-editor] pre code .hljs-bullet,
+[data-slate-editor] pre code .hljs-subst,
+[data-slate-editor] pre code .hljs-meta,
+[data-slate-editor] pre code .hljs-meta .hljs-keyword,
+[data-slate-editor] pre code .hljs-selector-attr,
+[data-slate-editor] pre code .hljs-selector-pseudo,
+[data-slate-editor] pre code .hljs-link {
   color: #e36209;
 }
 
-.ProseMirror pre code .hljs-built_in,
-.ProseMirror pre code .hljs-deletion {
+[data-slate-editor] pre code .hljs-built_in,
+[data-slate-editor] pre code .hljs-deletion {
   color: #c9510c;
 }
 
 /* Dark mode syntax highlighting */
-.dark .ProseMirror pre code .hljs-comment,
-.dark .ProseMirror pre code .hljs-quote {
+.dark [data-slate-editor] pre code .hljs-comment,
+.dark [data-slate-editor] pre code .hljs-quote {
   color: #8b949e;
 }
 
-.dark .ProseMirror pre code .hljs-keyword,
-.dark .ProseMirror pre code .hljs-selector-tag,
-.dark .ProseMirror pre code .hljs-addition {
+.dark [data-slate-editor] pre code .hljs-keyword,
+.dark [data-slate-editor] pre code .hljs-selector-tag,
+.dark [data-slate-editor] pre code .hljs-addition {
   color: #ff7b72;
 }
 
-.dark .ProseMirror pre code .hljs-number,
-.dark .ProseMirror pre code .hljs-string,
-.dark .ProseMirror pre code .hljs-meta .hljs-meta-string,
-.dark .ProseMirror pre code .hljs-literal,
-.dark .ProseMirror pre code .hljs-doctag,
-.dark .ProseMirror pre code .hljs-regexp {
+.dark [data-slate-editor] pre code .hljs-number,
+.dark [data-slate-editor] pre code .hljs-string,
+.dark [data-slate-editor] pre code .hljs-meta .hljs-meta-string,
+.dark [data-slate-editor] pre code .hljs-literal,
+.dark [data-slate-editor] pre code .hljs-doctag,
+.dark [data-slate-editor] pre code .hljs-regexp {
   color: #a5d6ff;
 }
 
-.dark .ProseMirror pre code .hljs-title,
-.dark .ProseMirror pre code .hljs-section,
-.dark .ProseMirror pre code .hljs-name,
-.dark .ProseMirror pre code .hljs-selector-id,
-.dark .ProseMirror pre code .hljs-selector-class {
+.dark [data-slate-editor] pre code .hljs-title,
+.dark [data-slate-editor] pre code .hljs-section,
+.dark [data-slate-editor] pre code .hljs-name,
+.dark [data-slate-editor] pre code .hljs-selector-id,
+.dark [data-slate-editor] pre code .hljs-selector-class {
   color: #d2a8ff;
 }
 
-.dark .ProseMirror pre code .hljs-attribute,
-.dark .ProseMirror pre code .hljs-attr,
-.dark .ProseMirror pre code .hljs-variable,
-.dark .ProseMirror pre code .hljs-template-variable,
-.dark .ProseMirror pre code .hljs-class .hljs-title,
-.dark .ProseMirror pre code .hljs-type {
+.dark [data-slate-editor] pre code .hljs-attribute,
+.dark [data-slate-editor] pre code .hljs-attr,
+.dark [data-slate-editor] pre code .hljs-variable,
+.dark [data-slate-editor] pre code .hljs-template-variable,
+.dark [data-slate-editor] pre code .hljs-class .hljs-title,
+.dark [data-slate-editor] pre code .hljs-type {
   color: #79c0ff;
 }
 
-.dark .ProseMirror pre code .hljs-symbol,
-.dark .ProseMirror pre code .hljs-bullet,
-.dark .ProseMirror pre code .hljs-subst,
-.dark .ProseMirror pre code .hljs-meta,
-.dark .ProseMirror pre code .hljs-meta .hljs-keyword,
-.dark .ProseMirror pre code .hljs-selector-attr,
-.dark .ProseMirror pre code .hljs-selector-pseudo,
-.dark .ProseMirror pre code .hljs-link {
+.dark [data-slate-editor] pre code .hljs-symbol,
+.dark [data-slate-editor] pre code .hljs-bullet,
+.dark [data-slate-editor] pre code .hljs-subst,
+.dark [data-slate-editor] pre code .hljs-meta,
+.dark [data-slate-editor] pre code .hljs-meta .hljs-keyword,
+.dark [data-slate-editor] pre code .hljs-selector-attr,
+.dark [data-slate-editor] pre code .hljs-selector-pseudo,
+.dark [data-slate-editor] pre code .hljs-link {
   color: #ffa657;
 }
 
-.dark .ProseMirror pre code .hljs-built_in,
-.dark .ProseMirror pre code .hljs-deletion {
+.dark [data-slate-editor] pre code .hljs-built_in,
+.dark [data-slate-editor] pre code .hljs-deletion {
   color: #ffa198;
 }
 
-/* Drag handle styles */
-.drag-handle {
-  position: absolute;
-  left: -24px;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+/* Slash input element */
+[data-slate-node="element"][data-slate-type="slash_input"] {
+  display: inline;
+  position: relative;
 }
 
-.drag-handle:hover {
+/* Notion-style drag handles - show on hover */
+.slate-draggable {
+  position: relative;
+}
+
+.slate-draggable .slate-dragHandle {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.slate-draggable:hover .slate-dragHandle {
   opacity: 1;
 }
 
-.drag-handle:active {
-  cursor: grabbing;
+/* Drop line indicator */
+.slate-dropLine {
+  background-color: hsl(var(--primary));
+  height: 2px;
+  position: absolute;
+  left: 0;
+  right: 0;
 }
 
-/* Show drag handle when hovering over a block */
-.ProseMirror > *:hover ~ .drag-handle,
-.ProseMirror > *:hover .drag-handle {
+/* Block selection styles */
+[data-slate-node="element"][data-block-selection="true"] {
+  background-color: hsl(var(--primary) / 0.1);
+  border-radius: 0.25rem;
+}
+
+/* Dragging state */
+.slate-draggable.dragging {
   opacity: 0.5;
 }
 
-/* Node range selection styles */
-.ProseMirror .node-range-selection {
-  background-color: hsl(var(--primary) / 0.1);
-  border-radius: 0.25rem;
+/* Notion-style placeholder for empty blocks */
+[data-slate-editor] [data-slate-placeholder] {
+  color: hsl(var(--muted-foreground) / 0.6) !important;
 }

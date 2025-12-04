@@ -449,8 +449,6 @@ function ReleaseDetailPage() {
             editorClassName="border-none shadow-none px-0"
             onChange={saveDescription}
             placeholder="Write your release notes here... Press '/' for commands"
-            showDragHandle={true}
-            showSlashMenu={true}
             showToolbar={true}
             value={description}
           />

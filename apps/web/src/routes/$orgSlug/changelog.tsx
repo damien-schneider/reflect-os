@@ -111,8 +111,6 @@ function PublicChangelog() {
                       <MarkdownEditor
                         editable={false}
                         editorClassName="border-none shadow-none px-0 min-h-0 [&_.ProseMirror]:min-h-0"
-                        showDragHandle={false}
-                        showSlashMenu={false}
                         showToolbar={false}
                         value={release.description}
                       />

@@ -5,13 +5,12 @@ import {
   useParams,
 } from "@tanstack/react-router";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { randID } from "@/rand";
 import type { Schema } from "@/schema";
 
@@ -31,6 +30,7 @@ function NewFeedback() {
   const z = useZero<Schema>();
   const { data: session } = authClient.useSession();
   const { openAuthDialog } = useAuthDialog();
+  const titleRef = useRef<HTMLTextAreaElement>(null);
 
   // Get organization and board
   const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
@@ -49,12 +49,33 @@ function NewFeedback() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Auto-resize title textarea
+  const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value.slice(0, 200);
+    setTitle(value);
+    // Auto-resize
+    if (titleRef.current) {
+      titleRef.current.style.height = "auto";
+      titleRef.current.style.height = `${titleRef.current.scrollHeight}px`;
+    }
+  };
+
+  // Handle title keydown - Enter moves to description
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      // Focus on the description editor would require a ref - for now just blur
+      titleRef.current?.blur();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (!title.trim()) {
       setError("Please enter a title");
+      titleRef.current?.focus();
       return;
     }
 
@@ -158,10 +179,10 @@ function NewFeedback() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="">
       {/* Back link */}
       <Button
-        className="gap-2"
+        className="mb-6 gap-2"
         onClick={() =>
           navigate({
             to: "/$orgSlug/$boardSlug",
@@ -174,58 +195,60 @@ function NewFeedback() {
         Back to {board?.name ?? "Board"}
       </Button>
 
-      {/* Header */}
-      <div>
-        <h1 className="font-bold text-2xl">Submit Feedback</h1>
-        <p className="mt-1 text-muted-foreground">
-          Share your ideas, suggestions, or report issues
-        </p>
-      </div>
-
-      {/* Form */}
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      {/* Notion-style form */}
+      <form onSubmit={handleSubmit}>
         {error && (
-          <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
+          <div className="mb-4 rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
             {error}
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
-          <Input
+        {/* Notion-style title input */}
+        <div className="mb-2">
+          <textarea
+            className={cn(
+              "w-full resize-none overflow-hidden bg-transparent",
+              "font-bold text-4xl leading-tight",
+              "placeholder:text-muted-foreground/50",
+              "border-none outline-none focus:outline-none focus:ring-0",
+              "min-h-[1.2em]"
+            )}
             disabled={isSubmitting}
-            id="title"
             maxLength={200}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Brief summary of your feedback"
+            onChange={handleTitleChange}
+            onKeyDown={handleTitleKeyDown}
+            placeholder="Untitled"
+            ref={titleRef}
+            rows={1}
             value={title}
           />
-          <p className="text-muted-foreground text-xs">
+          <p className="mt-1 text-muted-foreground text-xs">
             {title.length}/200 characters
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+        {/* Notion-style description editor */}
+        <div className="min-h-[300px]">
           {isSubmitting ? (
-            <div className="min-h-[200px] w-full rounded-lg border border-input bg-muted/50 px-4 py-3">
+            <div className="min-h-[200px] rounded-lg bg-muted/30 p-4">
               <p className="text-muted-foreground text-sm">
                 {description || "No description provided"}
               </p>
             </div>
           ) : (
             <MarkdownEditor
-              className="min-h-[200px]"
               editable
+              editorClassName="border-none shadow-none px-0 py-0 min-h-[200px] bg-transparent"
+              enableDnd
               onChange={setDescription}
-              placeholder="Provide more details about your feedback... Press '/' for commands"
-              showDragHandle={false}
+              placeholder="Add a description... Press '/' for commands"
               value={description}
             />
           )}
         </div>
 
-        <div className="flex justify-end gap-3">
+        {/* Submit buttons - sticky at bottom */}
+        <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-background py-4">
           <Button
             disabled={isSubmitting}
             onClick={() =>
@@ -239,7 +262,7 @@ function NewFeedback() {
           >
             Cancel
           </Button>
-          <Button disabled={isSubmitting} type="submit">
+          <Button disabled={isSubmitting || !title.trim()} type="submit">
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

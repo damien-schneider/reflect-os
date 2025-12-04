@@ -79,7 +79,7 @@ function FeedbackDetail() {
     feedback.feedbackTags?.map((ft) => ft.tag?.id ?? "").filter(Boolean) ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       {/* Back link */}
       <Button asChild className="gap-2" variant="ghost">
         <Link params={{ orgSlug, boardSlug }} to="/$orgSlug/$boardSlug">
@@ -172,8 +172,6 @@ function FeedbackDetail() {
             <MarkdownEditor
               editable={false}
               editorClassName="border-none shadow-none px-0 min-h-0 [&_.ProseMirror]:min-h-0"
-              showDragHandle={false}
-              showSlashMenu={false}
               showToolbar={false}
               value={feedback.description}
             />

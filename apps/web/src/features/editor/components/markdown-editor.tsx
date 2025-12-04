@@ -1,16 +1,28 @@
 "use client";
 
-import { EditorContent } from "@tiptap/react";
-import { common, createLowlight } from "lowlight";
+import { serializeMd } from "@platejs/markdown";
+import {
+  BoldIcon,
+  Code2Icon,
+  ItalicIcon,
+  StrikethroughIcon,
+} from "lucide-react";
+import { KEYS } from "platejs";
+import { Plate, PlateContent } from "platejs/react";
 import { useCallback, useRef, useSyncExternalStore } from "react";
-import { DragHandle } from "@/features/editor/components/drag-handle";
-import { SlashMenu } from "@/features/editor/components/slash-menu";
-import { EditorToolbar } from "@/features/editor/components/toolbar";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { FloatingToolbar } from "@/components/ui/floating-toolbar";
+import {
+  RedoToolbarButton,
+  UndoToolbarButton,
+} from "@/components/ui/history-toolbar-button";
+import { LinkToolbarButton } from "@/components/ui/link-toolbar-button";
+import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button";
+import { ToolbarGroup } from "@/components/ui/toolbar";
 import { useMarkdownEditor } from "@/features/editor/hooks/use-markdown-editor";
 import { cn } from "@/lib/utils";
 import "@/features/editor/components/editor.css";
-
-const lowlight = createLowlight(common);
 
 type MarkdownEditorProps = {
   value?: string;
@@ -21,8 +33,7 @@ type MarkdownEditorProps = {
   autoFocus?: boolean;
   editable?: boolean;
   showToolbar?: boolean;
-  showSlashMenu?: boolean;
-  showDragHandle?: boolean;
+  enableDnd?: boolean;
 };
 
 export function MarkdownEditor({
@@ -34,8 +45,7 @@ export function MarkdownEditor({
   autoFocus = false,
   editable = true,
   showToolbar = true,
-  showSlashMenu = true,
-  showDragHandle = true,
+  enableDnd = false,
 }: MarkdownEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMountedRef = useRef(true);
@@ -68,13 +78,10 @@ export function MarkdownEditor({
     placeholder,
     autoFocus,
     editable,
-    lowlight,
+    enableDnd,
   });
 
-  // Check if editor is destroyed to avoid rendering children that use it
-  const isEditorDestroyed = editor?.isDestroyed ?? true;
-
-  if (!editor || isEditorDestroyed) {
+  if (!editor) {
     return (
       <div
         className={cn("h-64 animate-pulse rounded-lg bg-muted", className)}
@@ -82,37 +89,65 @@ export function MarkdownEditor({
     );
   }
 
-  return (
+  const editorContent = (
     <div className={cn("relative flex flex-col", className)} ref={containerRef}>
-      <div className="relative">
-        {showDragHandle && editable && !isEditorDestroyed && (
-          <DragHandle editor={editor} />
-        )}
+      <Plate
+        editor={editor}
+        onChange={({ editor: ed }) => {
+          const markdown = serializeMd(ed);
+          handleUpdate(markdown);
+        }}
+      >
+        <div className="relative **:selection:bg-blue-500/35! dark:**:selection:bg-blue-400/45!">
+          <PlateContent
+            className={cn(
+              "prose prose-sm dark:prose-invert max-w-none",
+              "min-h-[200px] w-full rounded-lg border border-input bg-background px-4 py-3",
+              "*:mx-auto *:max-w-3xl focus:outline-none",
+              "",
+              editorClassName
+            )}
+            placeholder={placeholder}
+          />
 
-        <EditorContent
-          className={cn(
-            "prose prose-sm dark:prose-invert max-w-none",
-            "min-h-[200px] w-full rounded-lg border border-input bg-background px-4 py-3",
-            "[&_.ProseMirror]:min-h-[180px] [&_.ProseMirror]:outline-none",
-            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none",
-            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left",
-            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0",
-            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground",
-            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]",
-            editorClassName
+          {/* Floating toolbar appears when text is selected */}
+          {showToolbar && editable && (
+            <FloatingToolbar>
+              <ToolbarGroup>
+                <UndoToolbarButton />
+                <RedoToolbarButton />
+              </ToolbarGroup>
+              <ToolbarGroup>
+                <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘B)">
+                  <BoldIcon />
+                </MarkToolbarButton>
+                <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘I)">
+                  <ItalicIcon />
+                </MarkToolbarButton>
+                <MarkToolbarButton
+                  nodeType={KEYS.strikethrough}
+                  tooltip="Strikethrough"
+                >
+                  <StrikethroughIcon />
+                </MarkToolbarButton>
+                <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘E)">
+                  <Code2Icon />
+                </MarkToolbarButton>
+              </ToolbarGroup>
+              <ToolbarGroup>
+                <LinkToolbarButton />
+              </ToolbarGroup>
+            </FloatingToolbar>
           )}
-          editor={editor}
-        />
-
-        {/* BubbleMenu appears when text is selected */}
-        {showToolbar && editable && !isEditorDestroyed && (
-          <EditorToolbar editor={editor} />
-        )}
-
-        {showSlashMenu && editable && !isEditorDestroyed && (
-          <SlashMenu editor={editor} />
-        )}
-      </div>
+        </div>
+      </Plate>
     </div>
   );
+
+  // Wrap with DndProvider when drag and drop is enabled
+  if (enableDnd) {
+    return <DndProvider backend={HTML5Backend}>{editorContent}</DndProvider>;
+  }
+
+  return editorContent;
 }

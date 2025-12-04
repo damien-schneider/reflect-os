@@ -1,7 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  AlertCircle,
-  CheckCircle2,
   ChevronRight,
   Key,
   Loader2,
@@ -30,12 +28,12 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PasswordChangeForm } from "@/features/account/components/password-change-form";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   type Organization,
@@ -61,78 +59,9 @@ function MyAccount() {
 
   // Password change state
   const [showPasswordChange, setShowPasswordChange] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
-
-  const resetPasswordForm = () => {
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setPasswordError(null);
-    setPasswordSuccess(null);
-  };
 
   const closePasswordChange = () => {
     setShowPasswordChange(false);
-    resetPasswordForm();
-  };
-
-  const handlePasswordChange = async () => {
-    setPasswordError(null);
-    setPasswordSuccess(null);
-
-    // Validation
-    if (!currentPassword.trim()) {
-      setPasswordError("Enter your current password");
-      return;
-    }
-    if (!newPassword.trim()) {
-      setPasswordError("Enter a new password");
-      return;
-    }
-    if (newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords don't match");
-      return;
-    }
-
-    setPasswordLoading(true);
-
-    try {
-      await authClient.changePassword(
-        {
-          currentPassword,
-          newPassword,
-          revokeOtherSessions: true,
-        },
-        {
-          onSuccess: () => {
-            setPasswordSuccess("Password changed successfully");
-            setPasswordLoading(false);
-            setTimeout(() => {
-              closePasswordChange();
-            }, 1500);
-          },
-          onError: (ctx) => {
-            setPasswordError(
-              ctx.error.message ||
-                "Could not change password. Check your current password."
-            );
-            setPasswordLoading(false);
-          },
-        }
-      );
-    } catch {
-      setPasswordError("Could not change password. Please try again.");
-      setPasswordLoading(false);
-    }
   };
 
   // Organization management
@@ -471,90 +400,15 @@ function MyAccount() {
             <DrawerHeader>
               <DrawerTitle>Change Password</DrawerTitle>
             </DrawerHeader>
-            <div className="space-y-4 px-4 py-2">
-              {passwordError && (
-                <div className="flex items-start gap-2 text-destructive text-sm">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{passwordError}</span>
-                </div>
-              )}
-              {passwordSuccess && (
-                <div className="flex items-center gap-2 text-green-600 text-sm">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span>{passwordSuccess}</span>
-                </div>
-              )}
-              <div className="space-y-1.5">
-                <Label htmlFor="current-password-mobile">
-                  Current Password
-                </Label>
-                <Input
-                  autoComplete="current-password"
-                  disabled={passwordLoading}
-                  id="current-password-mobile"
-                  onChange={(e) => {
-                    setCurrentPassword(e.target.value);
-                    if (passwordError) {
-                      setPasswordError(null);
-                    }
-                  }}
-                  placeholder="Enter current password"
-                  type="password"
-                  value={currentPassword}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="new-password-mobile">New Password</Label>
-                <Input
-                  autoComplete="new-password"
-                  disabled={passwordLoading}
-                  id="new-password-mobile"
-                  onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    if (passwordError) {
-                      setPasswordError(null);
-                    }
-                  }}
-                  placeholder="At least 6 characters"
-                  type="password"
-                  value={newPassword}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="confirm-password-mobile">
-                  Confirm New Password
-                </Label>
-                <Input
-                  autoComplete="new-password"
-                  disabled={passwordLoading}
-                  id="confirm-password-mobile"
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (passwordError) {
-                      setPasswordError(null);
-                    }
-                  }}
-                  placeholder="Re-enter new password"
-                  type="password"
-                  value={confirmPassword}
-                />
-              </div>
+            <div className="px-4 py-2">
+              <PasswordChangeForm
+                idPrefix="mobile-"
+                onSuccess={closePasswordChange}
+              />
             </div>
             <DrawerFooter>
-              <Button disabled={passwordLoading} onClick={handlePasswordChange}>
-                {passwordLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Changing...
-                  </>
-                ) : (
-                  "Change Password"
-                )}
-              </Button>
               <DrawerClose asChild>
-                <Button disabled={passwordLoading} variant="outline">
-                  Cancel
-                </Button>
+                <Button variant="outline">Cancel</Button>
               </DrawerClose>
             </DrawerFooter>
           </DrawerContent>
@@ -571,87 +425,11 @@ function MyAccount() {
             <DialogHeader>
               <DialogTitle>Change Password</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              {passwordError && (
-                <div className="flex items-start gap-2 text-destructive text-sm">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{passwordError}</span>
-                </div>
-              )}
-              {passwordSuccess && (
-                <div className="flex items-center gap-2 text-green-600 text-sm">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span>{passwordSuccess}</span>
-                </div>
-              )}
-              <div className="space-y-1.5">
-                <Label htmlFor="current-password">Current Password</Label>
-                <Input
-                  autoComplete="current-password"
-                  disabled={passwordLoading}
-                  id="current-password"
-                  onChange={(e) => {
-                    setCurrentPassword(e.target.value);
-                    if (passwordError) {
-                      setPasswordError(null);
-                    }
-                  }}
-                  placeholder="Enter current password"
-                  type="password"
-                  value={currentPassword}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input
-                  autoComplete="new-password"
-                  disabled={passwordLoading}
-                  id="new-password"
-                  onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    if (passwordError) {
-                      setPasswordError(null);
-                    }
-                  }}
-                  placeholder="At least 6 characters"
-                  type="password"
-                  value={newPassword}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                <Input
-                  autoComplete="new-password"
-                  disabled={passwordLoading}
-                  id="confirm-password"
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (passwordError) {
-                      setPasswordError(null);
-                    }
-                  }}
-                  placeholder="Re-enter new password"
-                  type="password"
-                  value={confirmPassword}
-                />
-              </div>
-            </div>
+            <PasswordChangeForm onSuccess={closePasswordChange} />
             <DialogFooter>
               <DialogClose asChild>
-                <Button disabled={passwordLoading} variant="outline">
-                  Cancel
-                </Button>
+                <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button disabled={passwordLoading} onClick={handlePasswordChange}>
-                {passwordLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Changing...
-                  </>
-                ) : (
-                  "Change Password"
-                )}
-              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

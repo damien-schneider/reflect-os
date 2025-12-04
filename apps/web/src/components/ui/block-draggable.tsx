@@ -15,7 +15,7 @@ import {
   usePluginOption,
   useSelected,
 } from "platejs/react";
-import * as React from "react";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,8 +27,8 @@ import { cn } from "@/lib/utils";
 
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
 
-export const BlockDraggable: RenderNodeWrapper = (props) => {
-  const { editor, element, path } = props;
+export const BlockDraggable: RenderNodeWrapper = (blockProps) => {
+  const { editor, element, path } = blockProps;
 
   const enabled = (() => {
     if (editor.dom.readOnly) {
@@ -70,7 +70,7 @@ export const BlockDraggable: RenderNodeWrapper = (props) => {
     return;
   }
 
-  return (props) => <Draggable {...props} />;
+  return (dragProps) => <Draggable {...dragProps} />;
 };
 
 function Draggable(props: PlateElementProps) {
@@ -95,19 +95,18 @@ function Draggable(props: PlateElementProps) {
 
   const [previewTop, setPreviewTop] = React.useState(0);
 
-  const resetPreview = () => {
+  const resetPreview = React.useCallback(() => {
     if (previewRef.current) {
       previewRef.current.replaceChildren();
       previewRef.current?.classList.add("hidden");
     }
-  };
+  }, [previewRef]);
 
   // clear up virtual multiple preview when drag end
   React.useEffect(() => {
     if (!isDragging) {
       resetPreview();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDragging, resetPreview]);
 
   React.useEffect(() => {
@@ -268,7 +267,10 @@ function DragHandle({
 
             // If current block is not in selection, use it as the starting point
             if (!selectionNodes.some(([node]) => node.id === element.id)) {
-              selectionNodes = [[element, editor.api.findPath(element)!]];
+              const path = editor.api.findPath(element);
+              if (path) {
+                selectionNodes = [[element, path]];
+              }
             }
 
             // Process selection nodes to include list children
@@ -308,7 +310,10 @@ function DragHandle({
 
             // If current block is not in selection, use it as the starting point
             if (!selectedBlocks.some(([node]) => node.id === element.id)) {
-              selectedBlocks = [[element, editor.api.findPath(element)!]];
+              const path = editor.api.findPath(element);
+              if (path) {
+                selectedBlocks = [[element, path]];
+              }
             }
 
             // Process selection to include list children
@@ -332,7 +337,7 @@ function DragHandle({
           onMouseUp={() => {
             resetPreview();
           }}
-          role="button"
+          type="button"
         >
           <GripVertical className="text-muted-foreground" />
         </div>
@@ -376,22 +381,26 @@ const createDragPreviewElements = (
    * elements incorrectly.
    */
   const removeDataAttributes = (element: HTMLElement) => {
-    Array.from(element.attributes).forEach((attr) => {
+    for (const attr of Array.from(element.attributes)) {
       if (
         attr.name.startsWith("data-slate") ||
         attr.name.startsWith("data-block-id")
       ) {
         element.removeAttribute(attr.name);
       }
-    });
+    }
 
-    Array.from(element.children).forEach((child) => {
+    for (const child of Array.from(element.children)) {
       removeDataAttributes(child as HTMLElement);
-    });
+    }
   };
 
   const resolveElement = (node: TElement, index: number) => {
-    const domNode = editor.api.toDOMNode(node)!;
+    const domNode = editor.api.toDOMNode(node);
+    if (!domNode) {
+      return;
+    }
+
     const newDomNode = domNode.cloneNode(true) as HTMLElement;
 
     // Apply visual compensation for horizontal scroll
@@ -455,9 +464,9 @@ const createDragPreviewElements = (
     elements.push(wrapper);
   };
 
-  blocks.forEach((node, index) => {
+  for (const [node, index] of blocks.entries()) {
     resolveElement(node, index);
-  });
+  }
 
   editor.setOption(DndPlugin, "draggingId", ids);
 
@@ -474,11 +483,26 @@ const calculatePreviewTop = (
     element: TElement;
   }
 ): number => {
-  const child = editor.api.toDOMNode(element)!;
-  const editable = editor.api.toDOMNode(editor)!;
+  const child = editor.api.toDOMNode(element);
+  const editable = editor.api.toDOMNode(editor);
   const firstSelectedChild = blocks[0];
 
-  const firstDomNode = editor.api.toDOMNode(firstSelectedChild)!;
+  if (!child) {
+    return 0;
+  }
+
+  if (!editable) {
+    return 0;
+  }
+
+  if (!firstSelectedChild) {
+    return 0;
+  }
+
+  const firstDomNode = editor.api.toDOMNode(firstSelectedChild);
+  if (!firstDomNode) {
+    return 0;
+  }
   // Get editor's top padding
   const editorPaddingTop = Number(
     window.getComputedStyle(editable).paddingTop.replace("px", "")
@@ -513,7 +537,10 @@ const calculatePreviewTop = (
 };
 
 const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
-  const child = editor.api.toDOMNode(element)!;
+  const child = editor.api.toDOMNode(element);
+  if (!child) {
+    return 0;
+  }
 
   const currentMarginTopString = window.getComputedStyle(child).marginTop;
   const currentMarginTop = Number(currentMarginTopString.replace("px", ""));

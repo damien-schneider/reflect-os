@@ -6,7 +6,7 @@ import {
   Toolbar as ToolbarPrimitive,
   Tooltip as TooltipPrimitive,
 } from "radix-ui";
-import * as React from "react";
+import React from "react";
 
 import {
   DropdownMenuLabel,
@@ -122,7 +122,7 @@ type ToolbarButtonProps = {
 > &
   VariantProps<typeof toolbarButtonVariants>;
 
-export const ToolbarButton = withTooltip(function ToolbarButton({
+export const ToolbarButton = withTooltip(function ToolbarButtonComponent({
   children,
   className,
   isDropdown,
@@ -227,10 +227,10 @@ export function ToolbarSplitButtonSecondary({
   size,
   variant,
   ...props
-}: React.ComponentPropsWithoutRef<"span"> &
+}: React.ComponentPropsWithoutRef<"button"> &
   VariantProps<typeof dropdownArrowVariants>) {
   return (
-    <span
+    <button
       className={cn(
         dropdownArrowVariants({
           size,
@@ -240,11 +240,11 @@ export function ToolbarSplitButtonSecondary({
         className
       )}
       onClick={(e) => e.stopPropagation()}
-      role="button"
+      type="button"
       {...props}
     >
       <ChevronDown className="size-3.5 text-muted-foreground" data-icon />
-    </span>
+    </button>
   );
 }
 

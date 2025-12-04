@@ -12,7 +12,7 @@ import {
   useElement,
   useReadOnly,
 } from "platejs/react";
-import * as React from "react";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -112,7 +112,9 @@ function CodeBlockCombobox() {
         <Command shouldFilter={false}>
           <CommandInput
             className="h-9"
-            onValueChange={(value) => setSearchValue(value)}
+            onValueChange={(searchInputValue) =>
+              setSearchValue(searchInputValue)
+            }
             placeholder="Search language..."
             value={searchValue}
           />
@@ -124,12 +126,12 @@ function CodeBlockCombobox() {
                 <CommandItem
                   className="cursor-pointer"
                   key={language.label}
-                  onSelect={(value) => {
+                  onSelect={(selectedValue) => {
                     editor.tf.setNodes<TCodeBlockElement>(
-                      { lang: value },
+                      { lang: selectedValue },
                       { at: element }
                     );
-                    setSearchValue(value);
+                    setSearchValue(selectedValue);
                     setOpen(false);
                   }}
                   value={language.value}
@@ -168,7 +170,7 @@ function CopyButton({
   return (
     <Button
       onClick={() => {
-        void navigator.clipboard.writeText(
+        navigator.clipboard.writeText(
           typeof value === "function" ? value() : value
         );
         setHasCopied(true);

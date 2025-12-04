@@ -27,7 +27,7 @@ export function ListElement({
 }: PlateElementProps & VariantProps<typeof listVariants>) {
   return (
     <PlateElement
-      as={variant!}
+      as={variant || "ol"}
       className={listVariants({ variant })}
       {...props}
     >

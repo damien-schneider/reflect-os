@@ -22,7 +22,7 @@ import {
 import { cva } from "class-variance-authority";
 import type { Point, TElement } from "platejs";
 import { useComposedRef, useEditorRef } from "platejs/react";
-import * as React from "react";
+import React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ const defaultFilter: FilterFn = (
   );
 
   return Array.from(uniqueTerms).some((keyword) =>
-    filterWords(keyword!, search)
+    filterWords(keyword || "", search)
   );
 };
 
@@ -201,10 +201,14 @@ const InlineComboboxInput = ({
     trigger,
   } = React.useContext(InlineComboboxContext);
 
-  const store = useComboboxContext()!;
-  const value = store.useState("value");
+  const store = useComboboxContext();
+  const value = store?.useState("value");
 
   const ref = useComposedRef(propRef, contextRef);
+
+  if (!store) {
+    return null;
+  }
 
   /**
    * To create an auto-resizing input, we render a visually hidden span
@@ -295,13 +299,17 @@ const InlineComboboxItem = ({
 
   const { filter, removeInput } = React.useContext(InlineComboboxContext);
 
-  const store = useComboboxContext()!;
+  const store = useComboboxContext();
 
   // Optimization: Do not subscribe to value if filter is false
-  const search = filter && store.useState("value");
+  const searchValue = store?.useState("value");
+
+  if (!store) {
+    return null;
+  }
 
   const visible =
-    !filter || filter({ group, keywords, label, value }, search as string);
+    !filter || filter({ group, keywords, label, value }, searchValue as string);
 
   if (!visible) {
     return null;
@@ -324,8 +332,8 @@ const InlineComboboxEmpty = ({
   className,
 }: React.HTMLAttributes<HTMLDivElement>) => {
   const { setHasEmpty } = React.useContext(InlineComboboxContext);
-  const store = useComboboxContext()!;
-  const items = store.useState("items");
+  const store = useComboboxContext();
+  const items = store?.useState("items");
 
   React.useEffect(() => {
     setHasEmpty(true);
@@ -335,7 +343,7 @@ const InlineComboboxEmpty = ({
     };
   }, [setHasEmpty]);
 
-  if (items.length > 0) {
+  if (!store || (items && items.length > 0)) {
     return null;
   }
 

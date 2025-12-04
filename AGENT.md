@@ -16,6 +16,8 @@
 ## UI Components
 
 - Do NOT use the Card component from `@/components/ui/card` - avoid card-style layouts with boxes/borders around content sections
+- Use `<Link>` from `@tanstack/react-router` instead of `<a>` tags for internal navigation
+- Use `AlertDialog` from `@/components/ui/alert-dialog` instead of `window.alert()`, `window.confirm()`, or `confirm()` for user confirmations and alerts
 
 ## UX Best Practices
 

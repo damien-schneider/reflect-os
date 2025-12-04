@@ -7,6 +7,17 @@ import {
 } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Calendar, ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { randID } from "@/rand";
@@ -32,6 +43,11 @@ function DashboardChangelogIndex() {
       .related("releaseItems")
       .orderBy("createdAt", "desc")
   );
+
+  const [deleteRelease, setDeleteRelease] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   // Create a new draft release instantly and navigate to it
   const createNewRelease = async () => {
@@ -60,11 +76,11 @@ function DashboardChangelogIndex() {
     });
   };
 
-  const handleDelete = (releaseId: string, releaseTitle: string) => {
-    if (!confirm(`Delete "${releaseTitle}"? This cannot be undone.`)) {
-      return;
+  const confirmDelete = () => {
+    if (deleteRelease) {
+      z.mutate.release.delete({ id: deleteRelease.id });
+      setDeleteRelease(null);
     }
-    z.mutate.release.delete({ id: releaseId });
   };
 
   // Transform releases to include feedbacks count
@@ -168,7 +184,10 @@ function DashboardChangelogIndex() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleDelete(release.id as string, release.title as string);
+                    setDeleteRelease({
+                      id: release.id as string,
+                      title: release.title as string,
+                    });
                   }}
                   size="icon"
                   variant="ghost"
@@ -193,6 +212,30 @@ function DashboardChangelogIndex() {
           </div>
         )}
       </div>
+
+      <AlertDialog
+        onOpenChange={(open) => !open && setDeleteRelease(null)}
+        open={!!deleteRelease}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete release</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deleteRelease?.title}"? This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

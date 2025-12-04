@@ -134,3 +134,7 @@
     @apply text-foreground;
   }
 }
+
+@utility wrapper-content {
+  @apply mx-auto max-w-3xl;
+}

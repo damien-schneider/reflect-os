@@ -10,6 +10,7 @@ import {
   H6Plugin,
   HorizontalRulePlugin,
 } from "@platejs/basic-nodes/react";
+import { TrailingBlockPlugin } from "platejs";
 import { ParagraphPlugin } from "platejs/react";
 import { BlockquoteElement } from "@/components/ui/blockquote-node";
 import {
@@ -60,4 +61,5 @@ export const BasicBlocksKit = [
     shortcuts: { toggle: { keys: "mod+shift+period" } },
   }),
   HorizontalRulePlugin.withComponent(HrElement),
+  TrailingBlockPlugin,
 ];

@@ -1,9 +1,8 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ExternalLink, Globe, Hash, Lock, Save } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ExternalLink, Globe, Hash, Lock } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -35,8 +34,6 @@ function DashboardSettings() {
   const [logo, setLogo] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#3b82f6");
   const [customCss, setCustomCss] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
   // Changelog settings state
@@ -65,33 +62,44 @@ function DashboardSettings() {
     }
   }, [org]);
 
-  const handleSave = async () => {
-    if (!org) {
-      return;
-    }
-
-    setIsSaving(true);
-    setSaved(false);
-
-    try {
+  // Auto-save individual fields
+  const saveField = useCallback(
+    async (field: string, value: unknown) => {
+      if (!org) {
+        return;
+      }
       await z.mutate.organization.update({
         id: org.id,
-        name: name.trim(),
-        logo: logo.trim() || undefined,
-        primaryColor: primaryColor || undefined,
-        customCss: customCss.trim() || undefined,
+        [field]: value,
+      });
+    },
+    [org, z.mutate.organization]
+  );
+
+  const saveChangelogSettings = useCallback(
+    async (
+      updates: Partial<{
+        autoVersioning: boolean;
+        versionIncrement: "patch" | "minor" | "major";
+        versionPrefix: string;
+      }>
+    ) => {
+      if (!org) {
+        return;
+      }
+      const currentSettings = org.changelogSettings ?? {};
+      await z.mutate.organization.update({
+        id: org.id,
         changelogSettings: {
-          autoVersioning,
-          versionIncrement,
-          versionPrefix: versionPrefix.trim() || "v",
+          autoVersioning: currentSettings.autoVersioning ?? false,
+          versionIncrement: currentSettings.versionIncrement ?? "patch",
+          versionPrefix: currentSettings.versionPrefix ?? "v",
+          ...updates,
         },
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    },
+    [org, z.mutate.organization]
+  );
 
   if (!org) {
     return (
@@ -119,6 +127,11 @@ function DashboardSettings() {
           <Label htmlFor="name">Organization Name</Label>
           <Input
             id="name"
+            onBlur={() => {
+              if (name.trim() && name.trim() !== org.name) {
+                saveField("name", name.trim());
+              }
+            }}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your Organization"
             value={name}
@@ -131,6 +144,12 @@ function DashboardSettings() {
             <Input
               className="flex-1"
               id="logo"
+              onBlur={() => {
+                const newLogo = logo.trim() || undefined;
+                if (newLogo !== (org.logo ?? undefined)) {
+                  saveField("logo", newLogo);
+                }
+              }}
               onChange={(e) => {
                 setLogo(e.target.value);
                 setLogoError(false);
@@ -252,12 +271,22 @@ function DashboardSettings() {
             <Input
               className="h-10 w-16 cursor-pointer p-1"
               id="primaryColor"
+              onBlur={() => {
+                if (primaryColor !== (org.primaryColor ?? "#3b82f6")) {
+                  saveField("primaryColor", primaryColor || undefined);
+                }
+              }}
               onChange={(e) => setPrimaryColor(e.target.value)}
               type="color"
               value={primaryColor}
             />
             <Input
               className="flex-1"
+              onBlur={() => {
+                if (primaryColor !== (org.primaryColor ?? "#3b82f6")) {
+                  saveField("primaryColor", primaryColor || undefined);
+                }
+              }}
               onChange={(e) => setPrimaryColor(e.target.value)}
               placeholder="#3b82f6"
               value={primaryColor}
@@ -273,6 +302,12 @@ function DashboardSettings() {
           <Textarea
             className="font-mono text-sm"
             id="customCss"
+            onBlur={() => {
+              const newCss = customCss.trim() || undefined;
+              if (newCss !== (org.customCss ?? undefined)) {
+                saveField("customCss", newCss);
+              }
+            }}
             onChange={(e) => setCustomCss(e.target.value)}
             placeholder={`/* Custom styles */
 .your-class {
@@ -319,7 +354,10 @@ function DashboardSettings() {
             <Switch
               checked={autoVersioning}
               id="auto-versioning-toggle"
-              onCheckedChange={setAutoVersioning}
+              onCheckedChange={(checked) => {
+                setAutoVersioning(checked);
+                saveChangelogSettings({ autoVersioning: checked });
+              }}
             />
           </div>
 
@@ -330,9 +368,11 @@ function DashboardSettings() {
                   Default Increment Type
                 </Label>
                 <Select
-                  onValueChange={(value) =>
-                    setVersionIncrement(value as "patch" | "minor" | "major")
-                  }
+                  onValueChange={(value) => {
+                    const increment = value as "patch" | "minor" | "major";
+                    setVersionIncrement(increment);
+                    saveChangelogSettings({ versionIncrement: increment });
+                  }}
                   value={versionIncrement}
                 >
                   <SelectTrigger className="w-48" id="version-increment">
@@ -376,6 +416,15 @@ function DashboardSettings() {
                   className="w-24 font-mono"
                   id="version-prefix"
                   maxLength={5}
+                  onBlur={() => {
+                    const newPrefix = versionPrefix.trim() || "v";
+                    if (
+                      newPrefix !==
+                      (org.changelogSettings?.versionPrefix ?? "v")
+                    ) {
+                      saveChangelogSettings({ versionPrefix: newPrefix });
+                    }
+                  }}
                   onChange={(e) => setVersionPrefix(e.target.value)}
                   placeholder="v"
                   value={versionPrefix}
@@ -387,19 +436,6 @@ function DashboardSettings() {
             </div>
           )}
         </div>
-      </div>
-
-      <Separator />
-
-      {/* Save Button */}
-      <div className="flex justify-end gap-3">
-        {saved ? (
-          <p className="self-center text-green-600 text-sm">Settings saved!</p>
-        ) : null}
-        <Button disabled={isSaving} onClick={handleSave}>
-          <Save className="mr-2 h-4 w-4" />
-          {isSaving ? "Saving..." : "Save Changes"}
-        </Button>
       </div>
     </div>
   );

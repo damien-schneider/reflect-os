@@ -1,9 +1,8 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
-import { ExternalLink, Globe, Lock, Save } from "lucide-react";
-import { useState } from "react";
+import { ExternalLink, Globe, Lock } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -24,45 +23,36 @@ function AdminSettings() {
   const org = orgs?.[0];
 
   // Form state
-  const [name, setName] = useState(org?.name ?? "");
-  const [logo, setLogo] = useState(org?.logo ?? "");
-  const [primaryColor, setPrimaryColor] = useState(
-    org?.primaryColor ?? "#3b82f6"
-  );
-  const [customCss, setCustomCss] = useState(org?.customCss ?? "");
-  const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [name, setName] = useState("");
+  const [logo, setLogo] = useState("");
+  const [primaryColor, setPrimaryColor] = useState("#3b82f6");
+  const [customCss, setCustomCss] = useState("");
+  const [initialized, setInitialized] = useState(false);
 
-  // Update form when org loads
-  if (org && name !== org.name && !isSaving) {
-    setName(org.name);
-    setLogo(org.logo ?? "");
-    setPrimaryColor(org.primaryColor ?? "#3b82f6");
-    setCustomCss(org.customCss ?? "");
-  }
-
-  const handleSave = async () => {
-    if (!org) {
-      return;
+  // Initialize form when org loads
+  useEffect(() => {
+    if (org && !initialized) {
+      setName(org.name);
+      setLogo(org.logo ?? "");
+      setPrimaryColor(org.primaryColor ?? "#3b82f6");
+      setCustomCss(org.customCss ?? "");
+      setInitialized(true);
     }
+  }, [org, initialized]);
 
-    setIsSaving(true);
-    setSaved(false);
-
-    try {
+  // Auto-save individual fields
+  const saveField = useCallback(
+    async (field: string, value: unknown) => {
+      if (!org) {
+        return;
+      }
       await z.mutate.organization.update({
         id: org.id,
-        name: name.trim(),
-        logo: logo.trim() || undefined,
-        primaryColor: primaryColor || undefined,
-        customCss: customCss.trim() || undefined,
+        [field]: value,
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    },
+    [org, z.mutate.organization]
+  );
 
   if (!org) {
     return (
@@ -90,6 +80,11 @@ function AdminSettings() {
           <Label htmlFor="name">Organization Name</Label>
           <Input
             id="name"
+            onBlur={() => {
+              if (name.trim() && name.trim() !== org.name) {
+                saveField("name", name.trim());
+              }
+            }}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your Organization"
             value={name}
@@ -102,6 +97,12 @@ function AdminSettings() {
             <Input
               className="flex-1"
               id="logo"
+              onBlur={() => {
+                const newLogo = logo.trim() || undefined;
+                if (newLogo !== (org.logo ?? undefined)) {
+                  saveField("logo", newLogo);
+                }
+              }}
               onChange={(e) => setLogo(e.target.value)}
               placeholder="https://example.com/logo.png"
               value={logo}
@@ -221,12 +222,22 @@ function AdminSettings() {
             <Input
               className="h-10 w-16 cursor-pointer p-1"
               id="primaryColor"
+              onBlur={() => {
+                if (primaryColor !== (org.primaryColor ?? "#3b82f6")) {
+                  saveField("primaryColor", primaryColor || undefined);
+                }
+              }}
               onChange={(e) => setPrimaryColor(e.target.value)}
               type="color"
               value={primaryColor}
             />
             <Input
               className="flex-1"
+              onBlur={() => {
+                if (primaryColor !== (org.primaryColor ?? "#3b82f6")) {
+                  saveField("primaryColor", primaryColor || undefined);
+                }
+              }}
               onChange={(e) => setPrimaryColor(e.target.value)}
               placeholder="#3b82f6"
               value={primaryColor}
@@ -242,6 +253,12 @@ function AdminSettings() {
           <Textarea
             className="font-mono text-sm"
             id="customCss"
+            onBlur={() => {
+              const newCss = customCss.trim() || undefined;
+              if (newCss !== (org.customCss ?? undefined)) {
+                saveField("customCss", newCss);
+              }
+            }}
             onChange={(e) => setCustomCss(e.target.value)}
             placeholder={`/* Custom styles */
 .your-class {
@@ -255,19 +272,6 @@ function AdminSettings() {
             this feature.
           </p>
         </div>
-      </div>
-
-      <Separator />
-
-      {/* Save Button */}
-      <div className="flex justify-end gap-3">
-        {saved && (
-          <p className="self-center text-green-600 text-sm">Settings saved!</p>
-        )}
-        <Button disabled={isSaving} onClick={handleSave}>
-          <Save className="mr-2 h-4 w-4" />
-          {isSaving ? "Saving..." : "Save Changes"}
-        </Button>
       </div>
     </div>
   );

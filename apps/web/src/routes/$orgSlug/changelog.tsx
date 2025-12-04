@@ -109,7 +109,6 @@ function PublicChangelog() {
                     <div className="mt-2">
                       <MarkdownEditor
                         editable={false}
-                        editorClassName="border-none shadow-none px-0 min-h-0 [&_.ProseMirror]:min-h-0"
                         showToolbar={false}
                         value={release.description}
                       />

@@ -23,7 +23,6 @@ import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button";
 import { ToolbarGroup } from "@/components/ui/toolbar";
 import { useMarkdownEditor } from "@/features/editor/hooks/use-markdown-editor";
 import { cn } from "@/lib/utils";
-import "@/features/editor/components/editor.css";
 
 type MarkdownEditorProps = {
   value?: string;
@@ -99,7 +98,7 @@ export function MarkdownEditor({
           <Editor
             className={cn(
               "editor-content editor-padding",
-              "prose prose-sm dark:prose-invert max-w-none",
+              // "prose prose-sm dark:prose-invert max-w-none",
               "w-full rounded-lg border border-input bg-background",
               "min-h-150! focus:outline-none",
               editorClassName

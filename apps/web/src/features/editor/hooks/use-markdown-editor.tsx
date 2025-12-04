@@ -20,12 +20,6 @@ function normalizeContent(content: string): string {
   if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
     try {
       const parsed = JSON.parse(trimmed);
-
-      // Handle Tiptap/ProseMirror JSON format
-      if (parsed.type === "doc" && Array.isArray(parsed.content)) {
-        return convertTiptapToMarkdown(parsed);
-      }
-
       // Handle Slate/Plate JSON format (array of nodes)
       if (Array.isArray(parsed)) {
         return convertSlateToMarkdown(parsed);
@@ -41,110 +35,6 @@ function normalizeContent(content: string): string {
 
   // Content is already markdown
   return content;
-}
-
-/**
- * Convert Tiptap/ProseMirror JSON to markdown
- */
-function convertTiptapToMarkdown(doc: {
-  type: string;
-  content?: TiptapNode[];
-}): string {
-  if (!doc.content) {
-    return "";
-  }
-
-  return doc.content.map(convertTiptapNodeToMarkdown).join("\n\n");
-}
-
-type TiptapNode = {
-  type: string;
-  content?: TiptapNode[];
-  text?: string;
-  marks?: { type: string }[];
-  attrs?: Record<string, unknown>;
-};
-
-function convertTiptapNodeToMarkdown(node: TiptapNode): string {
-  switch (node.type) {
-    case "paragraph":
-      return node.content?.map(convertTiptapNodeToMarkdown).join("") ?? "";
-
-    case "heading": {
-      const level = (node.attrs?.level as number) ?? 1;
-      const text =
-        node.content?.map(convertTiptapNodeToMarkdown).join("") ?? "";
-      return `${"#".repeat(level)} ${text}`;
-    }
-
-    case "bulletList":
-      return (
-        node.content
-          ?.map((item) => `- ${convertTiptapNodeToMarkdown(item)}`)
-          .join("\n") ?? ""
-      );
-
-    case "orderedList":
-      return (
-        node.content
-          ?.map((item, i) => `${i + 1}. ${convertTiptapNodeToMarkdown(item)}`)
-          .join("\n") ?? ""
-      );
-
-    case "listItem":
-      return node.content?.map(convertTiptapNodeToMarkdown).join("") ?? "";
-
-    case "blockquote": {
-      const text =
-        node.content?.map(convertTiptapNodeToMarkdown).join("\n") ?? "";
-      return text
-        .split("\n")
-        .map((line) => `> ${line}`)
-        .join("\n");
-    }
-
-    case "codeBlock": {
-      const code =
-        node.content?.map(convertTiptapNodeToMarkdown).join("") ?? "";
-      const lang = (node.attrs?.language as string) ?? "";
-      return `\`\`\`${lang}\n${code}\n\`\`\``;
-    }
-
-    case "horizontalRule":
-      return "---";
-
-    case "text": {
-      let text = node.text ?? "";
-      if (node.marks) {
-        for (const mark of node.marks) {
-          switch (mark.type) {
-            case "bold":
-              text = `**${text}**`;
-              break;
-            case "italic":
-              text = `*${text}*`;
-              break;
-            case "strike":
-              text = `~~${text}~~`;
-              break;
-            case "code":
-              text = `\`${text}\``;
-              break;
-            default:
-              break;
-          }
-        }
-      }
-      return text;
-    }
-
-    default:
-      // For unknown types, try to extract text content
-      if (node.content) {
-        return node.content.map(convertTiptapNodeToMarkdown).join("");
-      }
-      return node.text ?? "";
-  }
 }
 
 type SlateNode = {

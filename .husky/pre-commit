@@ -1,4 +1,5 @@
 bun test
+bunx tsc --noEmit
 
 #!/bin/sh
 # Exit on any error

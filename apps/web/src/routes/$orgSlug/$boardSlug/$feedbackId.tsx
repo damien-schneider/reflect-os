@@ -168,14 +168,12 @@ function FeedbackDetail() {
           )}
 
           {/* Description */}
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <MarkdownEditor
-              editable={false}
-              editorClassName="border-none shadow-none px-0 min-h-0 [&_.ProseMirror]:min-h-0"
-              showToolbar={false}
-              value={feedback.description}
-            />
-          </div>
+
+          <MarkdownEditor
+            editable={false}
+            showToolbar={false}
+            value={feedback.description}
+          />
 
           <Separator />
 

@@ -124,7 +124,6 @@ export function CommentThread({
           <MarkdownEditor
             className="min-h-20"
             onChange={setNewComment}
-            placeholder="Write a comment... Press '/' for commands"
             value={newComment}
           />
           <div className="flex items-center justify-between">
@@ -287,7 +286,6 @@ function CommentItem({
             <div className="mt-1">
               <MarkdownEditor
                 editable={false}
-                editorClassName="border-none shadow-none px-0 min-h-0 [&_.ProseMirror]:min-h-0"
                 showToolbar={false}
                 value={comment.body}
               />
@@ -339,7 +337,6 @@ function CommentItem({
               <MarkdownEditor
                 className="min-h-[60px]"
                 onChange={setReplyContent}
-                placeholder="Write a reply..."
                 value={replyContent}
               />
               <div className="flex gap-2">

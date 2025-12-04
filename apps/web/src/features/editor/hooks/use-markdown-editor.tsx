@@ -1,61 +1,10 @@
 "use client";
 
-import { AutoformatPlugin } from "@platejs/autoformat";
-import {
-  BlockquotePlugin,
-  BoldPlugin,
-  CodePlugin,
-  H1Plugin,
-  H2Plugin,
-  H3Plugin,
-  H4Plugin,
-  H5Plugin,
-  H6Plugin,
-  HorizontalRulePlugin,
-  ItalicPlugin,
-  StrikethroughPlugin,
-} from "@platejs/basic-nodes/react";
-import {
-  CodeBlockPlugin,
-  CodeLinePlugin,
-  CodeSyntaxPlugin,
-} from "@platejs/code-block/react";
-import { DndPlugin } from "@platejs/dnd";
-import { IndentPlugin } from "@platejs/indent/react";
-import { LinkPlugin } from "@platejs/link/react";
-import { toggleList } from "@platejs/list";
-import { ListPlugin } from "@platejs/list/react";
 import { deserializeMd, MarkdownPlugin, serializeMd } from "@platejs/markdown";
-import { SlashInputPlugin, SlashPlugin } from "@platejs/slash-command/react";
-import { all, createLowlight } from "lowlight";
 import type { Value } from "platejs";
-import { KEYS } from "platejs";
-import { ParagraphPlugin, usePlateEditor } from "platejs/react";
-import { useMemo } from "react";
-import { BlockSelectionKit } from "@/components/editor/plugins/block-selection-kit";
-import { BlockDraggable } from "@/components/ui/block-draggable";
-import { BlockquoteElement } from "@/components/ui/blockquote-node";
-import {
-  CodeBlockElement,
-  CodeLineElement,
-  CodeSyntaxLeaf,
-} from "@/components/ui/code-block-node";
-import {
-  H1Element,
-  H2Element,
-  H3Element,
-  H4Element,
-  H5Element,
-  H6Element,
-} from "@/components/ui/heading-node";
-import { HrElement } from "@/components/ui/hr-node";
-import { LinkElement } from "@/components/ui/link-node";
-import { ParagraphElement } from "@/components/ui/paragraph-node";
-import { SlashInputElement } from "@/components/ui/slash-node";
-
-const lowlight = createLowlight(all);
-const TRIGGER_PREVIOUS_CHAR_PATTERN = /^\s?$/;
-const NUMBER_MATCH_REGEX = /\d+/;
+import { usePlateEditor } from "platejs/react";
+import { DndKit } from "@/components/editor/plugins/dnd-kit";
+import { EditorKit } from "@/components/editor/plugins/editor-kit";
 
 /**
  * Detects if content is JSON (legacy Tiptap/Slate format) or markdown string.
@@ -303,100 +252,9 @@ function convertSlateNodeToMarkdown(node: SlateNode): string | null {
   }
 }
 
-// Autoformat rules for Markdown-like shortcuts
-const autoformatRules = [
-  // Block rules - Headings
-  { match: "# ", mode: "block" as const, type: KEYS.h1 },
-  { match: "## ", mode: "block" as const, type: KEYS.h2 },
-  { match: "### ", mode: "block" as const, type: KEYS.h3 },
-  { match: "#### ", mode: "block" as const, type: KEYS.h4 },
-  { match: "##### ", mode: "block" as const, type: KEYS.h5 },
-  { match: "###### ", mode: "block" as const, type: KEYS.h6 },
-
-  // Block rules - Blockquote
-  { match: "> ", mode: "block" as const, type: KEYS.blockquote },
-
-  // Block rules - Horizontal rule
-  {
-    match: ["---", "—-", "***"],
-    mode: "block" as const,
-    type: KEYS.hr,
-  },
-
-  // Block rules - Code block
-  { match: "```", mode: "block" as const, type: KEYS.codeBlock },
-
-  // Block rules - Lists (unordered)
-  {
-    match: ["- ", "* "],
-    mode: "block" as const,
-    type: "list",
-    format: (editor: Parameters<typeof toggleList>[0]) => {
-      toggleList(editor, { listStyleType: "disc" });
-    },
-  },
-
-  // Block rules - Lists (ordered with regex)
-  {
-    match: [String.raw`^\d+\. $`, String.raw`^\d+\) $`],
-    matchByRegex: true,
-    mode: "block" as const,
-    type: "list",
-    format: (
-      editor: Parameters<typeof toggleList>[0],
-      { matchString }: { matchString: string }
-    ) => {
-      const number = Number(matchString.match(NUMBER_MATCH_REGEX)?.[0]) || 1;
-      toggleList(editor, {
-        listRestartPolite: number,
-        listStyleType: "decimal",
-      });
-    },
-  },
-
-  // Mark rules - Bold
-  {
-    match: "**",
-    mode: "mark" as const,
-    type: KEYS.bold,
-  },
-  {
-    match: "__",
-    mode: "mark" as const,
-    type: KEYS.bold,
-  },
-
-  // Mark rules - Italic
-  {
-    match: "*",
-    mode: "mark" as const,
-    type: KEYS.italic,
-  },
-  {
-    match: "_",
-    mode: "mark" as const,
-    type: KEYS.italic,
-  },
-
-  // Mark rules - Strikethrough
-  {
-    match: "~~",
-    mode: "mark" as const,
-    type: KEYS.strikethrough,
-  },
-
-  // Mark rules - Code
-  {
-    match: "`",
-    mode: "mark" as const,
-    type: KEYS.code,
-  },
-];
-
 type UseMarkdownEditorOptions = {
   content?: string;
   onUpdate?: (markdown: string) => void;
-  placeholder?: string;
   autoFocus?: boolean;
   editable?: boolean;
   enableDnd?: boolean;
@@ -405,91 +263,20 @@ type UseMarkdownEditorOptions = {
 export function useMarkdownEditor({
   content = "",
   onUpdate,
-  placeholder: _placeholder = "Start typing...",
   autoFocus = false,
   editable = true,
   enableDnd = false,
 }: UseMarkdownEditorOptions) {
   // Normalize content - converts legacy JSON to markdown if needed
-  const normalizedContent = useMemo(() => normalizeContent(content), [content]);
+  const normalizedContent = normalizeContent(content);
 
   const editor = usePlateEditor({
     plugins: [
-      // Basic blocks with components
-      ParagraphPlugin.withComponent(ParagraphElement),
-      H1Plugin.withComponent(H1Element),
-      H2Plugin.withComponent(H2Element),
-      H3Plugin.withComponent(H3Element),
-      H4Plugin.withComponent(H4Element),
-      H5Plugin.withComponent(H5Element),
-      H6Plugin.withComponent(H6Element),
-      BlockquotePlugin.withComponent(BlockquoteElement),
-      HorizontalRulePlugin.withComponent(HrElement),
+      // Core editor plugins
+      ...EditorKit,
 
-      // Basic marks
-      BoldPlugin,
-      ItalicPlugin,
-      StrikethroughPlugin,
-      CodePlugin,
-
-      // Code blocks with syntax highlighting
-      CodeBlockPlugin.configure({
-        options: { lowlight },
-      }).withComponent(CodeBlockElement),
-      CodeLinePlugin.withComponent(CodeLineElement),
-      CodeSyntaxPlugin.withComponent(CodeSyntaxLeaf),
-
-      // Links
-      LinkPlugin.configure({
-        options: {
-          defaultLinkAttributes: {
-            target: "_blank",
-            rel: "noopener noreferrer",
-          },
-        },
-      }).withComponent(LinkElement),
-
-      // Lists
-      IndentPlugin,
-      ListPlugin,
-
-      // Block selection (required for DnD) with visual overlay
-      ...BlockSelectionKit,
-
-      // Drag and drop with Notion-style drag handles
-      ...(enableDnd
-        ? [
-            DndPlugin.configure({
-              render: {
-                aboveNodes: BlockDraggable,
-              },
-            }),
-          ]
-        : []),
-
-      // Markdown support
-      MarkdownPlugin,
-
-      // Autoformat for Markdown shortcuts
-      AutoformatPlugin.configure({
-        options: {
-          rules: autoformatRules,
-          enableUndoOnDelete: true,
-        },
-      }),
-
-      // Slash commands
-      SlashPlugin.configure({
-        options: {
-          trigger: "/",
-          triggerPreviousCharPattern: TRIGGER_PREVIOUS_CHAR_PATTERN,
-          triggerQuery: (ed) =>
-            !ed.api.some({
-              match: { type: ed.getType(KEYS.codeBlock) },
-            }),
-        },
-      }),
-      SlashInputPlugin.withComponent(SlashInputElement),
+      // Drag and drop (optional)
+      ...(enableDnd ? DndKit : []),
     ],
     // Use the editor's markdown API to properly deserialize the markdown string
     value: (ed) => {

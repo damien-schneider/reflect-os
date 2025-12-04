@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import { AuthDialog } from "@/components/auth-dialog";
 
 // Context for managing auth dialog state globally
@@ -33,13 +27,13 @@ type AuthDialogProviderProps = {
 export function AuthDialogProvider({ children }: AuthDialogProviderProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const openAuthDialog = useCallback(() => {
+  const openAuthDialog = () => {
     setIsOpen(true);
-  }, []);
+  };
 
-  const closeAuthDialog = useCallback(() => {
+  const closeAuthDialog = () => {
     setIsOpen(false);
-  }, []);
+  };
 
   return (
     <AuthDialogContext.Provider

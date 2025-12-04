@@ -17,7 +17,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,7 +101,7 @@ function ReleaseDetailPage() {
   ]); // Only sync on release change, not on every render
 
   // Auto-save handlers
-  const saveTitle = useCallback(() => {
+  const saveTitle = () => {
     if (!(release && title.trim())) {
       return;
     }
@@ -111,9 +111,9 @@ function ReleaseDetailPage() {
       updatedAt: Date.now(),
     });
     setIsEditingTitle(false);
-  }, [release, title, z]);
+  };
 
-  const saveVersion = useCallback(() => {
+  const saveVersion = () => {
     if (!release) {
       return;
     }
@@ -123,24 +123,21 @@ function ReleaseDetailPage() {
       updatedAt: Date.now(),
     });
     setIsEditingVersion(false);
-  }, [release, version, z]);
+  };
 
-  const saveDescription = useCallback(
-    (markdown: string) => {
-      if (!release) {
-        return;
-      }
-      setDescription(markdown);
-      z.mutate.release.update({
-        id: release.id,
-        description: markdown || null,
-        updatedAt: Date.now(),
-      });
-    },
-    [release, z]
-  );
+  const saveDescription = (markdown: string) => {
+    if (!release) {
+      return;
+    }
+    setDescription(markdown);
+    z.mutate.release.update({
+      id: release.id,
+      description: markdown || null,
+      updatedAt: Date.now(),
+    });
+  };
 
-  const togglePublish = useCallback(() => {
+  const togglePublish = () => {
     if (!release) {
       return;
     }
@@ -150,9 +147,9 @@ function ReleaseDetailPage() {
       publishedAt: release.publishedAt ? null : now,
       updatedAt: now,
     });
-  }, [release, z]);
+  };
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = () => {
     if (!release) {
       return;
     }
@@ -171,83 +168,74 @@ function ReleaseDetailPage() {
       to: "/dashboard/$orgSlug/changelog",
       params: { orgSlug },
     });
-  }, [release, releaseItems, z, navigate, orgSlug]);
+  };
 
   // Add a single item to the release
-  const handleAddItem = useCallback(
-    (feedbackId: string) => {
-      if (!release) {
-        return;
-      }
-      // Skip if already added
-      if (selectedFeedbackIds.includes(feedbackId)) {
-        return;
-      }
+  const handleAddItem = (feedbackId: string) => {
+    if (!release) {
+      return;
+    }
+    // Skip if already added
+    if (selectedFeedbackIds.includes(feedbackId)) {
+      return;
+    }
 
-      const now = Date.now();
+    const now = Date.now();
+    z.mutate.releaseItem.insert({
+      id: crypto.randomUUID(),
+      releaseId: release.id,
+      feedbackId,
+      createdAt: now,
+    });
+    setSelectedFeedbackIds((prev) => [...prev, feedbackId]);
+    z.mutate.release.update({
+      id: release.id,
+      updatedAt: now,
+    });
+  };
+
+  // Add all available items to the release
+  const handleAddAllItems = (feedbackIds: string[]) => {
+    if (!release) {
+      return;
+    }
+    const now = Date.now();
+
+    // Only add items that aren't already selected
+    const newIds = feedbackIds.filter(
+      (id) => !selectedFeedbackIds.includes(id)
+    );
+    for (const feedbackId of newIds) {
       z.mutate.releaseItem.insert({
         id: crypto.randomUUID(),
         releaseId: release.id,
         feedbackId,
         createdAt: now,
       });
-      setSelectedFeedbackIds((prev) => [...prev, feedbackId]);
-      z.mutate.release.update({
-        id: release.id,
-        updatedAt: now,
-      });
-    },
-    [release, selectedFeedbackIds, z]
-  );
+    }
 
-  // Add all available items to the release
-  const handleAddAllItems = useCallback(
-    (feedbackIds: string[]) => {
-      if (!release) {
-        return;
-      }
-      const now = Date.now();
-
-      // Only add items that aren't already selected
-      const newIds = feedbackIds.filter(
-        (id) => !selectedFeedbackIds.includes(id)
-      );
-      for (const feedbackId of newIds) {
-        z.mutate.releaseItem.insert({
-          id: crypto.randomUUID(),
-          releaseId: release.id,
-          feedbackId,
-          createdAt: now,
-        });
-      }
-
-      setSelectedFeedbackIds((prev) => [...prev, ...newIds]);
-      z.mutate.release.update({
-        id: release.id,
-        updatedAt: now,
-      });
-    },
-    [release, selectedFeedbackIds, z]
-  );
+    setSelectedFeedbackIds((prev) => [...prev, ...newIds]);
+    z.mutate.release.update({
+      id: release.id,
+      updatedAt: now,
+    });
+  };
 
   // Remove an item from the release
-  const handleRemoveItem = useCallback(
-    (feedbackId: string) => {
-      if (!release) {
-        return;
-      }
-      const item = releaseItems.find((ri) => ri.feedbackId === feedbackId);
-      if (item) {
-        z.mutate.releaseItem.delete({ id: item.id });
-      }
-      setSelectedFeedbackIds((prev) => prev.filter((id) => id !== feedbackId));
-      z.mutate.release.update({
-        id: release.id,
-        updatedAt: Date.now(),
-      });
-    },
-    [release, releaseItems, z]
-  );
+  const handleRemoveItem = (feedbackId: string) => {
+    if (!release) {
+      return;
+    }
+    const item = releaseItems.find((ri) => ri.feedbackId === feedbackId);
+    if (item) {
+      z.mutate.releaseItem.delete({ id: item.id });
+    }
+    setSelectedFeedbackIds((prev) => prev.filter((id) => id !== feedbackId));
+    z.mutate.release.update({
+      id: release.id,
+      updatedAt: Date.now(),
+    });
+  };
 
   if (!release) {
     return (
@@ -445,10 +433,8 @@ function ReleaseDetailPage() {
         {/* Description - Markdown editor */}
         <div className="mt-8">
           <MarkdownEditor
-            className="min-h-[300px]"
             editorClassName="border-none shadow-none px-0"
             onChange={saveDescription}
-            placeholder="Write your release notes here... Press '/' for commands"
             showToolbar={true}
             value={description}
           />
@@ -486,7 +472,7 @@ function CompletedItemsSection({
   const [allFeedback] = useQuery(z.query.feedback.related("board"));
 
   // Filter to only completed items from this org's boards
-  const completedItems = useMemo(() => {
+  const completedItems = (() => {
     if (!(allFeedback && boards)) {
       return [];
     }
@@ -494,20 +480,16 @@ function CompletedItemsSection({
     return allFeedback
       .filter((f) => boardIds.has(f.boardId) && f.completedAt)
       .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
-  }, [allFeedback, boards]);
+  })();
 
   // Items available to add (not yet selected)
-  const availableItems = useMemo(
-    () =>
-      completedItems.filter((item) => !selectedFeedbackIds.includes(item.id)),
-    [completedItems, selectedFeedbackIds]
+  const availableItems = completedItems.filter(
+    (item) => !selectedFeedbackIds.includes(item.id)
   );
 
   // Selected items with full details
-  const selectedItems = useMemo(
-    () =>
-      completedItems.filter((item) => selectedFeedbackIds.includes(item.id)),
-    [completedItems, selectedFeedbackIds]
+  const selectedItems = completedItems.filter((item) =>
+    selectedFeedbackIds.includes(item.id)
   );
 
   const handleAddAll = () => {

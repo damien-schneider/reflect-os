@@ -30,8 +30,10 @@ const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
 export const BlockDraggable: RenderNodeWrapper = (props) => {
   const { editor, element, path } = props;
 
-  const enabled = React.useMemo(() => {
-    if (editor.dom.readOnly) return false;
+  const enabled = (() => {
+    if (editor.dom.readOnly) {
+      return false;
+    }
 
     if (path.length === 1 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
       return true;
@@ -62,9 +64,11 @@ export const BlockDraggable: RenderNodeWrapper = (props) => {
     }
 
     return false;
-  }, [editor, element, path]);
+  })();
 
-  if (!enabled) return;
+  if (!enabled) {
+    return;
+  }
 
   return (props) => <Draggable {...props} />;
 };
@@ -104,14 +108,14 @@ function Draggable(props: PlateElementProps) {
       resetPreview();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDragging]);
+  }, [isDragging, resetPreview]);
 
   React.useEffect(() => {
     if (isAboutToDrag) {
       previewRef.current?.classList.remove("opacity-0");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAboutToDrag]);
+  }, [isAboutToDrag, previewRef.current?.classList.remove]);
 
   const [dragButtonTop, setDragButtonTop] = React.useState(0);
 
@@ -125,7 +129,9 @@ function Draggable(props: PlateElementProps) {
           : "group"
       )}
       onMouseEnter={() => {
-        if (isDragging) return;
+        if (isDragging) {
+          return;
+        }
         setDragButtonTop(calcDragButtonTop(editor, element));
       }}
     >
@@ -146,7 +152,7 @@ function Draggable(props: PlateElementProps) {
               )}
             >
               <Button
-                className="-left-0 absolute h-6 w-full p-0"
+                className="absolute left-0 h-6 w-full p-0"
                 data-plate-prevent-deselect
                 ref={handleRef}
                 style={{ top: `${dragButtonTop + 3}px` }}
@@ -220,7 +226,7 @@ function Gutter({
   );
 }
 
-const DragHandle = React.memo(function DragHandle({
+function DragHandle({
   isDragging,
   previewRef,
   resetPreview,
@@ -247,7 +253,9 @@ const DragHandle = React.memo(function DragHandle({
           onMouseDown={(e) => {
             resetPreview();
 
-            if ((e.button !== 0 && e.button !== 2) || e.shiftKey) return;
+            if ((e.button !== 0 && e.button !== 2) || e.shiftKey) {
+              return;
+            }
 
             const blockSelection = editor
               .getApi(BlockSelectionPlugin)
@@ -285,7 +293,9 @@ const DragHandle = React.memo(function DragHandle({
               .blockSelection.set(blocks.map((block) => block.id as string));
           }}
           onMouseEnter={() => {
-            if (isDragging) return;
+            if (isDragging) {
+              return;
+            }
 
             const blockSelection = editor
               .getApi(BlockSelectionPlugin)
@@ -330,15 +340,14 @@ const DragHandle = React.memo(function DragHandle({
       <TooltipContent>Drag to move</TooltipContent>
     </Tooltip>
   );
-});
+}
 
-const DropLine = React.memo(function DropLine({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function DropLine({ className, ...props }: React.ComponentProps<"div">) {
   const { dropLine } = useDropLine();
 
-  if (!dropLine) return null;
+  if (!dropLine) {
+    return null;
+  }
 
   return (
     <div
@@ -353,7 +362,7 @@ const DropLine = React.memo(function DropLine({
       )}
     />
   );
-});
+}
 
 const createDragPreviewElements = (
   editor: PlateEditor,
@@ -429,10 +438,10 @@ const createDragPreviewElements = (
 
     if (lastDomNode) {
       const lastDomNodeRect = editor.api
-        .toDOMNode(lastDomNode)!
-        .parentElement!.getBoundingClientRect();
+        .toDOMNode(lastDomNode)
+        ?.parentElement?.getBoundingClientRect();
 
-      const domNodeRect = domNode.parentElement!.getBoundingClientRect();
+      const domNodeRect = domNode.parentElement?.getBoundingClientRect();
 
       const distance = domNodeRect.top - lastDomNodeRect.bottom;
 

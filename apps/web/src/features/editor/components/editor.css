@@ -1,4 +1,5 @@
-/* Plate.js Markdown Editor Styles */
+@import "tailwindcss";
+@import "tw-animate-css";
 
 /* Base editor styles */
 [data-slate-editor] {
@@ -6,14 +7,22 @@
   min-height: 180px;
 }
 
-/* Placeholder */
-[data-slate-placeholder] {
-  color: hsl(var(--muted-foreground)) !important;
-  opacity: 0.6;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  width: 100%;
+/* Editor content container - applies max-width to content blocks, not the editor itself */
+/* This allows selection and drag-drop to work on the full width while content is centered */
+.editor-content {
+  @apply min-h-full w-full;
+}
+
+/* Apply max-width and centering to block-level elements */
+.editor-content > [data-slate-node="element"] {
+  @apply mx-auto max-w-3xl;
+  /* Responsive padding - only on larger screens */
+  @apply px-4 lg:px-0;
+}
+
+/* Responsive horizontal padding for the editor */
+.editor-padding {
+  @apply px-4 sm:px-6 lg:px-16 xl:px-24;
 }
 
 /* Headings */
@@ -325,9 +334,4 @@
 /* Dragging state */
 .slate-draggable.dragging {
   opacity: 0.5;
-}
-
-/* Notion-style placeholder for empty blocks */
-[data-slate-editor] [data-slate-placeholder] {
-  color: hsl(var(--muted-foreground) / 0.6) !important;
 }

@@ -1,5 +1,4 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { useMemo } from "react";
 import { ReleaseCard } from "@/features/changelog/components/release-card";
 import type { Board, Feedback, Release, Schema } from "@/schema";
 
@@ -31,7 +30,7 @@ export function ReleaseList({
   );
 
   // Transform releases to include feedbacks - memoized for performance
-  const releasesWithFeedbacks = useMemo((): ReleaseWithFeedbacks[] => {
+  const releasesWithFeedbacks = ((): ReleaseWithFeedbacks[] => {
     if (!(releases && Array.isArray(releases))) {
       return [];
     }
@@ -54,7 +53,7 @@ export function ReleaseList({
         feedbacks,
       };
     });
-  }, [releases, showDrafts]);
+  })();
 
   if (releasesWithFeedbacks.length === 0) {
     return (

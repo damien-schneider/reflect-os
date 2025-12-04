@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Calendar, ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
-import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { randID } from "@/rand";
@@ -69,7 +68,7 @@ function DashboardChangelogIndex() {
   };
 
   // Transform releases to include feedbacks count
-  const releasesWithCounts = useMemo(() => {
+  const releasesWithCounts = (() => {
     if (!(releasesData && Array.isArray(releasesData) && org)) {
       return [];
     }
@@ -80,7 +79,7 @@ function DashboardChangelogIndex() {
         ? release.releaseItems.length
         : 0,
     }));
-  }, [releasesData, org]);
+  })();
 
   return (
     <div className="space-y-6">

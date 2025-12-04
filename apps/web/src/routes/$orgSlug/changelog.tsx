@@ -2,7 +2,6 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Calendar, CheckCircle } from "lucide-react";
-import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
@@ -31,7 +30,7 @@ function PublicChangelog() {
   );
 
   // Transform releases to include feedbacks - memoized for performance
-  const releasesWithFeedbacks = useMemo(() => {
+  const releasesWithFeedbacks = (() => {
     if (!(releasesData && org)) {
       return [];
     }
@@ -50,7 +49,7 @@ function PublicChangelog() {
           feedbacks,
         };
       });
-  }, [releasesData, org]);
+  })();
 
   if (!org) {
     return (

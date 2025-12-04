@@ -11,7 +11,7 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useZero } from "@rocicorp/zero/react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
 import { RoadmapLaneColumn } from "@/features/roadmap/components/roadmap-lane";
 import {
@@ -79,7 +79,7 @@ export function RoadmapKanban({
   );
 
   // Build lane configuration from custom lanes or use defaults
-  const laneConfigs = useMemo((): LaneConfig[] => {
+  const laneConfigs = ((): LaneConfig[] => {
     if (customLanes && customLanes.length > 0) {
       // Filter to only roadmap lane tags and sort by lane order
       return customLanes
@@ -103,22 +103,19 @@ export function RoadmapKanban({
       isDoneStatus: false, // Default lanes don't have done status
       laneOrder: ROADMAP_LANES.indexOf(lane),
     }));
-  }, [customLanes]);
+  })();
 
   // Get all lane IDs including backlog for admin
-  const laneIds = useMemo(() => {
+  const laneIds = (() => {
     const ids = laneConfigs.map((l) => l.id);
     return isAdmin ? ["backlog", ...ids] : ids;
-  }, [laneConfigs, isAdmin]);
+  })();
 
   // Combine items and backlog for lookup
-  const allItems = useMemo(
-    () => [...items, ...backlogItems],
-    [items, backlogItems]
-  );
+  const allItems = [...items, ...backlogItems];
 
   // Group items by lane (including backlog)
-  const itemsByLane = useMemo(() => {
+  const itemsByLane = (() => {
     const grouped: Record<string, RoadmapFeedbackItem[]> = {
       backlog: [],
     };
@@ -147,7 +144,7 @@ export function RoadmapKanban({
     }
 
     return grouped;
-  }, [items, backlogItems, laneConfigs]);
+  })();
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -257,7 +254,7 @@ export function RoadmapKanban({
   };
 
   // Build lane display config including backlog
-  const allLaneConfigs = useMemo(() => {
+  const allLaneConfigs = (() => {
     const backlogConfig: LaneConfig = {
       id: "backlog",
       label: "Backlog",
@@ -267,7 +264,7 @@ export function RoadmapKanban({
       laneOrder: -1,
     };
     return isAdmin ? [backlogConfig, ...laneConfigs] : laneConfigs;
-  }, [laneConfigs, isAdmin]);
+  })();
 
   return (
     <DndContext

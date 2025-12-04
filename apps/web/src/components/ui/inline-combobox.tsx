@@ -87,16 +87,13 @@ const InlineCombobox = ({
   const hasValueProp = valueProp !== undefined;
   const value = hasValueProp ? valueProp : valueState;
 
-  const setValue = React.useCallback(
-    (newValue: string) => {
-      setValueProp?.(newValue);
+  const setValue = (newValue: string) => {
+    setValueProp?.(newValue);
 
-      if (!hasValueProp) {
-        setValueState(newValue);
-      }
-    },
-    [setValueProp, hasValueProp]
-  );
+    if (!hasValueProp) {
+      setValueState(newValue);
+    }
+  };
 
   /**
    * Track the point just before the input element so we know where to
@@ -107,11 +104,15 @@ const InlineCombobox = ({
   React.useEffect(() => {
     const path = editor.api.findPath(element);
 
-    if (!path) return;
+    if (!path) {
+      return;
+    }
 
     const point = editor.api.before(path);
 
-    if (!point) return;
+    if (!point) {
+      return;
+    }
 
     const pointRef = editor.api.pointRef(point);
     insertPoint.current = pointRef.current;
@@ -142,26 +143,15 @@ const InlineCombobox = ({
 
   const [hasEmpty, setHasEmpty] = React.useState(false);
 
-  const contextValue: InlineComboboxContextValue = React.useMemo(
-    () => ({
-      filter,
-      inputProps,
-      inputRef,
-      removeInput,
-      setHasEmpty,
-      showTrigger,
-      trigger,
-    }),
-    [
-      trigger,
-      showTrigger,
-      filter,
-      inputRef,
-      inputProps,
-      removeInput,
-      setHasEmpty,
-    ]
-  );
+  const contextValue: InlineComboboxContextValue = {
+    filter,
+    inputProps,
+    inputRef,
+    removeInput,
+    setHasEmpty,
+    showTrigger,
+    trigger,
+  };
 
   const store = useComboboxStore({
     // open: ,
@@ -178,7 +168,7 @@ const InlineCombobox = ({
     if (!store.getState().activeId) {
       store.setActiveId(store.first());
     }
-  }, [items, store]);
+  }, [store]);
 
   return (
     <span contentEditable={false}>
@@ -310,13 +300,12 @@ const InlineComboboxItem = ({
   // Optimization: Do not subscribe to value if filter is false
   const search = filter && store.useState("value");
 
-  const visible = React.useMemo(
-    () =>
-      !filter || filter({ group, keywords, label, value }, search as string),
-    [filter, group, keywords, label, value, search]
-  );
+  const visible =
+    !filter || filter({ group, keywords, label, value }, search as string);
 
-  if (!visible) return null;
+  if (!visible) {
+    return null;
+  }
 
   return (
     <ComboboxItem
@@ -346,7 +335,9 @@ const InlineComboboxEmpty = ({
     };
   }, [setHasEmpty]);
 
-  if (items.length > 0) return null;
+  if (items.length > 0) {
+    return null;
+  }
 
   return (
     <div

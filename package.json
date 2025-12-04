@@ -38,12 +38,6 @@
     "ultracite": "6.3.8"
   },
   "dependencies": {
-    "@radix-ui/react-alert-dialog": "^1.1.15",
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-slot": "^1.2.4",
-    "@tanstack/pacer": "^0.16.3",
-    "cmdk": "^1.1.1",
-    "platejs": "^52.0.8",
     "sst": "3.9.33"
   },
   "trustedDependencies": [

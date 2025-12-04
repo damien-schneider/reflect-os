@@ -228,24 +228,22 @@ function NewFeedback() {
         </div>
 
         {/* Notion-style description editor */}
-        <div className="min-h-[300px]">
-          {isSubmitting ? (
-            <div className="min-h-[200px] rounded-lg bg-muted/30 p-4">
-              <p className="text-muted-foreground text-sm">
-                {description || "No description provided"}
-              </p>
-            </div>
-          ) : (
-            <MarkdownEditor
-              editable
-              editorClassName="border-none shadow-none px-0 py-0 min-h-[200px] bg-transparent"
-              enableDnd
-              onChange={setDescription}
-              placeholder="Add a description... Press '/' for commands"
-              value={description}
-            />
-          )}
-        </div>
+
+        {isSubmitting ? (
+          <div className="min-h-[200px] rounded-lg bg-muted/30 p-4">
+            <p className="text-muted-foreground text-sm">
+              {description || "No description provided"}
+            </p>
+          </div>
+        ) : (
+          <MarkdownEditor
+            editable
+            editorClassName="border-none shadow-none px-0 py-0 bg-transparent"
+            enableDnd
+            onChange={setDescription}
+            value={description}
+          />
+        )}
 
         {/* Submit buttons - sticky at bottom */}
         <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-background py-4">

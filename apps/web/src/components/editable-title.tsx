@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +36,7 @@ export function EditableTitle({
     }
   }, [isEditing]);
 
-  const handleSave = useCallback(() => {
+  const handleSave = () => {
     const trimmedValue = localValue.trim();
     if (trimmedValue && trimmedValue !== value) {
       onSave(trimmedValue);
@@ -45,26 +45,23 @@ export function EditableTitle({
       setLocalValue(value);
     }
     setIsEditing(false);
-  }, [localValue, value, onSave]);
+  };
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        handleSave();
-      } else if (e.key === "Escape") {
-        setLocalValue(value);
-        setIsEditing(false);
-      }
-    },
-    [handleSave, value]
-  );
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === "Escape") {
+      setLocalValue(value);
+      setIsEditing(false);
+    }
+  };
 
-  const handleClick = useCallback(() => {
+  const handleClick = () => {
     if (!disabled) {
       setIsEditing(true);
     }
-  }, [disabled]);
+  };
 
   if (isEditing) {
     return (

@@ -8,10 +8,11 @@ import {
   StrikethroughIcon,
 } from "lucide-react";
 import { KEYS } from "platejs";
-import { Plate, PlateContent } from "platejs/react";
-import { useCallback, useRef, useSyncExternalStore } from "react";
+import { Plate } from "platejs/react";
+import { useRef, useSyncExternalStore } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { Editor, EditorContainer } from "@/components/ui/editor";
 import { FloatingToolbar } from "@/components/ui/floating-toolbar";
 import {
   RedoToolbarButton,
@@ -27,7 +28,6 @@ import "@/features/editor/components/editor.css";
 type MarkdownEditorProps = {
   value?: string;
   onChange?: (markdown: string) => void;
-  placeholder?: string;
   className?: string;
   editorClassName?: string;
   autoFocus?: boolean;
@@ -36,10 +36,11 @@ type MarkdownEditorProps = {
   enableDnd?: boolean;
 };
 
+const EDITOR_PLACEHOLDER = "Start typing or press '/' for commands...";
+
 export function MarkdownEditor({
   value = "",
   onChange,
-  placeholder = "Start typing or press '/' for commands...",
   className,
   editorClassName,
   autoFocus = false,
@@ -62,20 +63,16 @@ export function MarkdownEditor({
     () => true
   );
 
-  const handleUpdate = useCallback(
-    (markdown: string) => {
-      // Only call onChange if still mounted
-      if (isMountedRef.current) {
-        onChange?.(markdown);
-      }
-    },
-    [onChange]
-  );
+  const handleUpdate = (markdown: string) => {
+    // Only call onChange if still mounted
+    if (isMountedRef.current) {
+      onChange?.(markdown);
+    }
+  };
 
   const { editor } = useMarkdownEditor({
     content: value,
     onUpdate: handleUpdate,
-    placeholder,
     autoFocus,
     editable,
     enableDnd,
@@ -98,16 +95,17 @@ export function MarkdownEditor({
           handleUpdate(markdown);
         }}
       >
-        <div className="relative **:selection:bg-blue-500/35! dark:**:selection:bg-blue-400/45!">
-          <PlateContent
+        <EditorContainer>
+          <Editor
             className={cn(
+              "editor-content editor-padding",
               "prose prose-sm dark:prose-invert max-w-none",
-              "min-h-[200px] w-full rounded-lg border border-input bg-background px-4 py-3",
-              "*:mx-auto *:max-w-3xl focus:outline-none",
-              "",
+              "w-full rounded-lg border border-input bg-background",
+              "min-h-150! focus:outline-none",
               editorClassName
             )}
-            placeholder={placeholder}
+            placeholder={EDITOR_PLACEHOLDER}
+            variant="default"
           />
 
           {/* Floating toolbar appears when text is selected */}
@@ -139,7 +137,7 @@ export function MarkdownEditor({
               </ToolbarGroup>
             </FloatingToolbar>
           )}
-        </div>
+        </EditorContainer>
       </Plate>
     </div>
   );

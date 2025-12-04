@@ -1,7 +1,6 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { format } from "date-fns";
 import { Check, CheckCircle } from "lucide-react";
-import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { Schema } from "@/schema";
 
@@ -30,7 +29,7 @@ export function ChangelogItemSelector({
   const [allFeedback] = useQuery(z.query.feedback.related("board"));
 
   // Filter to only completed items from this org's boards
-  const completedItems = useMemo(() => {
+  const completedItems = (() => {
     if (!(allFeedback && boards)) {
       return [];
     }
@@ -54,10 +53,10 @@ export function ChangelogItemSelector({
         return true;
       })
       .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
-  }, [allFeedback, boards, completedAfter]);
+  })();
 
   // Group by board for better organization
-  const groupedByBoard = useMemo(() => {
+  const groupedByBoard = (() => {
     const groups: Record<
       string,
       { board: (typeof boards)[number]; items: typeof completedItems }
@@ -76,7 +75,7 @@ export function ChangelogItemSelector({
     }
 
     return Object.values(groups);
-  }, [completedItems, boards]);
+  })();
 
   const toggleSelection = (id: string) => {
     if (selectedIds.includes(id)) {

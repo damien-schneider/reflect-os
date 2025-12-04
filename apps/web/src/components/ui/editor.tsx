@@ -55,7 +55,7 @@ const editorVariants = cva(
     "group/editor",
     "relative w-full cursor-text select-text overflow-x-hidden whitespace-pre-wrap break-words",
     "rounded-md ring-offset-background focus-visible:outline-none",
-    "**:data-slate-placeholder:!top-1/2 **:data-slate-placeholder:-translate-y-1/2 placeholder:text-muted-foreground/80 **:data-slate-placeholder:text-muted-foreground/80 **:data-slate-placeholder:opacity-100!",
+    "**:data-slate-placeholder:!top-1/2 **:data-slate-placeholder:-translate-y-1/2 placeholder:text-muted-foreground **:data-slate-placeholder:text-muted-foreground **:data-slate-placeholder:opacity-100!",
     "[&_strong]:font-bold"
   ),
   {
@@ -74,8 +74,7 @@ const editorVariants = cva(
         aiChat:
           "max-h-[min(70vh,320px)] w-full max-w-[700px] overflow-y-auto px-3 py-2 text-base md:text-sm",
         comment: cn("rounded-none border-none bg-transparent text-sm"),
-        default:
-          "size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]",
+        default: "size-full pt-4 pb-72 text-base",
         demo: "size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]",
         fullWidth: "size-full px-16 pt-4 pb-72 text-base sm:px-24",
         none: "",

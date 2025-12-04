@@ -1,6 +1,6 @@
 import { ZeroProvider } from "@rocicorp/zero/react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
@@ -52,7 +52,7 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
   // Create auth function for Zero - this is called when Zero needs a token
   // Using async function allows Zero to automatically refresh tokens
   // Per Zero docs: "This function is called by Zero if token verification fails"
-  const authFunction = useCallback(async () => {
+  const authFunction = async () => {
     if (!session) {
       console.log("[ZeroSetup] No session, returning undefined for auth");
       return;
@@ -63,7 +63,7 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
       throw new Error("Failed to fetch Zero authentication token");
     }
     return token;
-  }, [session]);
+  };
 
   // Initialize Zero when session state changes
   useEffect(() => {
@@ -146,30 +146,27 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
   };
 
   // Handle schema version updates - reload the page when needed
-  const handleUpdateNeeded = useCallback((reason: { type: string }) => {
+  const handleUpdateNeeded = (reason: { type: string }) => {
     console.log("[ZeroSetup] Update needed:", reason);
     if (reason.type === "SchemaVersionNotSupported") {
       console.log("[ZeroSetup] Schema version not supported, reloading...");
       // Give user a moment to see any pending UI changes
       setTimeout(() => window.location.reload(), 100);
     }
-  }, []);
+  };
 
-  // Memoize ZeroProvider props to prevent unnecessary re-renders
-  const zeroProps = useMemo(
-    () => ({
-      userID: state.userID,
-      // Use async function for auth - Zero will call this when token verification fails
-      // This enables automatic token refresh
-      auth:
-        state.status === "ready" && state.userID !== "anon"
-          ? authFunction
-          : undefined,
-      server: clientEnv.VITE_PUBLIC_ZERO_SERVER,
-      schema,
-    }),
-    [state.userID, state.status, authFunction]
-  );
+  // ZeroProvider props
+  const zeroProps = {
+    userID: state.userID,
+    // Use async function for auth - Zero will call this when token verification fails
+    // This enables automatic token refresh
+    auth:
+      state.status === "ready" && state.userID !== "anon"
+        ? authFunction
+        : undefined,
+    server: clientEnv.VITE_PUBLIC_ZERO_SERVER,
+    schema,
+  };
 
   // Loading state
   if (state.status === "loading") {

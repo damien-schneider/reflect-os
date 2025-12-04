@@ -83,8 +83,11 @@ export function PasswordChangeForm({
     );
   }
 
+  // Type for validation errors from TanStack Form
+  type ValidationError = string | { message?: string } | undefined;
+
   // Helper to extract error message from field errors
-  const getFieldError = (errors: unknown[]): string | undefined => {
+  const getFieldError = (errors: ValidationError[]): string | undefined => {
     if (errors.length === 0) {
       return;
     }
@@ -93,8 +96,8 @@ export function PasswordChangeForm({
         if (typeof err === "string") {
           return err;
         }
-        if (err && typeof err === "object" && "message" in err) {
-          return (err as { message: string }).message;
+        if (err && typeof err === "object" && "message" in err && err.message) {
+          return err.message;
         }
         return "";
       })

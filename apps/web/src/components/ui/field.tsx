@@ -26,7 +26,11 @@ function Field({
       {label && (
         <Label>
           {label}
-          {required && <span className="ml-1 text-destructive">*</span>}
+          {required && (
+            <span className="ml-1 text-destructive" title="required">
+              *
+            </span>
+          )}
         </Label>
       )}
       {children}

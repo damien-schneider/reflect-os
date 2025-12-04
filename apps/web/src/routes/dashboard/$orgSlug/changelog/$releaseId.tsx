@@ -248,9 +248,9 @@ function ReleaseDetailPage() {
   const isPublished = !!release.publishedAt;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="">
       {/* Header with back button and actions */}
-      <div className="flex items-center justify-between">
+      <div className="wrapper-content flex items-center justify-between">
         <Button asChild className="gap-2" variant="ghost">
           <Link params={{ orgSlug }} to="/dashboard/$orgSlug/changelog">
             <ArrowLeft className="h-4 w-4" />
@@ -314,7 +314,7 @@ function ReleaseDetailPage() {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center gap-3 text-muted-foreground text-sm">
+      <div className="wrapper-content flex items-center gap-3 text-muted-foreground text-sm">
         <Badge variant={isPublished ? "default" : "secondary"}>
           {isPublished ? "Published" : "Draft"}
         </Badge>
@@ -335,7 +335,7 @@ function ReleaseDetailPage() {
       </div>
 
       {/* Main content area - Notion-like */}
-      <div className="space-y-6">
+      <div className="wrapper-content space-y-6">
         {/* Properties section - above title like Notion */}
         <div className="space-y-3">
           {/* Version badge - click to edit */}
@@ -429,17 +429,15 @@ function ReleaseDetailPage() {
             {title || "Untitled Release"}
           </button>
         )}
-
-        {/* Description - Markdown editor */}
-        <div className="mt-8">
-          <MarkdownEditor
-            editorClassName="border-none shadow-none px-0"
-            onChange={saveDescription}
-            showToolbar={true}
-            value={description}
-          />
-        </div>
       </div>
+
+      {/* Description - Markdown editor (outside wrapper-content for proper full-width behavior) */}
+      <MarkdownEditor
+        editorClassName=""
+        onChange={saveDescription}
+        showToolbar={true}
+        value={description}
+      />
     </div>
   );
 }

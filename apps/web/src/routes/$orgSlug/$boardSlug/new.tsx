@@ -179,32 +179,34 @@ function NewFeedback() {
   }
 
   return (
-    <div className="">
+    <>
       {/* Back link */}
-      <Button
-        className="mb-6 gap-2"
-        onClick={() =>
-          navigate({
-            to: "/$orgSlug/$boardSlug",
-            params: { orgSlug, boardSlug },
-          })
-        }
-        variant="ghost"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to {board?.name ?? "Board"}
-      </Button>
+      <div className="wrapper-content flex">
+        <Button
+          className="mb-6 gap-2"
+          onClick={() =>
+            navigate({
+              to: "/$orgSlug/$boardSlug",
+              params: { orgSlug, boardSlug },
+            })
+          }
+          variant="ghost"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to {board?.name ?? "Board"}
+        </Button>
+      </div>
 
       {/* Notion-style form */}
       <form onSubmit={handleSubmit}>
         {error && (
-          <div className="mb-4 rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
+          <div className="wrapper-content mb-4 rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
             {error}
           </div>
         )}
 
         {/* Notion-style title input */}
-        <div className="mb-2">
+        <div className="wrapper-content mb-2">
           <textarea
             className={cn(
               "w-full resize-none overflow-hidden bg-transparent",
@@ -230,7 +232,7 @@ function NewFeedback() {
         {/* Notion-style description editor */}
 
         {isSubmitting ? (
-          <div className="min-h-[200px] rounded-lg bg-muted/30 p-4">
+          <div className="wrapper-content min-h-[200px] rounded-lg bg-muted/30 p-4">
             <p className="text-muted-foreground text-sm">
               {description || "No description provided"}
             </p>
@@ -246,7 +248,7 @@ function NewFeedback() {
         )}
 
         {/* Submit buttons - sticky at bottom */}
-        <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-background py-4">
+        <div className="wrapper-content sticky bottom-0 flex justify-end gap-3 border-t bg-background py-4">
           <Button
             disabled={isSubmitting}
             onClick={() =>
@@ -272,6 +274,6 @@ function NewFeedback() {
           </Button>
         </div>
       </form>
-    </div>
+    </>
   );
 }

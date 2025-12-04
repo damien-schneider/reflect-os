@@ -53,7 +53,7 @@ function PublicChangelog() {
 
   if (!org) {
     return (
-      <div className="container max-w-3xl py-12">
+      <div className="wrapper-content py-12">
         <div className="text-center">
           <p className="text-muted-foreground">Organization not found</p>
         </div>
@@ -62,9 +62,9 @@ function PublicChangelog() {
   }
 
   return (
-    <div className="container max-w-3xl py-12">
+    <div className="py-12">
       {/* Header */}
-      <div className="mb-12 text-center">
+      <div className="wrapper-content mb-12 text-center">
         <h1 className="font-bold text-3xl">Changelog</h1>
         <p className="mt-2 text-muted-foreground">
           The latest updates and improvements from {org.name}
@@ -77,7 +77,7 @@ function PublicChangelog() {
           {releasesWithFeedbacks.map((release) => (
             <article className="relative" key={release.id}>
               {/* Date marker */}
-              <div className="mb-4 flex items-center gap-3">
+              <div className="wrapper-content mb-4 flex items-center gap-3">
                 <div className="h-px flex-1 bg-border" />
                 <time
                   className="flex shrink-0 items-center gap-1.5 text-muted-foreground text-sm"
@@ -95,63 +95,72 @@ function PublicChangelog() {
               </div>
 
               {/* Release content */}
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {release.version && (
-                      <Badge className="font-mono" variant="default">
-                        {release.version}
-                      </Badge>
-                    )}
-                  </div>
-                  <CardTitle className="text-2xl">{release.title}</CardTitle>
-                  {release.description && (
-                    <div className="mt-2">
-                      <MarkdownEditor
-                        editable={false}
-                        showToolbar={false}
-                        value={release.description}
-                      />
+              <div className="wrapper-content">
+                <Card>
+                  <CardHeader>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {release.version && (
+                        <Badge className="font-mono" variant="default">
+                          {release.version}
+                        </Badge>
+                      )}
                     </div>
-                  )}
-                </CardHeader>
+                    <CardTitle className="text-2xl">{release.title}</CardTitle>
+                  </CardHeader>
+                </Card>
+              </div>
 
-                {release.feedbacks.length > 0 && (
-                  <CardContent>
-                    <div className="space-y-3">
-                      <h4 className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        What's New
-                      </h4>
-                      <ul className="space-y-2">
-                        {release.feedbacks.map((feedback) => (
-                          <li
-                            className="flex items-start gap-2"
-                            key={feedback.id}
-                          >
-                            <span className="mt-0.5 text-green-600">•</span>
-                            <div className="flex-1">
-                              <span className="font-medium">
-                                {feedback.title}
-                              </span>
-                              {feedback.board && (
-                                <span className="ml-2 text-muted-foreground text-xs">
-                                  in {feedback.board.name}
+              {/* Description - outside wrapper-content for proper editor behavior */}
+              {release.description && (
+                <div className="mt-4">
+                  <MarkdownEditor
+                    editable={false}
+                    showToolbar={false}
+                    value={release.description}
+                  />
+                </div>
+              )}
+
+              {/* Completed items */}
+              {release.feedbacks.length > 0 && (
+                <div className="wrapper-content mt-4">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="space-y-3">
+                        <h4 className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          What's New
+                        </h4>
+                        <ul className="space-y-2">
+                          {release.feedbacks.map((feedback) => (
+                            <li
+                              className="flex items-start gap-2"
+                              key={feedback.id}
+                            >
+                              <span className="mt-0.5 text-green-600">•</span>
+                              <div className="flex-1">
+                                <span className="font-medium">
+                                  {feedback.title}
                                 </span>
-                              )}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
+                                {feedback.board && (
+                                  <span className="ml-2 text-muted-foreground text-xs">
+                                    in {feedback.board.name}
+                                  </span>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </article>
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border bg-muted/30 py-12 text-center">
+        <div className="wrapper-content rounded-lg border bg-muted/30 py-12 text-center">
           <p className="text-muted-foreground">
             No releases published yet. Check back soon for updates!
           </p>

@@ -136,7 +136,7 @@ function DashboardOrgIndex() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="wrapper-content space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

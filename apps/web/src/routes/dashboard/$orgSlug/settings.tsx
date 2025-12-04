@@ -78,7 +78,7 @@ function DashboardSettings() {
   }
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="wrapper-content space-y-8">
       {/* Header */}
       <div>
         <h1 className="font-bold text-2xl">Organization Settings</h1>

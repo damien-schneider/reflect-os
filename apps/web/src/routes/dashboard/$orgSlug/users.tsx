@@ -71,7 +71,7 @@ function DashboardUsers() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="wrapper-content space-y-8">
       {/* Header */}
       <div>
         <h1 className="font-bold text-2xl">User Management</h1>

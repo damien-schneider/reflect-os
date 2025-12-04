@@ -81,133 +81,136 @@ function FeedbackDetail() {
   return (
     <div className="space-y-6">
       {/* Back link */}
-      <Button asChild className="gap-2" variant="ghost">
-        <Link params={{ orgSlug, boardSlug }} to="/$orgSlug/$boardSlug">
-          <ArrowLeft className="h-4 w-4" />
-          Back to {board?.name ?? "Board"}
-        </Link>
-      </Button>
+      <div className="wrapper-content">
+        <Button asChild className="gap-2" variant="ghost">
+          <Link params={{ orgSlug, boardSlug }} to="/$orgSlug/$boardSlug">
+            <ArrowLeft className="h-4 w-4" />
+            Back to {board?.name ?? "Board"}
+          </Link>
+        </Button>
+      </div>
 
       {/* Main content */}
-      <div className="flex gap-6">
-        {/* Vote button - sidebar on larger screens */}
-        <div className="hidden md:block">
-          <VoteButton
-            feedbackId={feedback.id}
-            size="lg"
-            voteCount={feedback.voteCount ?? 0}
-          />
-        </div>
-
-        {/* Content */}
-        <div className="min-w-0 flex-1 space-y-4">
-          {/* Header */}
-          <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <StatusBadge status={feedback.status ?? "open"} />
-              {feedback.isPinned && (
-                <span className="flex items-center gap-1 text-primary text-xs">
-                  <Pin className="h-3 w-3" />
-                  Pinned
-                </span>
-              )}
-              {!feedback.isApproved && (
-                <span className="flex items-center gap-1 text-muted-foreground text-xs">
-                  <Lock className="h-3 w-3" />
-                  Pending approval
-                </span>
-              )}
-            </div>
-            <h1 className="font-bold text-2xl">{feedback.title}</h1>
-            <div className="mt-2 flex items-center gap-2 text-muted-foreground text-sm">
-              <Link
-                className="hover:text-foreground"
-                params={{ userId: feedback.authorId }}
-                to="/u/$userId"
-              >
-                {feedback.author?.name ?? "Unknown User"}
-              </Link>
-              <span>•</span>
-              <span>
-                {formatDistanceToNow(feedback.createdAt, { addSuffix: true })}
-              </span>
-              {feedback.updatedAt > feedback.createdAt && (
-                <>
-                  <span>•</span>
-                  <span>edited</span>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Mobile vote button */}
-          <div className="md:hidden">
+      <div className="wrapper-content">
+        <div className="flex gap-6">
+          {/* Vote button - sidebar on larger screens */}
+          <div className="hidden md:block">
             <VoteButton
               feedbackId={feedback.id}
-              size="md"
+              size="lg"
               voteCount={feedback.voteCount ?? 0}
             />
           </div>
 
-          {/* Tags */}
-          <TagSelector
-            editable={isOrgMember}
-            feedbackId={feedback.id}
-            organizationId={org?.id ?? ""}
-            selectedTagIds={selectedTagIds}
-          />
+          {/* Content */}
+          <div className="min-w-0 flex-1 space-y-4">
+            {/* Header */}
+            <div>
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <StatusBadge status={feedback.status ?? "open"} />
+                {feedback.isPinned && (
+                  <span className="flex items-center gap-1 text-primary text-xs">
+                    <Pin className="h-3 w-3" />
+                    Pinned
+                  </span>
+                )}
+                {!feedback.isApproved && (
+                  <span className="flex items-center gap-1 text-muted-foreground text-xs">
+                    <Lock className="h-3 w-3" />
+                    Pending approval
+                  </span>
+                )}
+              </div>
+              <h1 className="font-bold text-2xl">{feedback.title}</h1>
+              <div className="mt-2 flex items-center gap-2 text-muted-foreground text-sm">
+                <Link
+                  className="hover:text-foreground"
+                  params={{ userId: feedback.authorId }}
+                  to="/u/$userId"
+                >
+                  {feedback.author?.name ?? "Unknown User"}
+                </Link>
+                <span>•</span>
+                <span>
+                  {formatDistanceToNow(feedback.createdAt, { addSuffix: true })}
+                </span>
+                {feedback.updatedAt > feedback.createdAt && (
+                  <>
+                    <span>•</span>
+                    <span>edited</span>
+                  </>
+                )}
+              </div>
+            </div>
 
-          {/* Admin Actions */}
-          {isOrgMember && (
-            <div className="flex gap-2">
-              <AddToRoadmap
-                currentLane={feedback.roadmapLane}
+            {/* Mobile vote button */}
+            <div className="md:hidden">
+              <VoteButton
                 feedbackId={feedback.id}
+                size="md"
+                voteCount={feedback.voteCount ?? 0}
               />
             </div>
-          )}
 
-          {/* Description */}
+            {/* Tags */}
+            <TagSelector
+              editable={isOrgMember}
+              feedbackId={feedback.id}
+              organizationId={org?.id ?? ""}
+              selectedTagIds={selectedTagIds}
+            />
 
-          <MarkdownEditor
-            editable={false}
-            showToolbar={false}
-            value={feedback.description}
-          />
-
-          <Separator />
-
-          {/* Admin notes (only for org members) */}
-          {isOrgMember &&
-            Array.isArray(adminNotes) &&
-            adminNotes.length > 0 && (
-              <div className="space-y-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950/30">
-                <h3 className="flex items-center gap-2 font-semibold text-sm">
-                  <Lock className="h-4 w-4" />
-                  Private Notes
-                </h3>
-                {(
-                  adminNotes as {
-                    id: string;
-                    body: string;
-                    createdAt: number;
-                    author?: { name: string };
-                  }[]
-                ).map((note) => (
-                  <div className="text-sm" key={note.id}>
-                    <div className="mb-1 text-muted-foreground text-xs">
-                      {note.author?.name} •{" "}
-                      {formatDistanceToNow(note.createdAt, { addSuffix: true })}
-                    </div>
-                    <p>{note.body}</p>
-                  </div>
-                ))}
+            {/* Admin Actions */}
+            {isOrgMember && (
+              <div className="flex gap-2">
+                <AddToRoadmap
+                  currentLane={feedback.roadmapLane}
+                  feedbackId={feedback.id}
+                />
               </div>
             )}
-
-          {/* Comments */}
-          <CommentThread feedbackId={feedback.id} isOrgMember={isOrgMember} />
+          </div>
         </div>
+      </div>
+
+      {/* Description - outside wrapper-content for proper editor behavior */}
+      <MarkdownEditor
+        editable={false}
+        showToolbar={false}
+        value={feedback.description}
+      />
+
+      <div className="wrapper-content space-y-4">
+        <Separator />
+
+        {/* Admin notes (only for org members) */}
+        {isOrgMember && Array.isArray(adminNotes) && adminNotes.length > 0 && (
+          <div className="space-y-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950/30">
+            <h3 className="flex items-center gap-2 font-semibold text-sm">
+              <Lock className="h-4 w-4" />
+              Private Notes
+            </h3>
+            {(
+              adminNotes as {
+                id: string;
+                body: string;
+                createdAt: number;
+                author?: { name: string };
+              }[]
+            ).map((note) => (
+              <div className="text-sm" key={note.id}>
+                <div className="mb-1 text-muted-foreground text-xs">
+                  {note.author?.name} •{" "}
+                  {formatDistanceToNow(note.createdAt, { addSuffix: true })}
+                </div>
+                <p>{note.body}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Comments */}
+        <CommentThread feedbackId={feedback.id} isOrgMember={isOrgMember} />
       </div>
     </div>
   );

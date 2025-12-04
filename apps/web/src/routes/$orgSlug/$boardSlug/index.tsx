@@ -63,11 +63,13 @@ function BoardIndex() {
 
   return (
     <div className="space-y-6">
-      <BoardHeader
-        board={board}
-        setViewMode={setViewMode}
-        viewMode={viewMode}
-      />
+      <div className="wrapper-content">
+        <BoardHeader
+          board={board}
+          setViewMode={setViewMode}
+          viewMode={viewMode}
+        />
+      </div>
 
       {viewMode === "list" ? (
         <ListView
@@ -90,13 +92,15 @@ function BoardIndex() {
       )}
 
       {isOrgMember === true ? (
-        <AdminFloatingBar
-          dashboardLink={{
-            to: "/dashboard/$orgSlug/$boardSlug",
-            params: { orgSlug, boardSlug },
-          }}
-          message="You're viewing the public page"
-        />
+        <div className="wrapper-content">
+          <AdminFloatingBar
+            dashboardLink={{
+              to: "/dashboard/$orgSlug/$boardSlug",
+              params: { orgSlug, boardSlug },
+            }}
+            message="You're viewing the public page"
+          />
+        </div>
       ) : null}
     </div>
   );
@@ -194,7 +198,7 @@ function ListView({
   openAuthDialog: () => void;
 }) {
   return (
-    <>
+    <div className="wrapper-content space-y-6">
       <FeedbackFilters />
 
       <p className="text-muted-foreground text-sm">
@@ -231,7 +235,7 @@ function ListView({
           />
         ) : null}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -293,7 +297,7 @@ function RoadmapView({
   roadmapItems: RoadmapFeedbackItem[];
 }) {
   return (
-    <>
+    <div className="wrapper-content space-y-6">
       <RoadmapKanban
         boardId={boardId}
         customLanes={roadmapLaneTags.length > 0 ? roadmapLaneTags : undefined}
@@ -307,6 +311,6 @@ function RoadmapView({
           <p className="text-muted-foreground">No items on the roadmap yet.</p>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

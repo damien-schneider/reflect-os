@@ -97,10 +97,8 @@ export function MarkdownEditor({
         <EditorContainer>
           <Editor
             className={cn(
-              "editor-content editor-padding",
-              // "prose prose-sm dark:prose-invert max-w-none",
-              "w-full rounded-lg border border-input bg-background",
-              "min-h-150! focus:outline-none",
+              "w-full",
+              "min-h-150! *:mx-auto *:max-w-3xl focus:outline-none",
               editorClassName
             )}
             placeholder={EDITOR_PLACEHOLDER}

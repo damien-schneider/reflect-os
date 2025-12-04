@@ -100,7 +100,7 @@ function DashboardBoardIndex() {
   const isNewBoard = board?.name === "Untitled Board";
 
   return (
-    <div className="space-y-6">
+    <div className="wrapper-content space-y-6">
       {isNewBoard === true && <NewBoardBanner />}
 
       <DashboardBoardHeader

@@ -105,29 +105,34 @@ function MyAccount() {
 
     setPasswordLoading(true);
 
-    await authClient.changePassword(
-      {
-        currentPassword,
-        newPassword,
-        revokeOtherSessions: true,
-      },
-      {
-        onSuccess: () => {
-          setPasswordSuccess("Password changed successfully");
-          setPasswordLoading(false);
-          setTimeout(() => {
-            closePasswordChange();
-          }, 1500);
+    try {
+      await authClient.changePassword(
+        {
+          currentPassword,
+          newPassword,
+          revokeOtherSessions: true,
         },
-        onError: (ctx) => {
-          setPasswordError(
-            ctx.error.message ||
-              "Could not change password. Check your current password."
-          );
-          setPasswordLoading(false);
-        },
-      }
-    );
+        {
+          onSuccess: () => {
+            setPasswordSuccess("Password changed successfully");
+            setPasswordLoading(false);
+            setTimeout(() => {
+              closePasswordChange();
+            }, 1500);
+          },
+          onError: (ctx) => {
+            setPasswordError(
+              ctx.error.message ||
+                "Could not change password. Check your current password."
+            );
+            setPasswordLoading(false);
+          },
+        }
+      );
+    } catch {
+      setPasswordError("Could not change password. Please try again.");
+      setPasswordLoading(false);
+    }
   };
 
   // Organization management

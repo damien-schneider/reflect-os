@@ -19,7 +19,7 @@ export const BlockSelectionKit = [
           return null;
         }
 
-        return <BlockSelection {...(props as never)} />;
+        return <BlockSelection plugin={props.plugin} />;
       },
     },
   })),

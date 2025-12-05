@@ -390,5 +390,19 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
         delete: [allowIfReleaseItemOrgMember],
       },
     },
+    subscription: {
+      row: {
+        // Subscription data is managed by Polar webhooks (server-side)
+        // Org members can read their subscription, but cannot modify directly
+        select: [allowIfLoggedIn],
+        // No client-side mutations - all changes come from Polar webhooks
+        insert: [],
+        update: {
+          preMutation: [],
+          postMutation: [],
+        },
+        delete: [],
+      },
+    },
   } satisfies PermissionsConfig<AuthData, Schema>;
 });

@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en" suppressHydrationWarning>
   <head>
+    <script type="module">
+    // first npm i react-grab
+    // then in head:
+    if (import.meta.env.DEV) {
+      import("react-grab");
+    }
+    </script>
     <script>
     "use strict";
     // Prevent FOUC for theme

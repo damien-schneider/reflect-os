@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
+import { createMutators } from "@/mutators";
 import { schema } from "@/schema";
 
 type ZeroState = {
@@ -156,6 +157,17 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
   };
 
   // ZeroProvider props
+  // Pass custom mutators for optimistic updates with server validation
+  const authData = { sub: state.userID !== "anon" ? state.userID : null };
+  const mutators = createMutators(authData);
+
+  // Derive mutate URL from window location (same origin as app)
+  // In production this would typically be configured via environment
+  const mutateURL =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/api/push`
+      : "/api/push";
+
   const zeroProps = {
     userID: state.userID,
     // Use async function for auth - Zero will call this when token verification fails
@@ -166,6 +178,8 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
         : undefined,
     server: clientEnv.VITE_PUBLIC_ZERO_SERVER,
     schema,
+    mutators,
+    mutateURL,
   };
 
   // Loading state

@@ -1,7 +1,8 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
-import { createFileRoute, useParams } from "@tanstack/react-router";
-import { Globe, Layers, Lock, Pencil, Plus, Trash2 } from "lucide-react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { Crown, Globe, Layers, Lock, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useLimitCheck } from "@/features/subscription";
 import { randID } from "@/rand";
 import type { Board, Schema } from "@/schema";
 
@@ -48,6 +50,10 @@ function AdminBoards() {
       .orderBy("createdAt", "desc")
   );
 
+  // Check board limit
+  const boardCount = boards?.length ?? 0;
+  const { isLimitReached, max } = useLimitCheck(boardCount, "boards");
+
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingBoard, setEditingBoard] = useState<Board | null>(null);
@@ -58,7 +64,6 @@ function AdminBoards() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const resetForm = () => {
     setName("");
@@ -77,43 +82,41 @@ function AdminBoards() {
     setShowCreateModal(true);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!(name.trim() && slug.trim() && org)) {
       return;
     }
 
-    setIsSubmitting(true);
+    if (editingBoard) {
+      // Update existing board
+      z.mutate.board.update({
+        id: editingBoard.id,
+        name: name.trim(),
+        slug: slug.trim().toLowerCase(),
+        description: description.trim() || undefined,
+        isPublic,
+        updatedAt: Date.now(),
+      });
+    } else {
+      // Create new board optimistically
+      // Server validates limits via push endpoint and will rollback if exceeded
+      const boardId = randID();
+      const now = Date.now();
 
-    try {
-      if (editingBoard) {
-        // Update existing board
-        await z.mutate.board.update({
-          id: editingBoard.id,
-          name: name.trim(),
-          slug: slug.trim().toLowerCase(),
-          description: description.trim() || undefined,
-          isPublic,
-          updatedAt: Date.now(),
-        });
-      } else {
-        // Create new board
-        await z.mutate.board.insert({
-          id: randID(),
-          organizationId: org.id,
-          name: name.trim(),
-          slug: slug.trim().toLowerCase(),
-          description: description.trim() || undefined,
-          isPublic,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        });
-      }
-
-      setShowCreateModal(false);
-      resetForm();
-    } finally {
-      setIsSubmitting(false);
+      z.mutate.board.insert({
+        id: boardId,
+        organizationId: org.id,
+        name: name.trim(),
+        slug: slug.trim().toLowerCase(),
+        description: description.trim() || "",
+        isPublic,
+        createdAt: now,
+        updatedAt: now,
+      });
     }
+
+    setShowCreateModal(false);
+    resetForm();
   };
 
   const handleDelete = async () => {
@@ -147,11 +150,38 @@ function AdminBoards() {
             Create and manage feedback boards
           </p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Board
-        </Button>
+        <div className="flex items-center gap-3">
+          <span className="text-muted-foreground text-sm">
+            {boardCount} / {max} boards
+          </span>
+          <Button
+            disabled={isLimitReached}
+            onClick={() => setShowCreateModal(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            New Board
+          </Button>
+        </div>
       </div>
+
+      {/* Limit reached warning */}
+      {isLimitReached && (
+        <Alert>
+          <Crown className="h-4 w-4" />
+          <AlertTitle>Board limit reached</AlertTitle>
+          <AlertDescription>
+            You've reached the maximum of {max} boards on your current plan.{" "}
+            <Link
+              className="font-medium underline underline-offset-4 hover:text-primary"
+              params={{ orgSlug }}
+              to="/dashboard/$orgSlug/subscription"
+            >
+              Upgrade your plan
+            </Link>{" "}
+            to create more boards.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* All Boards */}
       <div className="space-y-4">
@@ -260,15 +290,8 @@ function AdminBoards() {
             >
               Cancel
             </Button>
-            <Button
-              disabled={isSubmitting || !name.trim()}
-              onClick={handleSubmit}
-            >
-              {isSubmitting
-                ? "Saving..."
-                : editingBoard
-                  ? "Save Changes"
-                  : "Create Board"}
+            <Button disabled={!name.trim()} onClick={handleSubmit}>
+              {editingBoard ? "Save Changes" : "Create Board"}
             </Button>
           </DialogFooter>
         </DialogContent>

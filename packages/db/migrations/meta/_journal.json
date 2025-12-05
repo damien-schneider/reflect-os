@@ -15,6 +15,13 @@
       "when": 1764865270488,
       "tag": "0001_nervous_cyclops",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1764928036035,
+      "tag": "0002_luxuriant_anthem",
+      "breakpoints": true
     }
   ]
 }

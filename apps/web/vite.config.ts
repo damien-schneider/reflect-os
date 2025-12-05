@@ -24,6 +24,9 @@ export default defineConfig({
       target: "es2022",
     },
   },
+  server: {
+    allowedHosts: [".ngrok-free.app", ".ngrok-free.dev", ".ngrok.io"],
+  },
   plugins: [
     tanstackRouter(),
     tailwindcss(),

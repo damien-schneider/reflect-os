@@ -55,6 +55,9 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "check-types": {
+      "dependsOn": ["^build"]
+    },
     "db:push": {
       "cache": false
     },

@@ -1,3 +1,4 @@
+import { polarClient } from "@polar-sh/better-auth";
 import { organizationClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
@@ -5,5 +6,5 @@ import { createAuthClient } from "better-auth/react";
 // This avoids cross-origin issues and SSL certificate problems
 export const authClient = createAuthClient({
   baseURL: "", // Empty string = same origin
-  plugins: [organizationClient()],
+  plugins: [organizationClient(), polarClient()],
 });

@@ -3,11 +3,6 @@ import { createRoot } from "react-dom/client";
 import "@/index.css";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
-// Load react-grab dev tool in development mode
-if (import.meta.env.DEV) {
-  import("react-grab");
-}
-
 // Import the generated route tree
 import { routeTree } from "@/routeTree.gen";
 

@@ -10,6 +10,8 @@ import {
   Building2,
   ChevronDown,
   ChevronRight,
+  CreditCard,
+  Crown,
   Eye,
   EyeOff,
   FileText,
@@ -29,6 +31,14 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -41,6 +51,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useLimitCheck } from "@/features/subscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -167,7 +178,6 @@ function SideNavContent({
         isAccountPage={isAccountPage}
         navigate={navigate}
         pathname={pathname}
-        z={z}
       />
 
       <Separator />
@@ -218,7 +228,6 @@ function SideNavHeader({
 }
 
 type NavigateFunction = ReturnType<typeof useNavigate>;
-type ZeroInstance = ReturnType<typeof useZero<Schema>>;
 
 function MainNavigation({
   effectiveOrgSlug,
@@ -228,7 +237,6 @@ function MainNavigation({
   boards,
   currentOrgId,
   navigate,
-  z,
 }: {
   effectiveOrgSlug: string;
   boardSlug: string | undefined;
@@ -237,26 +245,37 @@ function MainNavigation({
   boards: Board[];
   currentOrgId: string | undefined;
   navigate: NavigateFunction;
-  z: ZeroInstance;
 }) {
   const [boardsExpanded, setBoardsExpanded] = useState(true);
+  const z = useZero<Schema>();
+
+  // Check board limit (client-side for UI feedback)
+  const boardCount = boards.length;
+  const { isLimitReached } = useLimitCheck(boardCount, "boards");
 
   const handleCreateBoard = () => {
-    if (!currentOrgId) {
+    if (!currentOrgId || isLimitReached) {
       return;
     }
+
     const boardId = randID();
-    const slug = `board-${randID()}`;
+    const slug = `board-${boardId}`;
+    const now = Date.now();
+
+    // Use optimistic insert - server validates via push endpoint
+    // If server rejects (limit reached), Zero will auto-rollback
     z.mutate.board.insert({
       id: boardId,
+      organizationId: currentOrgId,
       name: "Untitled Board",
       slug,
       description: "",
       isPublic: false,
-      organizationId: currentOrgId,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: now,
+      updatedAt: now,
     });
+
+    // Navigate immediately (optimistic)
     navigate({
       to: "/dashboard/$orgSlug/$boardSlug",
       params: { orgSlug: effectiveOrgSlug, boardSlug: slug },
@@ -304,6 +323,7 @@ function MainNavigation({
         boards={boards}
         boardsExpanded={boardsExpanded}
         effectiveOrgSlug={effectiveOrgSlug}
+        isLimitReached={isLimitReached}
         onCreateBoard={handleCreateBoard}
         onToggleExpanded={() => setBoardsExpanded(!boardsExpanded)}
       />
@@ -320,6 +340,7 @@ function BoardsSection({
   boards,
   boardSlug,
   effectiveOrgSlug,
+  isLimitReached,
   onCreateBoard,
 }: {
   boardsExpanded: boolean;
@@ -327,8 +348,19 @@ function BoardsSection({
   boards: Board[];
   boardSlug: string | undefined;
   effectiveOrgSlug: string;
+  isLimitReached: boolean;
   onCreateBoard: () => void;
 }) {
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+
+  const handleAddBoardClick = () => {
+    if (isLimitReached) {
+      setShowUpgradeDialog(true);
+    } else {
+      onCreateBoard();
+    }
+  };
+
   return (
     <div className="pt-4">
       <button
@@ -361,7 +393,7 @@ function BoardsSection({
           ) : null}
           <button
             className="flex items-center gap-2 px-3 py-1.5 text-muted-foreground text-xs hover:text-foreground"
-            onClick={onCreateBoard}
+            onClick={handleAddBoardClick}
             type="button"
           >
             <Plus className="h-3 w-3" />
@@ -369,6 +401,44 @@ function BoardsSection({
           </button>
         </div>
       ) : null}
+
+      {/* Upgrade Dialog */}
+      <Dialog onOpenChange={setShowUpgradeDialog} open={showUpgradeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Crown className="h-6 w-6 text-primary" />
+            </div>
+            <DialogTitle className="text-center">
+              Board Limit Reached
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              You've reached the maximum number of boards on your current plan.
+              Upgrade to create more boards and unlock additional features.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <Link
+              className="w-full"
+              onClick={() => setShowUpgradeDialog(false)}
+              params={{ orgSlug: effectiveOrgSlug }}
+              to="/dashboard/$orgSlug/subscription"
+            >
+              <Button className="w-full">
+                <Crown className="mr-2 h-4 w-4" />
+                Upgrade Plan
+              </Button>
+            </Link>
+            <Button
+              className="w-full"
+              onClick={() => setShowUpgradeDialog(false)}
+              variant="outline"
+            >
+              Maybe Later
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -403,6 +473,14 @@ function AdminSection({ effectiveOrgSlug }: { effectiveOrgSlug: string }) {
         >
           <Users className="h-4 w-4" />
           Users
+        </Link>
+        <Link
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+          params={{ orgSlug: effectiveOrgSlug }}
+          to="/dashboard/$orgSlug/subscription"
+        >
+          <CreditCard className="h-4 w-4" />
+          Subscription
         </Link>
         <Link
           className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"

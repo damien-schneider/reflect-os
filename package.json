@@ -12,6 +12,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
+    "check-types": "turbo check-types",
     "format": "biome check --write .",
     "format:unsafe": "biome check --write --unsafe .",
     "format:check": "biome check .",
@@ -28,6 +29,7 @@
     "docker:logs": "bun --filter @repo/docker logs",
     "docker:clean": "bun --filter @repo/docker clean",
     "zero:clean": "source .env && rm -rf \"${ZERO_REPLICA_FILE}\"*",
+    "tunnel": "ngrok http 5173",
     "prepare": "husky"
   },
   "devDependencies": {

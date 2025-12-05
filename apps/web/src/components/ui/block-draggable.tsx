@@ -337,7 +337,6 @@ function DragHandle({
           onMouseUp={() => {
             resetPreview();
           }}
-          type="button"
         >
           <GripVertical className="text-muted-foreground" />
         </div>
@@ -452,11 +451,13 @@ const createDragPreviewElements = (
 
       const domNodeRect = domNode.parentElement?.getBoundingClientRect();
 
-      const distance = domNodeRect.top - lastDomNodeRect.bottom;
+      if (domNodeRect && lastDomNodeRect) {
+        const distance = domNodeRect.top - lastDomNodeRect.bottom;
 
-      // Check if the two elements are adjacent (touching each other)
-      if (distance > 15) {
-        wrapper.style.marginTop = `${distance}px`;
+        // Check if the two elements are adjacent (touching each other)
+        if (distance > 15) {
+          wrapper.style.marginTop = `${distance}px`;
+        }
       }
     }
 
@@ -464,7 +465,7 @@ const createDragPreviewElements = (
     elements.push(wrapper);
   };
 
-  for (const [node, index] of blocks.entries()) {
+  for (const [index, node] of blocks.entries()) {
     resolveElement(node, index);
   }
 

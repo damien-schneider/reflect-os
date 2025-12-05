@@ -91,6 +91,31 @@ export const serverEnv = createEnv({
       .enum(["development", "production", "test"])
       .optional()
       .default("development"),
+
+    // ============================================
+    // POLAR BILLING
+    // ============================================
+
+    /**
+     * Polar organization access token for API calls
+     * Get this from your Polar organization settings
+     */
+    POLAR_ACCESS_TOKEN: z.string().min(1).optional(),
+
+    /**
+     * Polar webhook secret for verifying webhook signatures
+     * Get this when creating a webhook endpoint in Polar dashboard
+     */
+    POLAR_WEBHOOK_SECRET: z.string().min(1).optional(),
+
+    /**
+     * Polar environment (sandbox for testing, production for live)
+     * Use sandbox during development to test without real payments
+     */
+    POLAR_ENVIRONMENT: z
+      .enum(["sandbox", "production"])
+      .optional()
+      .default("sandbox"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

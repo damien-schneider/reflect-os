@@ -123,6 +123,30 @@ export const organization = pgTable("organization", {
     versionIncrement?: "patch" | "minor" | "major";
     versionPrefix?: string;
   }>(),
+  // Subscription fields - synced from Polar webhooks
+  subscriptionTier: text("subscription_tier").default("free"), // "free" | "pro" | "team"
+  subscriptionStatus: text("subscription_status").default("none"), // "active" | "trialing" | "past_due" | "canceled" | "none"
+  subscriptionId: text("subscription_id"), // Reference to active Polar subscription
+});
+
+// ============================================
+// SUBSCRIPTION TABLE
+// ============================================
+
+export const subscription = pgTable("subscription", {
+  id: text("id").primaryKey(), // Polar subscription ID
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  polarCustomerId: text("polar_customer_id").notNull(),
+  polarProductId: text("polar_product_id").notNull(),
+  polarProductName: text("polar_product_name"), // e.g., "Pro", "Team"
+  status: text("status").notNull(), // "active" | "trialing" | "past_due" | "canceled" | "unpaid"
+  currentPeriodStart: bigint("current_period_start", { mode: "number" }),
+  currentPeriodEnd: bigint("current_period_end", { mode: "number" }),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
 });
 
 export const member = pgTable(
@@ -502,5 +526,12 @@ export const releaseItemRelations = relations(releaseItem, ({ one }) => ({
   feedback: one(feedback, {
     fields: [releaseItem.feedbackId],
     references: [feedback.id],
+  }),
+}));
+
+export const subscriptionRelations = relations(subscription, ({ one }) => ({
+  organization: one(organization, {
+    fields: [subscription.organizationId],
+    references: [organization.id],
   }),
 }));

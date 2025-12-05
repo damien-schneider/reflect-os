@@ -1,5 +1,5 @@
 bun test
-bunx tsc --noEmit
+bun run check-types
 
 #!/bin/sh
 # Exit on any error

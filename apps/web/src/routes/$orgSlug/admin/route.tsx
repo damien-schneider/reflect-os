@@ -5,7 +5,14 @@ import {
   Outlet,
   useParams,
 } from "@tanstack/react-router";
-import { ArrowLeft, LayoutGrid, Settings, Tags, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  CreditCard,
+  LayoutGrid,
+  Settings,
+  Tags,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -19,6 +26,7 @@ const adminNavItems = [
   { href: "boards", label: "Boards", icon: LayoutGrid },
   { href: "tags", label: "Tags", icon: Tags },
   { href: "users", label: "Users", icon: Users },
+  { href: "subscription", label: "Subscription", icon: CreditCard },
   { href: "settings", label: "Settings", icon: Settings },
 ];
 

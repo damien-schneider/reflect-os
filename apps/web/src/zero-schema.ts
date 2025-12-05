@@ -55,6 +55,10 @@ const organizationTable = table("organization")
     }>()
       .optional()
       .from("changelog_settings"),
+    // Subscription fields - synced from Polar webhooks
+    subscriptionTier: string().optional().from("subscription_tier"), // "free" | "pro" | "team"
+    subscriptionStatus: string().optional().from("subscription_status"), // "active" | "trialing" | "past_due" | "canceled" | "none"
+    subscriptionId: string().optional().from("subscription_id"), // Reference to active subscription
   })
   .primaryKey("id");
 
@@ -211,6 +215,22 @@ const releaseItemTable = table("releaseItem")
   })
   .primaryKey("id");
 
+const subscriptionTable = table("subscription")
+  .columns({
+    id: string(), // Polar subscription ID
+    organizationId: string().from("organization_id"),
+    polarCustomerId: string().from("polar_customer_id"),
+    polarProductId: string().from("polar_product_id"),
+    polarProductName: string().optional().from("polar_product_name"),
+    status: string(), // "active" | "trialing" | "past_due" | "canceled" | "unpaid"
+    currentPeriodStart: number().optional().from("current_period_start"),
+    currentPeriodEnd: number().optional().from("current_period_end"),
+    cancelAtPeriodEnd: boolean().optional().from("cancel_at_period_end"),
+    createdAt: number().from("created_at"),
+    updatedAt: number().from("updated_at"),
+  })
+  .primaryKey("id");
+
 // ============================================
 // RELATIONSHIPS
 // ============================================
@@ -270,6 +290,11 @@ const organizationRelationships = relationships(
       sourceField: ["id"],
       destField: ["organizationId"],
       destSchema: releaseTable,
+    }),
+    subscriptions: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: subscriptionTable,
     }),
   })
 );
@@ -520,6 +545,17 @@ const releaseItemRelationships = relationships(releaseItemTable, ({ one }) => ({
   }),
 }));
 
+const subscriptionRelationships = relationships(
+  subscriptionTable,
+  ({ one }) => ({
+    organization: one({
+      sourceField: ["organizationId"],
+      destField: ["id"],
+      destSchema: organizationTable,
+    }),
+  })
+);
+
 // ============================================
 // CREATE SCHEMA
 // ============================================
@@ -540,6 +576,7 @@ export const schema = createSchema({
     adminNoteTable,
     releaseTable,
     releaseItemTable,
+    subscriptionTable,
   ],
   relationships: [
     userRelationships,
@@ -556,6 +593,7 @@ export const schema = createSchema({
     adminNoteRelationships,
     releaseRelationships,
     releaseItemRelationships,
+    subscriptionRelationships,
   ],
 });
 
@@ -580,3 +618,4 @@ export type Notification = Row<typeof notificationTable.schema>;
 export type AdminNote = Row<typeof adminNoteTable.schema>;
 export type Release = Row<typeof releaseTable.schema>;
 export type ReleaseItem = Row<typeof releaseItemTable.schema>;
+export type Subscription = Row<typeof subscriptionTable.schema>;

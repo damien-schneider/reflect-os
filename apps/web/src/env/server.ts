@@ -85,6 +85,18 @@ export const serverEnv = createEnv({
     DOMAIN_CERT: z.string().optional(),
 
     /**
+     * Resend API key for email verification
+     * @example "re_123456789"
+     */
+    RESEND_API_KEY: z.string().optional(),
+
+    /**
+     * Email address to send verification emails from
+     * @example "noreply@yourdomain.com"
+     */
+    RESEND_FROM_EMAIL: z.string().email().optional(),
+
+    /**
      * Node environment
      */
     NODE_ENV: z

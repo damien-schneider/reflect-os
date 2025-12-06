@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,8 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -40,6 +42,29 @@ function Login() {
     return true;
   };
 
+  const handleResendVerification = async () => {
+    if (!email.trim()) {
+      setError("Enter your email address");
+      return;
+    }
+
+    setIsResending(true);
+    setError(null);
+
+    const { error: resendError } = await authClient.sendVerificationEmail({
+      email,
+      callbackURL: "/dashboard",
+    });
+
+    setIsResending(false);
+
+    if (resendError) {
+      setError(resendError.message || "Failed to send verification email");
+    } else {
+      setSuccess("Verification email sent! Check your inbox.");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -60,10 +85,11 @@ function Login() {
         },
         {
           onSuccess: () => {
-            setSuccess("Account created! Redirecting...");
-            setTimeout(() => {
-              navigate({ to: "/dashboard" });
-            }, 1000);
+            setPendingVerification(true);
+            setSuccess(
+              "Account created! Check your email to verify your account."
+            );
+            setIsLoading(false);
           },
           onError: (ctx) => {
             console.error("Sign up error:", ctx.error);
@@ -89,6 +115,13 @@ function Login() {
             }, 1000);
           },
           onError: (ctx) => {
+            // Check if the error is due to unverified email
+            if (ctx.error.status === 403) {
+              setPendingVerification(true);
+              setError("Please verify your email before signing in.");
+              setIsLoading(false);
+              return;
+            }
             setError(
               ctx.error.message ||
                 "Invalid email or password. Check your credentials."
@@ -104,7 +137,72 @@ function Login() {
     setIsSignUp(!isSignUp);
     setError(null);
     setSuccess(null);
+    setPendingVerification(false);
   };
+
+  // Pending verification state
+  if (pendingVerification) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center p-4">
+        <div className="w-full max-w-sm space-y-6">
+          <div className="space-y-4 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Mail className="h-6 w-6" />
+            </div>
+            <h1 className="font-semibold text-2xl">Check your email</h1>
+            <p className="text-muted-foreground text-sm">
+              We've sent a verification link to <strong>{email}</strong>. Click
+              the link in the email to verify your account.
+            </p>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 text-destructive text-sm">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {success && (
+            <div className="flex items-center gap-2 text-green-600 text-sm">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>{success}</span>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <Button
+              className="w-full"
+              disabled={isResending}
+              onClick={handleResendVerification}
+              variant="outline"
+            >
+              {isResending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Resend verification email"
+              )}
+            </Button>
+
+            <Button
+              className="w-full"
+              onClick={() => {
+                setPendingVerification(false);
+                setError(null);
+                setSuccess(null);
+              }}
+              variant="ghost"
+            >
+              Back to {isSignUp ? "sign up" : "sign in"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center p-4">

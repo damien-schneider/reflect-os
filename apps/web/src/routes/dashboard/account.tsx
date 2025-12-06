@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ChevronRight,
+  Key,
   Loader2,
   LogOut,
   Plus,
@@ -32,6 +33,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PasswordChangeForm } from "@/features/account/components/password-change-form";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   type Organization,
@@ -53,6 +55,13 @@ function MyAccount() {
   const handleSignOut = async () => {
     await authClient.signOut();
     navigate({ to: "/login" });
+  };
+
+  // Password change state
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+
+  const closePasswordChange = () => {
+    setShowPasswordChange(false);
   };
 
   // Organization management
@@ -195,14 +204,25 @@ function MyAccount() {
             <TooltipContent>{session?.user.email}</TooltipContent>
           </Tooltip>
 
-          <Button
-            className="h-auto p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={handleSignOut}
-            variant="ghost"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              className="h-auto justify-start p-0"
+              onClick={() => setShowPasswordChange(true)}
+              variant="ghost"
+            >
+              <Key className="mr-2 h-4 w-4" />
+              Change Password
+            </Button>
+
+            <Button
+              className="h-auto justify-start p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={handleSignOut}
+              variant="ghost"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </section>
 
         {/* Right column: Organizations */}
@@ -364,6 +384,51 @@ function MyAccount() {
               {footerContent}
               <DialogClose asChild>
                 <Button variant="outline">Done</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Password Change - Mobile: Drawer */}
+      {isMobile && (
+        <Drawer
+          onOpenChange={(open) => !open && closePasswordChange()}
+          open={showPasswordChange}
+        >
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Change Password</DrawerTitle>
+            </DrawerHeader>
+            <div className="px-4 py-2">
+              <PasswordChangeForm
+                idPrefix="mobile-"
+                onSuccess={closePasswordChange}
+              />
+            </div>
+            <DrawerFooter>
+              <DrawerClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Password Change - Desktop: Dialog */}
+      {!isMobile && (
+        <Dialog
+          onOpenChange={(open) => !open && closePasswordChange()}
+          open={showPasswordChange}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Change Password</DialogTitle>
+            </DialogHeader>
+            <PasswordChangeForm onSuccess={closePasswordChange} />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
               </DialogClose>
             </DialogFooter>
           </DialogContent>

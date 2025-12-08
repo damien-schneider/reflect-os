@@ -124,3 +124,7 @@ services:
 volumes:
   postgres_data:
   zero_data:
+
+networks:
+  default:
+    name: reflect-network

@@ -38,6 +38,7 @@
     "@platejs/slash-command": "^52.0.1",
     "@platejs/table": "^52.0.1",
     "@platejs/toc": "^52.0.1",
+    "@polar-sh/better-auth": "^1.5.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@repo/backend": "workspace:*",
     "@repo/db": "workspace:*",

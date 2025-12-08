@@ -1,14 +1,15 @@
-version: "3.8"
-
-# Docker Compose for Coolify deployment
-# See: https://coolify.io/docs/knowledge-base/docker/compose
+# Docker Compose for Dokploy deployment
+# 
+# Required Environment Variables (set in Dokploy UI):
+#   POSTGRES_PASSWORD - Database password
+#   BETTER_AUTH_SECRET - Auth secret key
+#   ZERO_AUTH_SECRET - Zero sync auth secret
+#   PUBLIC_URL - Your public domain (e.g., https://reflect.example.com)
 #
-# Coolify Magic Variables (auto-generated):
-#   SERVICE_URL_<NAME> - Full URL with protocol (e.g., "https://reflect.cuicui.day")
-#   SERVICE_PASSWORD_<NAME> - Auto-generated password/secret
-#
-# All secrets are auto-generated - no manual env vars required!
-# Just configure domains in Coolify UI for web and zero-cache services.
+# Optional:
+#   POLAR_ACCESS_TOKEN - For billing integration
+#   POLAR_WEBHOOK_SECRET - For billing webhooks
+#   POLAR_ENVIRONMENT - sandbox or production
 
 services:
   # PostgreSQL Database
@@ -16,9 +17,9 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=${POSTGRES_USER:-user}
-      - POSTGRES_PASSWORD=$SERVICE_PASSWORD_POSTGRES
-      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-reflect}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     # Required for Zero replication
@@ -31,11 +32,7 @@ services:
       - "-c"
       - "max_wal_senders=10"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-postgres}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-reflect}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,27 +46,23 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    # Expose port 4848 for Coolify's reverse proxy
     expose:
       - "4848"
     environment:
-      # Coolify magic variable - SERVICE_URL includes https:// protocol
-      - SERVICE_URL_ZERO_CACHE
       # Database connections
-      - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
-      - ZERO_CVR_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
-      - ZERO_CHANGE_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
-      # Authentication - auto-generated secrets
-      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:-$SERVICE_PASSWORD_ZEROAUTH}
-      - ZERO_ADMIN_PASSWORD=$SERVICE_PASSWORD_ZEROADMIN
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
+      ZERO_CVR_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
+      ZERO_CHANGE_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
+      # Authentication
+      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
+      ZERO_ADMIN_PASSWORD: ${ZERO_ADMIN_PASSWORD:-admin}
       # Replica file for local caching
-      - ZERO_REPLICA_FILE=/data/zero_replica.db
-      # Logging and workers
-      - ZERO_LOG_LEVEL=${ZERO_LOG_LEVEL:-info}
-      - LOG_LEVEL=${ZERO_LOG_LEVEL:-info}
-      - ZERO_NUM_SYNC_WORKERS=${ZERO_NUM_SYNC_WORKERS:-2}
-      # Production mode
-      - NODE_ENV=production
+      ZERO_REPLICA_FILE: /data/zero_replica.db
+      # Logging
+      ZERO_LOG_LEVEL: ${ZERO_LOG_LEVEL:-info}
+      LOG_LEVEL: ${ZERO_LOG_LEVEL:-info}
+      ZERO_NUM_SYNC_WORKERS: ${ZERO_NUM_SYNC_WORKERS:-2}
+      NODE_ENV: production
     volumes:
       - zero_data:/data
 
@@ -82,26 +75,22 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    # Expose port 3001 for Coolify's reverse proxy
     expose:
       - "3001"
     environment:
-      # Coolify magic variables
-      - SERVICE_URL_BACKEND
-      - SERVICE_URL_WEB
       # Database connection
-      - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
       # Auth secrets
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-$SERVICE_PASSWORD_BETTERAUTH}
-      - BETTER_AUTH_URL=${SERVICE_URL_WEB}
-      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:-$SERVICE_PASSWORD_ZEROAUTH}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      BETTER_AUTH_URL: ${PUBLIC_URL:?PUBLIC_URL is required}
+      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET}
       # Polar billing (optional)
-      - POLAR_ACCESS_TOKEN=${POLAR_ACCESS_TOKEN:-}
-      - POLAR_WEBHOOK_SECRET=${POLAR_WEBHOOK_SECRET:-}
-      - POLAR_ENVIRONMENT=${POLAR_ENVIRONMENT:-sandbox}
+      POLAR_ACCESS_TOKEN: ${POLAR_ACCESS_TOKEN:-}
+      POLAR_WEBHOOK_SECRET: ${POLAR_WEBHOOK_SECRET:-}
+      POLAR_ENVIRONMENT: ${POLAR_ENVIRONMENT:-sandbox}
       # Server config
-      - PORT=3001
-      - NODE_ENV=production
+      PORT: "3001"
+      NODE_ENV: production
 
   # Web Application (Vite/React frontend)
   web:
@@ -116,45 +105,17 @@ services:
         condition: service_started
       backend:
         condition: service_started
-    # Expose port 3000 for Coolify's reverse proxy
     expose:
       - "3000"
     environment:
-      # Coolify magic variables - SERVICE_URL includes https:// protocol
-      - SERVICE_URL_WEB
-      - SERVICE_URL_ZERO_CACHE
-      - SERVICE_URL_BACKEND
-      # Zero server URL (passed to frontend at runtime)
-      - VITE_PUBLIC_ZERO_SERVER=${SERVICE_URL_ZERO_CACHE}
-      # API server URL (passed to frontend at runtime)
-      - VITE_PUBLIC_API_URL=${SERVICE_URL_BACKEND}
-      # Server-side environment variables (for SSR/migrations)
-      - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-$SERVICE_PASSWORD_BETTERAUTH}
-      - BETTER_AUTH_URL=${SERVICE_URL_WEB}
-      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:-$SERVICE_PASSWORD_ZEROAUTH}
-      - NODE_ENV=production
-
-  # Drizzle Studio - Database Management UI
-  # Configure domain in Coolify (e.g., database.reflect-os.com)
-  # Access with: admin / $SERVICE_PASSWORD_64_DRIZZLE (check Coolify UI for password)
-  drizzle-studio:
-    image: node:20-alpine
-    restart: unless-stopped
-    working_dir: /app
-    depends_on:
-      postgres:
-        condition: service_healthy
-    expose:
-      - "4983"
-    environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
-    volumes:
-      - ./packages/db:/app:ro
-    command: sh -c "npm install drizzle-kit drizzle-orm postgres && npx drizzle-kit studio --host 0.0.0.0 --port 4983"
-    labels:
-      # Basic Auth - Username: admin, Password: auto-generated by Coolify
-      - "coolify.basicAuth=admin:$$SERVICE_PASSWORD_64_DRIZZLE"
+      # Zero server URL (for frontend)
+      VITE_PUBLIC_ZERO_SERVER: ${PUBLIC_URL}/zero
+      # Server-side environment
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${PUBLIC_URL}
+      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET}
+      NODE_ENV: production
 
 volumes:
   postgres_data:

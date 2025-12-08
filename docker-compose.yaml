@@ -4,7 +4,11 @@
 #   POSTGRES_PASSWORD - Database password
 #   BETTER_AUTH_SECRET - Auth secret key
 #   ZERO_AUTH_SECRET - Zero sync auth secret
-#   PUBLIC_URL - Your public domain (e.g., https://reflect.example.com)
+#   PUBLIC_URL - Your public domain (e.g., https://beta.reflet.app)
+#
+# Subdomain URLs (set in Dokploy UI):
+#   BACKEND_URL - Backend API URL (e.g., https://beta-backend.reflet.app)
+#   ZERO_SERVER_URL - Zero sync server URL (e.g., https://beta-zero.reflet.app)
 #
 # Optional:
 #   POLAR_ACCESS_TOKEN - For billing integration
@@ -112,8 +116,12 @@ services:
     expose:
       - "3000"
     environment:
-      # Zero server URL (for frontend)
-      VITE_PUBLIC_ZERO_SERVER: ${PUBLIC_URL}/zero
+      # Frontend environment (injected into built JS at runtime)
+      # VITE_PUBLIC_ZERO_SERVER: URL where frontend connects to zero-cache
+      VITE_PUBLIC_ZERO_SERVER: ${ZERO_SERVER_URL:?ZERO_SERVER_URL is required - e.g., https://beta-zero.reflet.app}
+      # Server-side proxy: URL where web server proxies /api/* requests
+      # Uses internal Docker network by default, or external URL if set
+      VITE_PUBLIC_API_URL: http://backend:3001
       # Server-side environment
       ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}

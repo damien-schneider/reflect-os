@@ -9,6 +9,9 @@
   ],
   "scripts": {
     "dev": "turbo dev",
+    "dev:backend": "bun --filter @repo/backend dev",
+    "dev:web": "bun --filter @repo/web dev",
+    "dev:zero-cache": "bun --filter @repo/web dev:zero-cache",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
@@ -17,8 +20,6 @@
     "format:unsafe": "biome check --write --unsafe .",
     "format:check": "biome check .",
     "dev:docker": "bun --filter @repo/docker dev",
-    "dev:web": "bun --filter @repo/web dev",
-    "dev:zero-cache": "bun --filter @repo/web dev:zero-cache",
     "db:push": "bun --filter @repo/db db:push",
     "db:generate": "bun --filter @repo/db db:generate",
     "db:migrate": "bun --filter @repo/db db:migrate",

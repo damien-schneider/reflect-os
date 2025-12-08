@@ -1,0 +1,39 @@
+# Backend API Dockerfile
+# Multi-stage build for production
+
+FROM oven/bun:1 AS base
+WORKDIR /app
+
+# Install dependencies
+FROM base AS deps
+COPY package.json bun.lock ./
+COPY apps/backend/package.json ./apps/backend/
+COPY packages/db/package.json ./packages/db/
+RUN bun install --frozen-lockfile
+
+# Build stage
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/backend/node_modules ./apps/backend/node_modules
+COPY . .
+
+# Build the backend
+WORKDIR /app/apps/backend
+RUN bun build src/server.ts --outdir dist --target bun
+
+# Production stage
+FROM oven/bun:1-slim AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy built files
+COPY --from=builder /app/apps/backend/dist ./dist
+COPY --from=builder /app/apps/backend/package.json ./
+
+# Copy node_modules for runtime dependencies
+COPY --from=deps /app/apps/backend/node_modules ./node_modules
+
+EXPOSE 3001
+
+CMD ["bun", "run", "dist/server.js"]

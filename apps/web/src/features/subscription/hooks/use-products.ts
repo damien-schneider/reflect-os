@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { api } from "@/lib/api-client";
 import { parseTierFromProductName } from "../tier.utils";
 import {
   type BillingInterval,
@@ -22,7 +23,7 @@ export type PolarPrice = {
 export type PolarBenefit = {
   id: string;
   type: string;
-  description: string;
+  description: string | null;
 };
 
 /**
@@ -52,17 +53,6 @@ export type ProductsByTier = Partial<
   >
 >;
 
-type RawProduct = {
-  id: string;
-  name: string;
-  description: string | null;
-  slug: string;
-  isRecurring: boolean;
-  recurringInterval: "month" | "year" | null;
-  prices: PolarPrice[];
-  benefits: PolarBenefit[];
-};
-
 /**
  * Hook to fetch products from Polar and group them by tier.
  * Tier is parsed from product name (e.g., "Pro Monthly" -> tier: "pro").
@@ -76,12 +66,12 @@ export function useProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("/api/products");
+        const response = await api.api.products.$get();
         if (!response.ok) {
           throw new Error("Failed to fetch products");
         }
         const data = await response.json();
-        const rawProducts: RawProduct[] = data.products ?? [];
+        const rawProducts = "products" in data ? data.products : [];
 
         // Parse products and extract tier from name
         const parsedProducts: PolarProduct[] = [];
@@ -104,17 +94,23 @@ export function useProducts() {
             continue;
           }
 
-          parsedProducts.push({
-            id: product.id,
-            name: product.name,
-            description: product.description,
-            slug: product.slug,
-            isRecurring: product.isRecurring,
-            recurringInterval: product.recurringInterval,
-            prices: product.prices,
-            benefits: product.benefits,
-            tier,
-          });
+          // Only include month/year intervals (skip week if present)
+          if (
+            product.recurringInterval === "month" ||
+            product.recurringInterval === "year"
+          ) {
+            parsedProducts.push({
+              id: product.id,
+              name: product.name,
+              description: product.description,
+              slug: product.slug,
+              isRecurring: product.isRecurring,
+              recurringInterval: product.recurringInterval,
+              prices: product.prices,
+              benefits: product.benefits,
+              tier,
+            });
+          }
         }
 
         // Log warnings in development

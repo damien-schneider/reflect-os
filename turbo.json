@@ -9,7 +9,10 @@
     "BETTER_AUTH_SECRET",
     "BETTER_AUTH_URL",
     "VITE_PUBLIC_ZERO_SERVER",
-    "VITE_PUBLIC_API_SERVER"
+    "VITE_PUBLIC_API_URL",
+    "POLAR_ACCESS_TOKEN",
+    "POLAR_WEBHOOK_SECRET",
+    "POLAR_ENVIRONMENT"
   ],
   "globalPassThroughEnv": [
     "ZERO_UPSTREAM_DB",
@@ -29,18 +32,23 @@
       "dependsOn": ["@repo/docker#dev"],
       "cache": false
     },
+    "@repo/backend#dev": {
+      "dependsOn": ["@repo/db#db:push"],
+      "cache": false,
+      "persistent": true
+    },
     "@repo/web#dev:zero-cache": {
       "dependsOn": ["@repo/db#db:push"],
       "cache": false,
       "persistent": true
     },
     "@repo/web#dev:vite": {
-      "dependsOn": ["@repo/db#db:push"],
+      "dependsOn": ["@repo/db#db:push", "@repo/backend#dev"],
       "cache": false,
       "persistent": true
     },
     "@repo/web#dev": {
-      "dependsOn": ["@repo/db#db:push"],
+      "dependsOn": ["@repo/db#db:push", "@repo/backend#dev"],
       "cache": false,
       "persistent": true
     },

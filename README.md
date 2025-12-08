@@ -150,7 +150,7 @@ for an example implementation using Hono.
 **1. Start the PostgreSQL database:**
 
 If you are using Docker (referencing the example in
-[docker](docker/docker-compose.yml)), run:
+[docker](docker/docker-compose.yaml)), run:
 
 ```bash
 npm run dev:db-up

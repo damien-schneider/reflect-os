@@ -2,6 +2,7 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 import type { Schema, Subscription } from "@/zero-schema";
 import type { SubscriptionStatus } from "../status.config";
@@ -143,13 +144,11 @@ export function useSubscriptionCheckout() {
     const targetTier = parseTierFromProductSlug(productSlug);
 
     // Check with Polar for existing subscription (handles db/polar mismatch)
-    const checkResponse = await fetch("/api/check-subscription", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const checkResponse = await api.api["check-subscription"].$post({
+      json: {
         organizationId: org.id,
         targetTier,
-      }),
+      },
     });
 
     if (checkResponse.ok) {
@@ -157,18 +156,18 @@ export function useSubscriptionCheckout() {
 
       // If user has active subscription but can't checkout (same tier),
       // trigger a sync to fix the db mismatch and throw error
-      if (!checkData.canCheckout) {
+      if ("canCheckout" in checkData && !checkData.canCheckout) {
         // Trigger background sync to update the database
-        fetch("/api/sync-subscription", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ organizationId: org.id }),
-        }).catch((err) =>
-          console.warn("[Checkout] Background sync failed:", err)
-        );
+        api.api["sync-subscription"]
+          .$post({
+            json: { organizationId: org.id },
+          })
+          .catch((err: unknown) =>
+            console.warn("[Checkout] Background sync failed:", err)
+          );
 
         const errorMessage =
-          checkData.message ||
+          ("message" in checkData && checkData.message) ||
           `You already have an active ${PLAN_TIERS[targetTier ?? currentTier].label} subscription`;
 
         throw new Error(errorMessage);
@@ -178,14 +177,11 @@ export function useSubscriptionCheckout() {
     // Only continue if we passed the subscription check
     // This handles users who signed up before Polar was integrated
     try {
-      const ensureResponse = await fetch("/api/ensure-customer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const ensureResponse = await api.api["ensure-customer"].$post();
 
       if (ensureResponse.ok) {
         const ensureData = await ensureResponse.json();
-        if (ensureData.created) {
+        if ("created" in ensureData && ensureData.created) {
           console.log("[Checkout] Created new Polar customer");
         }
       } else {
@@ -384,30 +380,29 @@ export function useSubscriptionSync() {
     setSyncResult({ status: "idle" });
 
     try {
-      const response = await fetch("/api/sync-subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ organizationId: org.id }),
+      const response = await api.api["sync-subscription"].$post({
+        json: { organizationId: org.id },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Sync failed");
+        throw new Error("error" in data ? data.error : "Sync failed");
       }
 
       lastSyncTime.current = Date.now();
       setCooldownRemaining(SYNC_COOLDOWN_MS);
 
-      if (data.synced) {
+      if ("synced" in data && data.synced) {
         setSyncResult({
           status: "success",
-          message: `Synced to ${data.subscription.tier} plan`,
+          message: `Synced to ${"subscription" in data ? data.subscription.tier : "unknown"} plan`,
         });
       } else {
         setSyncResult({
           status: "no-subscription",
-          message: data.message || "No active subscription found",
+          message:
+            "message" in data ? data.message : "No active subscription found",
         });
       }
     } catch (error) {

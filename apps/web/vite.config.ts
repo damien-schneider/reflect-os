@@ -1,5 +1,4 @@
 import path from "node:path";
-import { getRequestListener } from "@hono/node-server";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-vite-plugin";
 import react from "@vitejs/plugin-react";
@@ -10,6 +9,9 @@ import { defineConfig } from "vite";
 if (process.env.NODE_ENV === "development") {
   dotenv.config({ path: "../../.env" });
 }
+
+// Backend server port (default 3001 for development)
+const BACKEND_PORT = process.env.BACKEND_PORT ?? "3001";
 
 // Note: Server environment validation happens at runtime, not build time
 // Client env vars (VITE_PUBLIC_*) are validated when the app loads
@@ -26,6 +28,13 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [".ngrok-free.app", ".ngrok-free.dev", ".ngrok.io"],
+    // Proxy /api/* requests to the backend server in development
+    proxy: {
+      "/api": {
+        target: `http://localhost:${BACKEND_PORT}`,
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     tanstackRouter(),
@@ -35,21 +44,6 @@ export default defineConfig({
         plugins: ["babel-plugin-react-compiler"],
       },
     }),
-    {
-      name: "api-server",
-      configureServer(server) {
-        server.middlewares.use(async (req, res, next) => {
-          if (!req.url?.startsWith("/api")) {
-            return next();
-          }
-          const { app } = await import("./api/index.js");
-          getRequestListener(async (request) => await app.fetch(request, {}))(
-            req,
-            res
-          );
-        });
-      },
-    },
   ],
   resolve: {
     alias: {

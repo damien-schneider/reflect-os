@@ -1,93 +1,35 @@
+/**
+ * Subscription Routes
+ *
+ * Handles subscription management: ensuring customers, syncing, and checking status.
+ */
+
 import { Polar } from "@polar-sh/sdk";
-import { PushProcessor } from "@rocicorp/zero/server";
-import { zeroNodePg } from "@rocicorp/zero/server/adapters/pg";
 import { Hono } from "hono";
-import { handle } from "hono/vercel";
-import { SignJWT } from "jose";
-import { Pool } from "pg";
-import { serverEnv } from "../src/env/server";
-import { createMutators } from "../src/mutators";
-import { schema } from "../src/zero-schema";
 import {
   auth,
-  dbPool as authDbPool,
   polarClient as authPolarClient,
+  dbPool,
   mapProductToTier,
   updateOrgSubscription,
   upsertSubscription,
-} from "./auth";
-import { createServerMutators } from "./server-mutators";
+} from "../auth";
+import { env } from "../env";
 
-export const config = {
-  runtime: "edge",
-};
+const app = new Hono();
 
-// Initialize Polar client for products endpoint
-const polarClient = serverEnv.POLAR_ACCESS_TOKEN
+// Initialize Polar client
+const polarClient = env.POLAR_ACCESS_TOKEN
   ? new Polar({
-      accessToken: serverEnv.POLAR_ACCESS_TOKEN,
-      server:
-        serverEnv.POLAR_ENVIRONMENT === "production" ? "production" : "sandbox",
+      accessToken: env.POLAR_ACCESS_TOKEN,
+      server: env.POLAR_ENVIRONMENT === "production" ? "production" : "sandbox",
     })
   : null;
 
-// Database pool for limit checks
-const dbPool = new Pool({
-  connectionString: serverEnv.ZERO_UPSTREAM_DB,
-});
+// =============================================================================
+// ENSURE CUSTOMER
+// =============================================================================
 
-export const app = new Hono().basePath("/api");
-
-app.on(["POST", "GET"], "/auth/**", (c) => auth.handler(c.req.raw));
-
-// Fetch available products from Polar
-// Products should be named: "{Tier} Monthly" or "{Tier} Yearly"
-// e.g., "Pro Monthly", "Pro Yearly", "Team Monthly", "Team Yearly"
-app.get("/products", async (c) => {
-  if (!polarClient) {
-    return c.json({ error: "Polar not configured", products: [] }, 200);
-  }
-
-  try {
-    const response = await polarClient.products.list({
-      isRecurring: true,
-      isArchived: false,
-    });
-
-    // Transform to client-friendly format
-    // Tier is parsed from product name on the client
-    const products = response.result.items.map((product) => ({
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      slug: product.name.toLowerCase().replace(/\s+/g, "-"),
-      isRecurring: product.isRecurring,
-      recurringInterval: product.recurringInterval,
-      prices: product.prices.map((price) => ({
-        id: price.id,
-        amount:
-          "amountType" in price && price.amountType === "fixed"
-            ? price.priceAmount
-            : null,
-        currency: "priceCurrency" in price ? price.priceCurrency : "usd",
-        type: price.type,
-      })),
-      benefits: product.benefits.map((benefit) => ({
-        id: benefit.id,
-        type: benefit.type,
-        description: benefit.description,
-      })),
-    }));
-
-    return c.json({ products });
-  } catch (error) {
-    console.error("[API /products] Error:", error);
-    return c.json({ error: "Failed to fetch products", products: [] }, 200);
-  }
-});
-
-// Ensure Polar customer exists for the current user
-// This is called before checkout to handle users who signed up before Polar was integrated
 app.post("/ensure-customer", async (c) => {
   if (!polarClient) {
     return c.json({ error: "Polar not configured" }, 500);
@@ -158,121 +100,11 @@ app.post("/ensure-customer", async (c) => {
   }
 });
 
-app.get("/zero-token", async (c) => {
-  try {
-    console.log("[API /zero-token] Fetching session...");
-
-    const session = await auth.api.getSession({
-      headers: c.req.raw.headers,
-    });
-
-    if (!session) {
-      console.log("[API /zero-token] No session found, returning 401");
-      return c.text("Unauthorized", 401);
-    }
-
-    console.log("[API /zero-token] Session found for user:", session.user.id);
-
-    if (!serverEnv.ZERO_AUTH_SECRET) {
-      console.error("[API /zero-token] ❌ ZERO_AUTH_SECRET is not configured");
-      return c.json(
-        { error: "Server misconfigured: ZERO_AUTH_SECRET not set" },
-        500
-      );
-    }
-
-    const jwtPayload = {
-      sub: session.user.id,
-      iat: Math.floor(Date.now() / 1000),
-    };
-
-    const jwt = await new SignJWT(jwtPayload)
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("30days")
-      .sign(new TextEncoder().encode(serverEnv.ZERO_AUTH_SECRET));
-
-    console.log(
-      "[API /zero-token] ✅ Token generated successfully for user:",
-      session.user.id
-    );
-    return c.json({ token: jwt });
-  } catch (error) {
-    console.error("[API /zero-token] ❌ Error generating token:", error);
-    return c.json(
-      {
-        error: "Failed to generate token",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      500
-    );
-  }
-});
-
-// Initialize PushProcessor for Zero custom mutators
-// This encapsulates the standard push protocol implementation
-const pushProcessor = new PushProcessor(zeroNodePg(schema, dbPool));
-
-// Push endpoint for Zero custom mutators
-// This receives mutations from the client and validates them server-side
-app.post("/push", async (c) => {
-  try {
-    // Get auth data from JWT token in the request
-    // PushProcessor extracts the JWT from the Authorization header
-    const authHeader = c.req.header("Authorization");
-    let authData: { sub: string | null } = { sub: null };
-
-    if (authHeader?.startsWith("Bearer ")) {
-      // The token is a JWT signed with ZERO_AUTH_SECRET
-      // We can decode the payload to get the user ID
-      const token = authHeader.slice(7);
-      try {
-        // Decode JWT payload (base64url encoded)
-        const [, payloadB64] = token.split(".");
-        if (payloadB64) {
-          const payload = JSON.parse(
-            atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/"))
-          );
-          authData = { sub: payload.sub ?? null };
-        }
-      } catch {
-        console.warn("[API /push] Failed to decode JWT payload");
-      }
-    }
-
-    console.log("[API /push] Processing push for user:", authData.sub);
-
-    // Create client mutators, then wrap with server-side validation
-    const clientMutators = createMutators(authData);
-    const serverMutators = createServerMutators(authData, clientMutators);
-
-    // Process the push request with server mutators
-    // Mutations that throw errors are skipped, not rolled back
-    const result = await pushProcessor.process(serverMutators, c.req.raw);
-
-    return c.json(result);
-  } catch (error) {
-    console.error("[API /push] Error:", error);
-    // Throwing an error here will cause the client to resend all queued mutations
-    return c.json(
-      {
-        error: "Failed to process push",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      500
-    );
-  }
-});
-
-export default handle(app);
-
 // =============================================================================
-// SYNC SUBSCRIPTION ENDPOINT
+// SYNC SUBSCRIPTION
 // =============================================================================
 
-// Sync subscription status from Polar to local database
-// This is used when webhooks fail or are not configured
 app.post("/sync-subscription", async (c) => {
-  // Use the polar client from auth.ts (already initialized)
   if (!authPolarClient) {
     return c.json({ error: "Polar not configured" }, 500);
   }
@@ -301,7 +133,7 @@ app.post("/sync-subscription", async (c) => {
     );
 
     // First, verify the user is a member/owner of this organization
-    const memberCheck = await authDbPool.query(
+    const memberCheck = await dbPool.query(
       'SELECT role FROM member WHERE "organizationId" = $1 AND "userId" = $2',
       [organizationId, session.user.id]
     );
@@ -380,11 +212,9 @@ app.post("/sync-subscription", async (c) => {
 
       if (allSubscriptions.result.items.length > 0) {
         // User has subscriptions but none are active - downgrade to free
-        // Find the most recent subscription to get its status
         const latestSub = allSubscriptions.result.items[0];
-        const latestStatus = latestSub.status; // e.g., "canceled"
+        const latestStatus = latestSub.status;
 
-        // Update organization to free tier
         await updateOrgSubscription(organizationId, {
           subscriptionId: latestSub.id,
           tier: "free",
@@ -495,11 +325,9 @@ app.post("/sync-subscription", async (c) => {
 });
 
 // =============================================================================
-// CHECK SUBSCRIPTION ENDPOINT
+// CHECK SUBSCRIPTION
 // =============================================================================
 
-// Check if user already has an active subscription on Polar
-// This is called before checkout to prevent duplicate subscriptions
 app.post("/check-subscription", async (c) => {
   if (!authPolarClient) {
     return c.json({ error: "Polar not configured" }, 500);
@@ -627,3 +455,5 @@ app.post("/check-subscription", async (c) => {
     });
   }
 });
+
+export default app;

@@ -7,7 +7,7 @@ This guide explains how to deploy the Reflect OS Zero application on Coolify.
 The application consists of three services:
 
 1. **PostgreSQL** - Database for storing application data
-2. **Zero Cache** - Rocicorp Zero sync server for real-time data synchronization  
+2. **Zero Cache** - Rocicorp Zero sync server for real-time data synchronization
 3. **Web** - Vite/React frontend with Hono API server
 
 ## Prerequisites
@@ -30,7 +30,7 @@ The application consists of three services:
 2. Select **"Docker Compose"**
 3. Choose your source:
    - **GitHub/GitLab**: Connect your repository
-   - **Docker Compose (Raw)**: Paste the contents of `docker-compose.coolify.yml`
+   - **Docker Compose (Raw)**: Paste the contents of `docker-compose.yaml`
 
 ### 3. Configure Environment Variables
 
@@ -38,37 +38,37 @@ In Coolify's UI, set the following environment variables:
 
 #### Required Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `POSTGRES_PASSWORD` | PostgreSQL password | `your-secure-password` |
-| `ZERO_AUTH_SECRET` | Secret for Zero JWT signing (min 32 chars) | `your-zero-auth-secret-min-32-chars` |
-| `BETTER_AUTH_SECRET` | Secret for Better Auth (min 32 chars) | `your-better-auth-secret-min-32-chars` |
-| `VITE_PUBLIC_ZERO_SERVER` | Public URL for Zero cache server | `https://zero.yourdomain.com` |
-| `VITE_PUBLIC_API_SERVER` | Public URL for web application | `https://app.yourdomain.com` |
-| `BETTER_AUTH_URL` | Same as VITE_PUBLIC_API_SERVER | `https://app.yourdomain.com` |
+| Variable                  | Description                                | Example                                |
+| ------------------------- | ------------------------------------------ | -------------------------------------- |
+| `POSTGRES_PASSWORD`       | PostgreSQL password                        | `your-secure-password`                 |
+| `ZERO_AUTH_SECRET`        | Secret for Zero JWT signing (min 32 chars) | `your-zero-auth-secret-min-32-chars`   |
+| `BETTER_AUTH_SECRET`      | Secret for Better Auth (min 32 chars)      | `your-better-auth-secret-min-32-chars` |
+| `VITE_PUBLIC_ZERO_SERVER` | Public URL for Zero cache server           | `https://zero.yourdomain.com`          |
+| `VITE_PUBLIC_API_SERVER`  | Public URL for web application             | `https://app.yourdomain.com`           |
+| `BETTER_AUTH_URL`         | Same as VITE_PUBLIC_API_SERVER             | `https://app.yourdomain.com`           |
 
 #### Optional Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `POSTGRES_USER` | PostgreSQL username | `user` |
-| `POSTGRES_DB` | PostgreSQL database name | `postgres` |
-| `ZERO_LOG_LEVEL` | Zero cache log level | `info` |
-| `ZERO_NUM_SYNC_WORKERS` | Number of Zero sync workers | `2` |
+| Variable                | Description                 | Default    |
+| ----------------------- | --------------------------- | ---------- |
+| `POSTGRES_USER`         | PostgreSQL username         | `user`     |
+| `POSTGRES_DB`           | PostgreSQL database name    | `postgres` |
+| `ZERO_LOG_LEVEL`        | Zero cache log level        | `info`     |
+| `ZERO_NUM_SYNC_WORKERS` | Number of Zero sync workers | `2`        |
 
 ### 4. Configure Domains
 
 In Coolify, assign domains to each service:
 
-1. **Web Service**: 
+1. **Web Service**:
+
    - Domain: `app.yourdomain.com` (or your chosen domain)
    - Port: `3000`
 
 2. **Zero Cache Service**:
    - Domain: `zero.yourdomain.com` (or your chosen subdomain)
    - Port: `4848`
-   
-3. **PostgreSQL**: 
+3. **PostgreSQL**:
    - No public domain needed (internal only)
 
 ### 5. Configure SSL

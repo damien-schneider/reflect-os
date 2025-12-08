@@ -73,7 +73,37 @@ services:
     volumes:
       - zero_data:/data
 
-  # Web Application (Vite/React frontend with API)
+  # Backend API Server (Hono)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Expose port 3001 for Coolify's reverse proxy
+    expose:
+      - "3001"
+    environment:
+      # Coolify magic variables
+      - SERVICE_URL_BACKEND
+      - SERVICE_URL_WEB
+      # Database connection
+      - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
+      # Auth secrets
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-$SERVICE_PASSWORD_BETTERAUTH}
+      - BETTER_AUTH_URL=${SERVICE_URL_WEB}
+      - ZERO_AUTH_SECRET=${ZERO_AUTH_SECRET:-$SERVICE_PASSWORD_ZEROAUTH}
+      # Polar billing (optional)
+      - POLAR_ACCESS_TOKEN=${POLAR_ACCESS_TOKEN:-}
+      - POLAR_WEBHOOK_SECRET=${POLAR_WEBHOOK_SECRET:-}
+      - POLAR_ENVIRONMENT=${POLAR_ENVIRONMENT:-sandbox}
+      # Server config
+      - PORT=3001
+      - NODE_ENV=production
+
+  # Web Application (Vite/React frontend)
   web:
     build:
       context: .
@@ -84,6 +114,8 @@ services:
         condition: service_healthy
       zero-cache:
         condition: service_started
+      backend:
+        condition: service_started
     # Expose port 3000 for Coolify's reverse proxy
     expose:
       - "3000"
@@ -91,9 +123,12 @@ services:
       # Coolify magic variables - SERVICE_URL includes https:// protocol
       - SERVICE_URL_WEB
       - SERVICE_URL_ZERO_CACHE
+      - SERVICE_URL_BACKEND
       # Zero server URL (passed to frontend at runtime)
       - VITE_PUBLIC_ZERO_SERVER=${SERVICE_URL_ZERO_CACHE}
-      # Server-side environment variables
+      # API server URL (passed to frontend at runtime)
+      - VITE_PUBLIC_API_URL=${SERVICE_URL_BACKEND}
+      # Server-side environment variables (for SSR/migrations)
       - ZERO_UPSTREAM_DB=postgres://${POSTGRES_USER:-user}:$SERVICE_PASSWORD_POSTGRES@postgres:5432/${POSTGRES_DB:-postgres}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-$SERVICE_PASSWORD_BETTERAUTH}
       - BETTER_AUTH_URL=${SERVICE_URL_WEB}

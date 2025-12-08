@@ -1,90 +1,50 @@
 // Production server for the web application
-// Serves both the static frontend and the API
+// Serves static frontend and proxies API requests to backend
 
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { SignJWT } from "jose";
-import { auth } from "./api/auth.js";
-
-// Initialize server environment
-const serverEnv = {
-  ZERO_UPSTREAM_DB: process.env.ZERO_UPSTREAM_DB ?? "",
-  ZERO_AUTH_SECRET: process.env.ZERO_AUTH_SECRET ?? "",
-  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET ?? "",
-  BETTER_AUTH_URL: process.env.BETTER_AUTH_URL ?? "",
-};
-
-// Validate required environment variables
-const requiredEnvVars = [
-  "ZERO_UPSTREAM_DB",
-  "ZERO_AUTH_SECRET",
-  "BETTER_AUTH_SECRET",
-  "BETTER_AUTH_URL",
-];
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    console.error(`Missing required environment variable: ${envVar}`);
-    process.exit(1);
-  }
-}
-
-console.log(`Auth configuration:
-  BETTER_AUTH_URL: ${serverEnv.BETTER_AUTH_URL}
-  NODE_ENV: ${process.env.NODE_ENV}
-`);
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
+const API_URL = process.env.VITE_PUBLIC_API_URL || "http://localhost:3001";
 
-// Create API app
-const apiApp = new Hono();
-
-// Enable CORS for API routes
-apiApp.use(
-  "/*",
-  cors({
-    origin: serverEnv.BETTER_AUTH_URL,
-    credentials: true,
-  })
-);
-
-apiApp.on(["POST", "GET"], "/auth/**", async (c) => {
-  try {
-    return await auth.handler(c.req.raw);
-  } catch (error) {
-    console.error("Auth error:", error);
-    throw error;
-  }
-});
-
-apiApp.get("/zero-token", async (c) => {
-  const session = await auth.api.getSession({
-    headers: c.req.raw.headers,
-  });
-
-  if (!session) {
-    return c.text("Unauthorized", 401);
-  }
-
-  const jwtPayload = {
-    sub: session.user.id,
-    iat: Math.floor(Date.now() / 1000),
-  };
-
-  const jwt = await new SignJWT(jwtPayload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("30days")
-    .sign(new TextEncoder().encode(serverEnv.ZERO_AUTH_SECRET));
-
-  return c.json({ token: jwt });
-});
+console.log(`Web server configuration:
+  PORT: ${PORT}
+  API_URL: ${API_URL}
+  NODE_ENV: ${process.env.NODE_ENV}
+`);
 
 // Create main app
 const app = new Hono();
 
-// Mount API routes
-app.route("/api", apiApp);
+// Proxy API requests to backend
+app.all("/api/*", async (c) => {
+  const url = new URL(c.req.url);
+  const backendUrl = `${API_URL}${url.pathname}${url.search}`;
+
+  try {
+    const response = await fetch(backendUrl, {
+      method: c.req.method,
+      headers: c.req.raw.headers,
+      body:
+        c.req.method !== "GET" && c.req.method !== "HEAD"
+          ? c.req.raw.body
+          : undefined,
+      // @ts-expect-error - duplex is needed for streaming request bodies
+      duplex: "half",
+    });
+
+    // Forward the response
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+  } catch (error) {
+    console.error("API proxy error:", error);
+    return c.json({ error: "Backend unavailable" }, 503);
+  }
+});
 
 // Serve static files from dist directory
 app.use("/*", serveStatic({ root: "./dist" }));
@@ -92,7 +52,7 @@ app.use("/*", serveStatic({ root: "./dist" }));
 // Fallback to index.html for SPA routing
 app.get("*", serveStatic({ path: "./dist/index.html" }));
 
-console.log(`🚀 Server starting on http://localhost:${PORT}`);
+console.log(`🚀 Web server starting on http://localhost:${PORT}`);
 
 serve({
   fetch: app.fetch,

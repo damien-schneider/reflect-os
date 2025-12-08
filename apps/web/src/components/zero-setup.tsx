@@ -3,6 +3,7 @@ import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { clientEnv } from "@/env/client";
+import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 import { createMutators } from "@/mutators";
 import { schema } from "@/schema";
@@ -13,16 +14,18 @@ type ZeroState = {
   error?: string;
 };
 
-// Fetch Zero token from API
+// Fetch Zero token from API (type-safe)
 async function fetchZeroToken(): Promise<string | null> {
   try {
     console.log("[ZeroSetup] Fetching Zero auth token...");
-    const res = await fetch("/api/zero-token");
+    const res = await api.api["zero-token"].$get();
 
     if (res.ok) {
-      const { token } = await res.json();
-      console.log("[ZeroSetup] ✅ Zero token obtained successfully");
-      return token;
+      const data = await res.json();
+      if ("token" in data) {
+        console.log("[ZeroSetup] ✅ Zero token obtained successfully");
+        return data.token;
+      }
     }
     const errorText = await res.text();
     console.error(

@@ -28,6 +28,9 @@ const processedEnv = {
   VITE_PUBLIC_ZERO_SERVER: normalizeUrl(
     import.meta.env.VITE_PUBLIC_ZERO_SERVER as string | undefined
   ),
+  VITE_PUBLIC_API_URL: normalizeUrl(
+    import.meta.env.VITE_PUBLIC_API_URL as string | undefined
+  ),
 };
 
 export const clientEnv = createEnv({
@@ -44,6 +47,20 @@ export const clientEnv = createEnv({
         (val) => isPlaceholder(val) || z.string().url().safeParse(val).success,
         "VITE_PUBLIC_ZERO_SERVER must be a valid URL"
       ),
+
+    /**
+     * URL of the backend API server (optional)
+     * If not set, API calls go to same origin (Vite proxy in dev, or /api/* in prod)
+     * @example "http://localhost:3001" for development with separate backend
+     * @example "https://api.yourdomain.com" for production
+     */
+    VITE_PUBLIC_API_URL: z
+      .string()
+      .refine(
+        (val) => isPlaceholder(val) || z.string().url().safeParse(val).success,
+        "VITE_PUBLIC_API_URL must be a valid URL"
+      )
+      .optional(),
   },
   runtimeEnv: processedEnv,
   emptyStringAsUndefined: true,

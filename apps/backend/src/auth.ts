@@ -3,35 +3,31 @@ import { Polar } from "@polar-sh/sdk";
 import { betterAuth } from "better-auth";
 import { organization } from "better-auth/plugins";
 import { Pool } from "pg";
-import { serverEnv } from "../src/env/server";
+import { env } from "./env";
 
-const isProduction = serverEnv.NODE_ENV === "production";
+const isProduction = env.NODE_ENV === "production";
 
 console.log("Better Auth initialized with:", {
-  baseURL: serverEnv.BETTER_AUTH_URL,
+  baseURL: env.BETTER_AUTH_URL,
   isProduction,
-  databaseConnected: !!serverEnv.ZERO_UPSTREAM_DB,
+  databaseConnected: !!env.ZERO_UPSTREAM_DB,
 });
 
 // Initialize Polar client (only if access token is configured)
-// Exported for use in sync-subscription endpoint
-export const polarClient = serverEnv.POLAR_ACCESS_TOKEN
+export const polarClient = env.POLAR_ACCESS_TOKEN
   ? new Polar({
-      accessToken: serverEnv.POLAR_ACCESS_TOKEN,
-      server:
-        serverEnv.POLAR_ENVIRONMENT === "production" ? "production" : "sandbox",
+      accessToken: env.POLAR_ACCESS_TOKEN,
+      server: env.POLAR_ENVIRONMENT === "production" ? "production" : "sandbox",
     })
   : null;
 
 // Database pool for direct queries (used in webhook handlers)
-// Exported for use in sync-subscription endpoint
 export const dbPool = new Pool({
-  connectionString: serverEnv.ZERO_UPSTREAM_DB,
+  connectionString: env.ZERO_UPSTREAM_DB,
 });
 
 // Helper to map Polar product name to subscription tier
 // Products should be named: "{Tier} Monthly" or "{Tier} Yearly"
-// Exported for use in sync-subscription endpoint
 export const mapProductToTier = (productName: string | null): string => {
   if (!productName) {
     return "free";
@@ -52,7 +48,6 @@ export const mapProductToTier = (productName: string | null): string => {
 };
 
 // Helper to update organization subscription in database
-// Exported for use in sync-subscription endpoint
 export const updateOrgSubscription = async (
   organizationId: string,
   subscriptionData: {
@@ -85,7 +80,6 @@ export const updateOrgSubscription = async (
 };
 
 // Helper to upsert subscription record
-// Exported for use in sync-subscription endpoint
 export const upsertSubscription = async (subscriptionData: {
   id: string;
   organizationId: string;
@@ -155,16 +149,16 @@ const polarPlugins = polarClient
                 return [];
               }
             },
-            successUrl: `${serverEnv.BETTER_AUTH_URL}/subscription/success?checkout_id={CHECKOUT_ID}`,
+            successUrl: `${env.BETTER_AUTH_URL}/subscription/success?checkout_id={CHECKOUT_ID}`,
             authenticatedUsersOnly: true,
           }),
           portal({
-            returnUrl: serverEnv.BETTER_AUTH_URL,
+            returnUrl: env.BETTER_AUTH_URL,
           }),
-          ...(serverEnv.POLAR_WEBHOOK_SECRET
+          ...(env.POLAR_WEBHOOK_SECRET
             ? [
                 webhooks({
-                  secret: serverEnv.POLAR_WEBHOOK_SECRET,
+                  secret: env.POLAR_WEBHOOK_SECRET,
                   onSubscriptionCreated: async (payload) => {
                     console.log(
                       "[Polar Webhook] Subscription created:",
@@ -318,8 +312,8 @@ const polarPlugins = polarClient
 
 export const auth = betterAuth({
   database: dbPool,
-  baseURL: serverEnv.BETTER_AUTH_URL,
-  trustedOrigins: [serverEnv.BETTER_AUTH_URL],
+  baseURL: env.BETTER_AUTH_URL,
+  trustedOrigins: [env.BETTER_AUTH_URL],
   plugins: [organization(), ...polarPlugins],
   emailAndPassword: {
     enabled: true,

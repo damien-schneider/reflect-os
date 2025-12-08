@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 import type { Schema } from "@/schema";
 
@@ -57,20 +58,24 @@ function SubscriptionSuccess() {
     const syncSubscription = async () => {
       setSyncStatus("syncing");
       try {
-        const response = await fetch("/api/sync-subscription", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ organizationId: firstOrg.id }),
+        const response = await api.api["sync-subscription"].$post({
+          json: { organizationId: firstOrg.id },
         });
 
         const data = await response.json();
 
-        if (response.ok && data.synced) {
-          console.log("[Success Page] Subscription synced:", data.subscription);
+        if (response.ok && "synced" in data && data.synced) {
+          console.log(
+            "[Success Page] Subscription synced:",
+            "subscription" in data ? data.subscription : null
+          );
           setSyncStatus("success");
         } else {
           // Not an error - just no subscription to sync
-          console.log("[Success Page] Sync result:", data.message);
+          console.log(
+            "[Success Page] Sync result:",
+            "message" in data ? data.message : "No message"
+          );
           setSyncStatus("success");
         }
       } catch (error) {

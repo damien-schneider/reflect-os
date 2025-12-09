@@ -1,6 +1,6 @@
 # Database Migrations Dockerfile
-# Lightweight init container that runs Drizzle migrations and exits
-# This follows the "init container" pattern - runs once, exits on success
+# Init container that runs Drizzle migrations and exits
+# Uses service_completed_successfully in docker-compose for orchestration
 
 FROM oven/bun:1-alpine
 
@@ -21,8 +21,5 @@ RUN cd packages/db && bun run build
 
 WORKDIR /app/packages/db
 
-# Run migrations and exit
-# drizzle-kit migrate will:
-# - Apply all pending migrations from ./migrations folder
-# - Exit 0 on success, non-zero on failure
+# Run migrations directly - drizzle-kit handles logging and exit codes
 CMD ["bunx", "drizzle-kit", "migrate"]

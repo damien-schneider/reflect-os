@@ -60,6 +60,10 @@ services:
       - reflect-network
     # Init container: runs once, must complete successfully
     restart: "no"
+    # Deploy configuration for compatibility with various orchestrators
+    deploy:
+      restart_policy:
+        condition: none
 
   # Zero Cache Server (sync server for Rocicorp Zero)
   zero-cache:

@@ -30,6 +30,18 @@ services:
     ports:
       - "5434:5432" # Different port to avoid conflicts
 
+  # Database Migrations (init container - runs once and exits)
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ZERO_UPSTREAM_DB: postgres://user:localpassword@postgres:5432/postgres
+    restart: "no"
+
   zero-cache:
     build:
       context: .
@@ -38,6 +50,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
     environment:
       ZERO_UPSTREAM_DB: postgres://user:localpassword@postgres:5432/postgres
       ZERO_CVR_DB: postgres://user:localpassword@postgres:5432/postgres
@@ -62,6 +76,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: production
       ZERO_UPSTREAM_DB: postgres://user:localpassword@postgres:5432/postgres

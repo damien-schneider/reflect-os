@@ -43,12 +43,12 @@
       "persistent": true
     },
     "@repo/web#dev:vite": {
-      "dependsOn": ["@repo/db#db:push", "@repo/backend#dev"],
+      "dependsOn": ["@repo/db#db:push"],
       "cache": false,
       "persistent": true
     },
     "@repo/web#dev": {
-      "dependsOn": ["@repo/db#db:push", "@repo/backend#dev"],
+      "dependsOn": ["@repo/db#db:push"],
       "cache": false,
       "persistent": true
     },

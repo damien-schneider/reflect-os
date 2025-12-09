@@ -16,7 +16,6 @@
  */
 
 import { hc } from "hono/client";
-import { clientEnv } from "@/env/client";
 
 // =============================================================================
 // API Type Definitions
@@ -125,15 +124,10 @@ type ApiClientType = {
 // API Client Implementation
 // =============================================================================
 
-// Determine the API base URL
-// In development: empty string (same origin, Vite proxies /api/* to backend)
-// In production with separate backend: use VITE_PUBLIC_API_URL
-const getApiBaseUrl = (): string => {
-  if (clientEnv.VITE_PUBLIC_API_URL) {
-    return clientEnv.VITE_PUBLIC_API_URL;
-  }
-  return "";
-};
+// API base URL is always same-origin (empty string)
+// In development: Vite proxies /api/* to backend (see vite.config.ts)
+// In production: web server proxies /api/* to backend (see server.ts)
+const API_BASE_URL = "";
 
 /**
  * Type-safe API client instance
@@ -141,7 +135,7 @@ const getApiBaseUrl = (): string => {
  * All endpoints are typed based on the backend's route definitions.
  * The client includes credentials for authenticated requests.
  */
-export const api: ApiClientType = hc(getApiBaseUrl(), {
+export const api: ApiClientType = hc(API_BASE_URL, {
   fetch: (input: RequestInfo | URL, init?: RequestInit) =>
     fetch(input, {
       ...init,

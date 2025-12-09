@@ -124,8 +124,8 @@ services:
     environment:
       # Zero server URL (public URL for frontend WebSocket connection)
       VITE_PUBLIC_ZERO_SERVER: ${ZERO_SERVER_URL:?ZERO_SERVER_URL is required - set in Dokploy UI}
-      # API URL (internal Docker network for server-side proxy)
-      VITE_PUBLIC_API_URL: http://backend:3001
+      # Internal API URL for server-side proxy (Docker network, NOT browser)
+      INTERNAL_API_URL: http://backend:3001
       # Server-side environment
       ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}

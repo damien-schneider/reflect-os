@@ -310,10 +310,31 @@ const polarPlugins = polarClient
     ]
   : [];
 
+// Regex for removing trailing slashes
+const trailingSlashRegex = /\/$/;
+
+// Build trusted origins list (includes URL variations)
+const getTrustedOrigins = (): string[] => {
+  const origins: string[] = [];
+
+  if (env.BETTER_AUTH_URL) {
+    origins.push(env.BETTER_AUTH_URL);
+    // Also allow without trailing slash
+    origins.push(env.BETTER_AUTH_URL.replace(trailingSlashRegex, ""));
+  }
+
+  // In development, allow localhost
+  if (!isProduction) {
+    origins.push("http://localhost:5173", "http://localhost:3000");
+  }
+
+  return [...new Set(origins)];
+};
+
 export const auth = betterAuth({
   database: dbPool,
   baseURL: env.BETTER_AUTH_URL,
-  trustedOrigins: [env.BETTER_AUTH_URL],
+  trustedOrigins: getTrustedOrigins(),
   plugins: [organization(), ...polarPlugins],
   emailAndPassword: {
     enabled: true,

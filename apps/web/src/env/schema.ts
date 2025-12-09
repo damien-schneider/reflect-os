@@ -39,14 +39,6 @@ export const clientSchema = {
    * @note Can use __VITE_PUBLIC_ZERO_SERVER__ placeholder for Docker runtime injection
    */
   VITE_PUBLIC_ZERO_SERVER: urlOrPlaceholder,
-
-  /**
-   * URL of the backend API server (optional)
-   * If not set, API calls go to same origin (Vite proxy in dev, or /api/* in prod)
-   * @example "http://localhost:3001" for development with separate backend
-   * @example "https://api.yourdomain.com" for production
-   */
-  VITE_PUBLIC_API_URL: urlOrPlaceholder.optional(),
 } as const;
 
 // ============================================
@@ -58,6 +50,14 @@ export const serverSchema = {
    * Port for the web server to listen on
    */
   PORT: z.coerce.number().default(3000),
+
+  /**
+   * Internal backend API URL for server-side proxy
+   * Uses Docker service name internally, NOT for browser access
+   * @example "http://localhost:3001" for development
+   * @example "http://backend:3001" for Docker
+   */
+  INTERNAL_API_URL: z.string().url().default("http://localhost:3001"),
 
   /**
    * Node environment

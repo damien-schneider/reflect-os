@@ -25,8 +25,7 @@ export const buildEnv = createEnv({
       console.error(`   ${issue.path?.join(".")}: ${issue.message}`);
     }
     console.error("\n📝 Required VITE_PUBLIC_* variables:");
-    console.error("   - VITE_PUBLIC_ZERO_SERVER: URL of Zero sync server");
-    console.error("   - VITE_PUBLIC_API_URL: (optional) URL of backend API\n");
+    console.error("   - VITE_PUBLIC_ZERO_SERVER: URL of Zero sync server\n");
     console.error(
       "💡 Set these in your .env file or as environment variables\n"
     );
@@ -36,6 +35,3 @@ export const buildEnv = createEnv({
 
 console.log("✅ Build-time environment validation passed");
 console.log(`   VITE_PUBLIC_ZERO_SERVER: ${buildEnv.VITE_PUBLIC_ZERO_SERVER}`);
-if (buildEnv.VITE_PUBLIC_API_URL) {
-  console.log(`   VITE_PUBLIC_API_URL: ${buildEnv.VITE_PUBLIC_API_URL}`);
-}

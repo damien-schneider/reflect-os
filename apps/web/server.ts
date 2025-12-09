@@ -10,17 +10,17 @@ const env = serverEnv;
 
 console.log(`Web server configuration:
   PORT: ${env.PORT}
-  API_URL: ${env.VITE_PUBLIC_API_URL}
+  INTERNAL_API_URL: ${env.INTERNAL_API_URL}
   NODE_ENV: ${env.NODE_ENV}
 `);
 
 // Create main app
 const app = new Hono();
 
-// Proxy API requests to backend
+// Proxy API requests to backend (using internal Docker URL)
 app.all("/api/*", async (c) => {
   const url = new URL(c.req.url);
-  const backendUrl = `${env.VITE_PUBLIC_API_URL}${url.pathname}${url.search}`;
+  const backendUrl = `${env.INTERNAL_API_URL}${url.pathname}${url.search}`;
 
   try {
     const response = await fetch(backendUrl, {

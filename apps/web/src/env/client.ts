@@ -12,7 +12,6 @@ export const clientEnv = createEnv({
   client: clientSchema,
   runtimeEnv: {
     VITE_PUBLIC_ZERO_SERVER: import.meta.env.VITE_PUBLIC_ZERO_SERVER,
-    VITE_PUBLIC_API_URL: import.meta.env.VITE_PUBLIC_API_URL,
   },
   emptyStringAsUndefined: true,
   skipValidation: false,

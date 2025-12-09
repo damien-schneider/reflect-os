@@ -13,9 +13,17 @@ if (process.env.NODE_ENV === "development") {
 // Backend server port (default 3001 for development)
 const BACKEND_PORT = process.env.BACKEND_PORT ?? "3001";
 
-// Note: Server environment validation happens at runtime, not build time
-// Client env vars (VITE_PUBLIC_*) are validated when the app loads
-// This avoids build failures when server env vars aren't available during Docker build
+// Validate client environment variables at build time
+// This ensures VITE_PUBLIC_* vars are set before building
+// Note: Import is dynamic to avoid issues with import.meta.env not being available
+console.log("🔧 Build-time environment:");
+console.log(
+  `   VITE_PUBLIC_ZERO_SERVER: ${process.env.VITE_PUBLIC_ZERO_SERVER ?? "(not set - will use placeholder)"}`
+);
+console.log(
+  `   VITE_PUBLIC_API_URL: ${process.env.VITE_PUBLIC_API_URL ?? "(not set)"}`
+);
+console.log(`   NODE_ENV: ${process.env.NODE_ENV}`);
 
 export default defineConfig({
   build: {

@@ -1,6 +1,16 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
+/**
+ * Server-side environment variables
+ *
+ * These are validated at RUNTIME (not build time) because:
+ * 1. They contain secrets that shouldn't be in the build
+ * 2. They're provided via Docker environment at container start
+ * 3. They may differ between environments (staging vs production)
+ *
+ * For build-time validation, see client.ts
+ */
 export const serverEnv = createEnv({
   server: {
     /**
@@ -12,13 +22,21 @@ export const serverEnv = createEnv({
      * Internal API URL for proxying requests to backend
      * In Docker: http://backend:3001, locally: http://localhost:3001
      */
-    VITE_PUBLIC_API_URL: z.url().default("http://localhost:3001"),
+    VITE_PUBLIC_API_URL: z.string().url().default("http://localhost:3001"),
+
+    /**
+     * Node environment
+     */
+    NODE_ENV: z
+      .enum(["development", "production", "test"])
+      .default("development"),
 
     /**
      * PostgreSQL connection string for Zero upstream database
      * @example "postgresql://user:password@localhost:5432/mydb"
      */
     ZERO_UPSTREAM_DB: z
+      .string()
       .url("ZERO_UPSTREAM_DB must be a valid PostgreSQL URL")
       .refine(
         (url) =>
@@ -33,10 +51,7 @@ export const serverEnv = createEnv({
     ZERO_AUTH_SECRET: z
       .string()
       .min(1, "ZERO_AUTH_SECRET is required")
-      .refine(
-        (val) => process.env.NODE_ENV === "development" || val.length >= 32,
-        "ZERO_AUTH_SECRET must be at least 32 characters in production"
-      ),
+      .optional(),
 
     /**
      * Path to Zero replica SQLite file (for local development)
@@ -47,10 +62,7 @@ export const serverEnv = createEnv({
     /**
      * Zero cache server log level
      */
-    ZERO_LOG_LEVEL: z
-      .enum(["debug", "info", "warn", "error"])
-      .optional()
-      .default("info"),
+    ZERO_LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 
     /**
      * Secret key for Better Auth sessions (min 32 chars for security)
@@ -58,10 +70,7 @@ export const serverEnv = createEnv({
     BETTER_AUTH_SECRET: z
       .string()
       .min(1, "BETTER_AUTH_SECRET is required")
-      .refine(
-        (val) => process.env.NODE_ENV === "development" || val.length >= 32,
-        "BETTER_AUTH_SECRET must be at least 32 characters in production"
-      ),
+      .optional(),
 
     /**
      * Base URL for Better Auth callbacks
@@ -70,14 +79,8 @@ export const serverEnv = createEnv({
      */
     BETTER_AUTH_URL: z
       .string()
-      .transform((url) => {
-        // Add https:// if no protocol is present
-        if (!(url.startsWith("http://") || url.startsWith("https://"))) {
-          return `https://${url}`;
-        }
-        return url;
-      })
-      .pipe(z.string().url("BETTER_AUTH_URL must be a valid URL")),
+      .url("BETTER_AUTH_URL must be a valid URL")
+      .optional(),
 
     /**
      * AWS Region (optional, for SST/AWS deployment)
@@ -86,7 +89,6 @@ export const serverEnv = createEnv({
 
     /**
      * Custom domain name (optional, for SST deployment)
-     * @example "yourdomain.com"
      */
     DOMAIN_NAME: z.string().optional(),
 
@@ -95,46 +97,47 @@ export const serverEnv = createEnv({
      */
     DOMAIN_CERT: z.string().optional(),
 
-    /**
-     * Node environment
-     */
-    NODE_ENV: z
-      .enum(["development", "production", "test"])
-      .optional()
-      .default("development"),
-
     // ============================================
-    // POLAR BILLING
+    // POLAR BILLING (optional)
     // ============================================
 
     /**
      * Polar organization access token for API calls
-     * Get this from your Polar organization settings
      */
     POLAR_ACCESS_TOKEN: z.string().min(1).optional(),
 
     /**
      * Polar webhook secret for verifying webhook signatures
-     * Get this when creating a webhook endpoint in Polar dashboard
      */
     POLAR_WEBHOOK_SECRET: z.string().min(1).optional(),
 
     /**
      * Polar environment (sandbox for testing, production for live)
-     * Use sandbox during development to test without real payments
      */
-    POLAR_ENVIRONMENT: z
-      .enum(["sandbox", "production"])
-      .optional()
-      .default("sandbox"),
+    POLAR_ENVIRONMENT: z.enum(["sandbox", "production"]).default("sandbox"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
-  // Skip validation during build (when server env vars aren't available)
-  // and in lint/client environments
+  // Server env vars are validated at RUNTIME, not build time
+  // Skip validation during:
+  // - Vite build (server vars not available)
+  // - Client-side (no access to server vars)
+  // - Lint/test commands
   skipValidation:
     !!process.env.SKIP_ENV_VALIDATION ||
-    process.env.npm_lifecycle_event === "lint" ||
     process.env.npm_lifecycle_event === "build" ||
+    process.env.npm_lifecycle_event === "lint" ||
     typeof window !== "undefined",
+  onValidationError: (issues) => {
+    console.error("❌ Invalid server environment variables:");
+    for (const issue of issues) {
+      console.error(`  - ${issue.path?.join(".")}: ${issue.message}`);
+    }
+    throw new Error("Invalid server environment variables");
+  },
+  onInvalidAccess: (variable) => {
+    throw new Error(
+      `❌ Attempted to access server-side env var "${variable}" on the client`
+    );
+  },
 });

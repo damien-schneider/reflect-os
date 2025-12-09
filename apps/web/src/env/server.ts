@@ -12,14 +12,13 @@ export const serverEnv = createEnv({
      * Internal API URL for proxying requests to backend
      * In Docker: http://backend:3001, locally: http://localhost:3001
      */
-    VITE_PUBLIC_API_URL: z.string().url().default("http://localhost:3001"),
+    VITE_PUBLIC_API_URL: z.url().default("http://localhost:3001"),
 
     /**
      * PostgreSQL connection string for Zero upstream database
      * @example "postgresql://user:password@localhost:5432/mydb"
      */
     ZERO_UPSTREAM_DB: z
-      .string()
       .url("ZERO_UPSTREAM_DB must be a valid PostgreSQL URL")
       .refine(
         (url) =>

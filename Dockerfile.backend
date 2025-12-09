@@ -19,6 +19,10 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Build dependencies first (email package exports from dist/)
+RUN cd packages/db && bun run build
+RUN cd packages/email && bun run build
+
 # Build the backend
 WORKDIR /app/apps/backend
 RUN bun build src/server.ts --outdir dist --target bun

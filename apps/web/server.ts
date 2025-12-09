@@ -4,14 +4,14 @@
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
+import { serverEnv } from "./src/env/server";
 
-const PORT = Number.parseInt(process.env.PORT || "3000", 10);
-const API_URL = process.env.VITE_PUBLIC_API_URL || "http://localhost:3001";
+const env = serverEnv;
 
 console.log(`Web server configuration:
-  PORT: ${PORT}
-  API_URL: ${API_URL}
-  NODE_ENV: ${process.env.NODE_ENV}
+  PORT: ${env.PORT}
+  API_URL: ${env.VITE_PUBLIC_API_URL}
+  NODE_ENV: ${env.NODE_ENV}
 `);
 
 // Create main app
@@ -20,7 +20,7 @@ const app = new Hono();
 // Proxy API requests to backend
 app.all("/api/*", async (c) => {
   const url = new URL(c.req.url);
-  const backendUrl = `${API_URL}${url.pathname}${url.search}`;
+  const backendUrl = `${env.VITE_PUBLIC_API_URL}${url.pathname}${url.search}`;
 
   try {
     const response = await fetch(backendUrl, {
@@ -52,9 +52,9 @@ app.use("/*", serveStatic({ root: "./dist" }));
 // Fallback to index.html for SPA routing
 app.get("*", serveStatic({ path: "./dist/index.html" }));
 
-console.log(`🚀 Web server starting on http://localhost:${PORT}`);
+console.log(`🚀 Web server starting on http://localhost:${env.PORT}`);
 
 serve({
   fetch: app.fetch,
-  port: PORT,
+  port: env.PORT,
 });

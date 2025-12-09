@@ -4,6 +4,17 @@ import { z } from "zod";
 export const serverEnv = createEnv({
   server: {
     /**
+     * Port for the web server to listen on
+     */
+    PORT: z.coerce.number().default(3000),
+
+    /**
+     * Internal API URL for proxying requests to backend
+     * In Docker: http://backend:3001, locally: http://localhost:3001
+     */
+    VITE_PUBLIC_API_URL: z.string().url().default("http://localhost:3001"),
+
+    /**
      * PostgreSQL connection string for Zero upstream database
      * @example "postgresql://user:password@localhost:5432/mydb"
      */
@@ -14,7 +25,8 @@ export const serverEnv = createEnv({
         (url) =>
           url.startsWith("postgresql://") || url.startsWith("postgres://"),
         "ZERO_UPSTREAM_DB must be a PostgreSQL connection string"
-      ),
+      )
+      .optional(),
 
     /**
      * Secret key for Zero JWT authentication (min 32 chars for security)

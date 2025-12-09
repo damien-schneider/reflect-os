@@ -4,8 +4,13 @@
 #   POSTGRES_PASSWORD - Database password
 #   BETTER_AUTH_SECRET - Auth secret key
 #   ZERO_AUTH_SECRET - Zero sync auth secret
-#   PUBLIC_URL - Your public domain (e.g., https://beta.reflet.app)
-#   ZERO_SERVER_URL - Zero sync server URL (e.g., https://beta-zero.reflet.app)
+#   PUBLIC_URL - Frontend URL (e.g., https://beta.reflet.app)
+#   ZERO_SERVER_URL - Zero cache public URL (e.g., https://beta-zero.reflet.app)
+#
+# Dokploy Domain Setup:
+#   web        → beta.reflet.app:3000
+#   backend    → beta-backend.reflet.app:3001
+#   zero-cache → beta-zero.reflet.app:4848
 #
 # Optional:
 #   POLAR_ACCESS_TOKEN - For billing integration

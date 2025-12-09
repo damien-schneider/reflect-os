@@ -5,9 +5,6 @@
 #   BETTER_AUTH_SECRET - Auth secret key
 #   ZERO_AUTH_SECRET - Zero sync auth secret
 #   PUBLIC_URL - Your public domain (e.g., https://beta.reflet.app)
-#
-# Subdomain URLs (set in Dokploy UI):
-#   BACKEND_URL - Backend API URL (e.g., https://beta-backend.reflet.app)
 #   ZERO_SERVER_URL - Zero sync server URL (e.g., https://beta-zero.reflet.app)
 #
 # Optional:
@@ -21,10 +18,11 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      POSTGRES_DB: ${POSTGRES_DB:-reflect}
+      POSTGRES_DB: reflect
     volumes:
+      # Named volume for Dokploy backup management
       - postgres_data:/var/lib/postgresql/data
     # Required for Zero replication
     command:
@@ -36,14 +34,12 @@ services:
       - "-c"
       - "max_wal_senders=10"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-reflect}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d reflect"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - reflect-network
 
   # Zero Cache Server (sync server for Rocicorp Zero)
   zero-cache:
@@ -58,9 +54,9 @@ services:
       - "4848"
     environment:
       # Database connections
-      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
-      ZERO_CVR_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
-      ZERO_CHANGE_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
+      ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_CVR_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_CHANGE_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
       # Authentication
       ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
       ZERO_ADMIN_PASSWORD: ${ZERO_ADMIN_PASSWORD:-admin}
@@ -72,7 +68,10 @@ services:
       ZERO_NUM_SYNC_WORKERS: ${ZERO_NUM_SYNC_WORKERS:-2}
       NODE_ENV: production
     volumes:
+      # Named volume for zero-cache replica data
       - zero_data:/data
+    networks:
+      - reflect-network
 
   # Backend API Server (Hono)
   backend:
@@ -87,10 +86,10 @@ services:
       - "3001"
     environment:
       # Database connection
-      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
+      ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
       # Auth secrets
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
-      BETTER_AUTH_URL: ${PUBLIC_URL:?PUBLIC_URL is required}
+      BETTER_AUTH_URL: ${PUBLIC_URL:?PUBLIC_URL is required - set in Dokploy UI}
       ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET}
       # Polar billing (optional)
       POLAR_ACCESS_TOKEN: ${POLAR_ACCESS_TOKEN:-}
@@ -99,6 +98,8 @@ services:
       # Server config
       PORT: "3001"
       NODE_ENV: production
+    networks:
+      - reflect-network
 
   # Web Application (Vite/React frontend)
   web:
@@ -116,23 +117,27 @@ services:
     expose:
       - "3000"
     environment:
-      # Frontend environment (injected into built JS at runtime)
-      # VITE_PUBLIC_ZERO_SERVER: URL where frontend connects to zero-cache
-      VITE_PUBLIC_ZERO_SERVER: ${ZERO_SERVER_URL:?ZERO_SERVER_URL is required - e.g., https://beta-zero.reflet.app}
-      # Server-side proxy: URL where web server proxies /api/* requests
-      # Uses internal Docker network by default, or external URL if set
+      # Zero server URL (public URL for frontend WebSocket connection)
+      VITE_PUBLIC_ZERO_SERVER: ${ZERO_SERVER_URL:?ZERO_SERVER_URL is required - set in Dokploy UI}
+      # API URL (internal Docker network for server-side proxy)
       VITE_PUBLIC_API_URL: http://backend:3001
       # Server-side environment
-      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-reflect}
+      ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${PUBLIC_URL}
       ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET}
       NODE_ENV: production
+    networks:
+      - reflect-network
 
 volumes:
+  # PostgreSQL data - backs up the entire database
   postgres_data:
+    name: reflect-postgres-data
+  # Zero cache replica - can be regenerated but speeds up restarts
   zero_data:
+    name: reflect-zero-data
 
 networks:
-  default:
+  reflect-network:
     name: reflect-network

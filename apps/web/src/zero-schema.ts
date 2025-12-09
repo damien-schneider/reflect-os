@@ -231,6 +231,16 @@ const subscriptionTable = table("subscription")
   })
   .primaryKey("id");
 
+const changelogSubscriptionTable = table("changelogSubscription")
+  .from("changelog_subscription")
+  .columns({
+    id: string(),
+    userId: string().from("user_id"),
+    organizationId: string().from("organization_id"),
+    subscribedAt: number().from("subscribed_at"),
+  })
+  .primaryKey("id");
+
 // ============================================
 // RELATIONSHIPS
 // ============================================
@@ -260,6 +270,11 @@ const userRelationships = relationships(userTable, ({ many }) => ({
     sourceField: ["id"],
     destField: ["userId"],
     destSchema: notificationTable,
+  }),
+  changelogSubscriptions: many({
+    sourceField: ["id"],
+    destField: ["userId"],
+    destSchema: changelogSubscriptionTable,
   }),
 }));
 
@@ -295,6 +310,11 @@ const organizationRelationships = relationships(
       sourceField: ["id"],
       destField: ["organizationId"],
       destSchema: subscriptionTable,
+    }),
+    changelogSubscriptions: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: changelogSubscriptionTable,
     }),
   })
 );
@@ -556,6 +576,22 @@ const subscriptionRelationships = relationships(
   })
 );
 
+const changelogSubscriptionRelationships = relationships(
+  changelogSubscriptionTable,
+  ({ one }) => ({
+    user: one({
+      sourceField: ["userId"],
+      destField: ["id"],
+      destSchema: userTable,
+    }),
+    organization: one({
+      sourceField: ["organizationId"],
+      destField: ["id"],
+      destSchema: organizationTable,
+    }),
+  })
+);
+
 // ============================================
 // CREATE SCHEMA
 // ============================================
@@ -577,6 +613,7 @@ export const schema = createSchema({
     releaseTable,
     releaseItemTable,
     subscriptionTable,
+    changelogSubscriptionTable,
   ],
   relationships: [
     userRelationships,
@@ -594,6 +631,7 @@ export const schema = createSchema({
     releaseRelationships,
     releaseItemRelationships,
     subscriptionRelationships,
+    changelogSubscriptionRelationships,
   ],
 });
 
@@ -619,3 +657,6 @@ export type AdminNote = Row<typeof adminNoteTable.schema>;
 export type Release = Row<typeof releaseTable.schema>;
 export type ReleaseItem = Row<typeof releaseItemTable.schema>;
 export type Subscription = Row<typeof subscriptionTable.schema>;
+export type ChangelogSubscription = Row<
+  typeof changelogSubscriptionTable.schema
+>;

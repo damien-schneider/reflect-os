@@ -1,0 +1,41 @@
+{
+  "name": "@repo/email",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./templates": {
+      "types": "./dist/templates/index.d.ts",
+      "import": "./dist/templates/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit",
+    "email:dev": "email dev -p 3002"
+  },
+  "dependencies": {
+    "@react-email/components": "1.0.1",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "resend": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.9",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react-email": "5.0.6",
+    "typescript": "^5.5.3"
+  }
+}

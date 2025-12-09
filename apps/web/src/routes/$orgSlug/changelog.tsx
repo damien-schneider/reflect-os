@@ -1,10 +1,15 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { Calendar, CheckCircle } from "lucide-react";
+import { Bell, BellOff, Calendar, CheckCircle } from "lucide-react";
+import { nanoid } from "nanoid";
+import { useCallback, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
+import { authClient } from "@/lib/auth-client";
 import type { Schema } from "@/schema";
 
 export const Route = createFileRoute("/$orgSlug/changelog")({
@@ -14,6 +19,10 @@ export const Route = createFileRoute("/$orgSlug/changelog")({
 function PublicChangelog() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
   const z = useZero<Schema>();
+
+  // Get current user session
+  const { data: session } = authClient.useSession();
+  const userId = session?.user?.id;
 
   // Get organization
   const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
@@ -29,8 +38,49 @@ function PublicChangelog() {
       .orderBy("publishedAt", "desc")
   );
 
+  // Get user's changelog subscription for this org
+  const subscriptionsQuery =
+    userId && org?.id
+      ? z.query.changelogSubscription
+          .where("userId", "=", userId)
+          .where("organizationId", "=", org.id)
+      : z.query.changelogSubscription
+          .where("userId", "=", "__none__")
+          .where("organizationId", "=", "__none__");
+
+  const [subscriptions] = useQuery(subscriptionsQuery);
+  const isSubscribed = subscriptions && subscriptions.length > 0;
+
+  // Toggle subscription handler
+  const handleToggleSubscription = useCallback(async () => {
+    if (!(userId && org?.id)) {
+      return;
+    }
+
+    if (isSubscribed && subscriptions?.[0]) {
+      // Unsubscribe - delete the subscription
+      await z.mutate.changelogSubscription.delete({
+        id: subscriptions[0].id,
+      });
+    } else {
+      // Subscribe - create new subscription
+      await z.mutate.changelogSubscription.insert({
+        id: nanoid(),
+        userId,
+        organizationId: org.id,
+        subscribedAt: Date.now(),
+      });
+    }
+  }, [
+    userId,
+    org?.id,
+    isSubscribed,
+    subscriptions,
+    z.mutate.changelogSubscription,
+  ]);
+
   // Transform releases to include feedbacks - memoized for performance
-  const releasesWithFeedbacks = (() => {
+  const releasesWithFeedbacks = useMemo(() => {
     if (!(releasesData && org)) {
       return [];
     }
@@ -49,7 +99,7 @@ function PublicChangelog() {
           feedbacks,
         };
       });
-  })();
+  }, [releasesData, org]);
 
   if (!org) {
     return (
@@ -69,6 +119,37 @@ function PublicChangelog() {
         <p className="mt-2 text-muted-foreground">
           The latest updates and improvements from {org.name}
         </p>
+
+        {/* Email Subscription Toggle - only show for logged-in users */}
+        {userId && (
+          <div className="mx-auto mt-6 flex max-w-md items-center justify-center gap-3 rounded-lg border bg-card p-4">
+            <div className="flex items-center gap-2">
+              {isSubscribed ? (
+                <Bell className="h-5 w-5 text-primary" />
+              ) : (
+                <BellOff className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div className="text-left">
+                <Label
+                  className="cursor-pointer font-medium text-sm"
+                  htmlFor="changelog-subscription"
+                >
+                  Email Updates
+                </Label>
+                <p className="text-muted-foreground text-xs">
+                  {isSubscribed
+                    ? "You'll receive emails for new releases"
+                    : "Get notified when new releases are published"}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={isSubscribed}
+              id="changelog-subscription"
+              onCheckedChange={handleToggleSubscription}
+            />
+          </div>
+        )}
       </div>
 
       {/* Releases */}

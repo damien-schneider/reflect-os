@@ -12,6 +12,7 @@ import {
 export {
   type AdminNote,
   type Board,
+  type ChangelogSubscription,
   type Comment,
   type Feedback,
   type FeedbackTag,
@@ -208,6 +209,12 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
       )
     );
 
+  // ChangelogSubscription permissions - users can manage their own subscriptions
+  const allowIfChangelogSubscriptionOwner = (
+    authData: AuthData,
+    { cmp }: ExpressionBuilder<Schema, "changelogSubscription">
+  ) => cmp("userId", "=", authData.sub ?? "");
+
   return {
     user: {
       row: {
@@ -402,6 +409,20 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
           postMutation: [],
         },
         delete: [],
+      },
+    },
+    changelogSubscription: {
+      row: {
+        // Users can view their own subscriptions
+        select: [allowIfChangelogSubscriptionOwner],
+        // Logged in users can subscribe
+        insert: [allowIfLoggedIn],
+        update: {
+          preMutation: [allowIfChangelogSubscriptionOwner],
+          postMutation: [allowIfChangelogSubscriptionOwner],
+        },
+        // Users can unsubscribe (delete their own subscription)
+        delete: [allowIfChangelogSubscriptionOwner],
       },
     },
   } satisfies PermissionsConfig<AuthData, Schema>;

@@ -10,8 +10,8 @@ import { createEnv } from "@t3-oss/env-core";
 import dotenv from "dotenv";
 import { clientSchema } from "./schema";
 
-// Load .env from monorepo root BEFORE validation
-dotenv.config({ path: "../../.env" });
+// Load .env from app directory BEFORE validation
+dotenv.config({ path: ".env" });
 
 export const buildEnv = createEnv({
   clientPrefix: "VITE_PUBLIC_",

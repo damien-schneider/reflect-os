@@ -60,10 +60,10 @@ function Login() {
         },
         {
           onSuccess: () => {
-            setSuccess("Account created! Redirecting...");
+            setSuccess("Account created! Check your email to verify.");
             setTimeout(() => {
-              navigate({ to: "/dashboard" });
-            }, 1000);
+              navigate({ to: "/check-email", search: { email } });
+            }, 500);
           },
           onError: (ctx) => {
             console.error("Sign up error:", ctx.error);
@@ -89,6 +89,25 @@ function Login() {
             }, 1000);
           },
           onError: (ctx) => {
+            const errorMsg = ctx.error.message?.toLowerCase() ?? "";
+
+            // Handle email not verified error
+            // Better Auth returns "Email not verified" message or status 403
+            const isEmailNotVerified =
+              ctx.error.status === 403 ||
+              errorMsg.includes("not verified") ||
+              errorMsg.includes("verify your email") ||
+              errorMsg === "email not verified";
+
+            if (isEmailNotVerified) {
+              setIsLoading(false);
+              navigate({
+                to: "/check-email",
+                search: { email },
+              });
+              return;
+            }
+
             setError(
               ctx.error.message ||
                 "Invalid email or password. Check your credentials."

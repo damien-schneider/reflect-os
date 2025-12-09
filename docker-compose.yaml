@@ -16,6 +16,9 @@
 #   POLAR_ACCESS_TOKEN - For billing integration
 #   POLAR_WEBHOOK_SECRET - For billing webhooks
 #   POLAR_ENVIRONMENT - sandbox or production
+#   RESEND_API_KEY - For sending emails (verification, notifications)
+#   EMAIL_FROM_ADDRESS - Sender email (e.g., noreply@yourdomain.com)
+#   EMAIL_FROM_NAME - Sender display name
 
 services:
   # PostgreSQL Database
@@ -123,6 +126,10 @@ services:
       POLAR_ACCESS_TOKEN: ${POLAR_ACCESS_TOKEN:-}
       POLAR_WEBHOOK_SECRET: ${POLAR_WEBHOOK_SECRET:-}
       POLAR_ENVIRONMENT: ${POLAR_ENVIRONMENT:-sandbox}
+      # Email (optional - for verification & notifications)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Reflet}
       # Server config
       PORT: "3001"
       NODE_ENV: production

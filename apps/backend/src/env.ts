@@ -104,6 +104,30 @@ export const env = createEnv({
       .enum(["sandbox", "production"])
       .optional()
       .default("sandbox"),
+
+    // ============================================
+    // EMAIL (RESEND)
+    // ============================================
+
+    /**
+     * Resend API key for sending emails
+     * Get this from your Resend dashboard at https://resend.com
+     */
+    RESEND_API_KEY: z.string().min(1).optional(),
+
+    /**
+     * Email sender address
+     * Use onboarding@resend.dev for development (Resend's test domain)
+     * Use your verified domain email for production
+     * @example "noreply@yourdomain.com"
+     */
+    EMAIL_FROM_ADDRESS: z.email().optional(),
+
+    /**
+     * Email sender name displayed to recipients
+     * @example "Reflet"
+     */
+    EMAIL_FROM_NAME: z.string().optional().default("Reflet"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

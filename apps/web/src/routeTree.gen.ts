@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CheckEmailRouteImport } from './routes/check-email'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as OrgSlugRouteRouteImport } from './routes/$orgSlug/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -43,6 +44,11 @@ import { Route as DashboardOrgSlugChangelogReleaseIdRouteImport } from './routes
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckEmailRoute = CheckEmailRouteImport.update({
+  id: '/check-email',
+  path: '/check-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$orgSlug': typeof OrgSlugRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
   '/login': typeof LoginRoute
   '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugRouteRouteWithChildren
   '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
@@ -233,6 +240,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/check-email': typeof CheckEmailRoute
   '/login': typeof LoginRoute
   '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
   '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
@@ -262,6 +270,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$orgSlug': typeof OrgSlugRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
   '/login': typeof LoginRoute
   '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugRouteRouteWithChildren
   '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
@@ -296,6 +305,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$orgSlug'
     | '/dashboard'
+    | '/check-email'
     | '/login'
     | '/$orgSlug/$boardSlug'
     | '/$orgSlug/admin'
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/check-email'
     | '/login'
     | '/$orgSlug/admin'
     | '/$orgSlug/changelog'
@@ -354,6 +365,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$orgSlug'
     | '/dashboard'
+    | '/check-email'
     | '/login'
     | '/$orgSlug/$boardSlug'
     | '/$orgSlug/admin'
@@ -387,6 +399,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OrgSlugRouteRoute: typeof OrgSlugRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  CheckEmailRoute: typeof CheckEmailRoute
   LoginRoute: typeof LoginRoute
   SubscriptionSuccessRoute: typeof SubscriptionSuccessRoute
   UUserIdRoute: typeof UUserIdRoute
@@ -399,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check-email': {
+      id: '/check-email'
+      path: '/check-email'
+      fullPath: '/check-email'
+      preLoaderRoute: typeof CheckEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -736,6 +756,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OrgSlugRouteRoute: OrgSlugRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  CheckEmailRoute: CheckEmailRoute,
   LoginRoute: LoginRoute,
   SubscriptionSuccessRoute: SubscriptionSuccessRoute,
   UUserIdRoute: UUserIdRoute,

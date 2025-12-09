@@ -1,5 +1,6 @@
 "use client";
 
+import { useNavigate } from "@tanstack/react-router";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ type AuthDialogProps = {
 };
 
 export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -86,17 +88,28 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
         },
         {
           onSuccess: () => {
-            setSuccess("Account created!");
-            setTimeout(() => {
-              handleOpenChange(false);
-            }, 500);
+            setSuccess("Account created! Check your email.");
+            handleOpenChange(false);
+            // Redirect to check-email page since verification is required
+            navigate({
+              to: "/check-email",
+              search: { email },
+            });
           },
           onError: (ctx) => {
             console.error("Sign up error:", ctx.error);
-            setError(
-              ctx.error.message ||
-                "Could not create account. Try a different email."
-            );
+            // Provide more helpful error messages based on error type
+            let errorMessage = ctx.error.message;
+            if (
+              errorMessage?.toLowerCase().includes("verification") ||
+              errorMessage?.toLowerCase().includes("email")
+            ) {
+              errorMessage =
+                "Could not send verification email. Please try again or use a different email.";
+            } else if (!errorMessage) {
+              errorMessage = "Could not create account. Please try again.";
+            }
+            setError(errorMessage);
             setIsLoading(false);
           },
         }
@@ -115,6 +128,31 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
             }, 500);
           },
           onError: (ctx) => {
+            const errorMsg = ctx.error.message?.toLowerCase() ?? "";
+
+            // Handle email not verified error
+            // Better Auth returns "Email not verified" message or status 403
+            const isEmailNotVerified =
+              ctx.error.status === 403 ||
+              errorMsg.includes("not verified") ||
+              errorMsg.includes("verify your email") ||
+              errorMsg === "email not verified";
+
+            console.log("[Auth] Sign-in error:", {
+              status: ctx.error.status,
+              message: ctx.error.message,
+              isEmailNotVerified,
+            });
+
+            if (isEmailNotVerified) {
+              setIsLoading(false);
+              handleOpenChange(false);
+              navigate({
+                to: "/check-email",
+                search: { email },
+              });
+              return;
+            }
             setError(
               ctx.error.message ||
                 "Invalid email or password. Check your credentials."

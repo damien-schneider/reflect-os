@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n vite,zero -c blue,green \"vite\" \"dotenv -e ../../.env -- zero-cache-dev -p src/schema.ts\"",
+    "dev": "concurrently -n vite,zero -c blue,green \"vite\" \"dotenv -e .env -- zero-cache-dev -p src/schema.ts\"",
     "dev:vite": "vite",
-    "dev:zero-cache": "dotenv -e ../../.env -- zero-cache-dev -p src/schema.ts",
+    "dev:zero-cache": "dotenv -e .env -- zero-cache-dev -p src/schema.ts",
     "build": "vite build",
     "typecheck": "tsc -b",
     "check-types": "tsc --noEmit",

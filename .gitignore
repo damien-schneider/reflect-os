@@ -34,4 +34,17 @@ zero-schema.json
 .sst
 
 .turbo
+
+# react-email
+.react-email
+
+# Environment files (per-app and root)
 .env
+.env.local
+.env.*.local
+apps/*/.env
+apps/*/.env.local
+apps/*/.env.*.local
+packages/*/.env
+packages/*/.env.local
+packages/*/.env.*.local

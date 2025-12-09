@@ -6,6 +6,7 @@
 
 import { Hono } from "hono";
 import authRoutes from "./auth";
+import changelogRoutes from "./changelog";
 import productsRoutes from "./products";
 import subscriptionRoutes from "./subscription";
 import zeroTokenRoutes from "./zero-token";
@@ -13,6 +14,7 @@ import zeroTokenRoutes from "./zero-token";
 export const app = new Hono()
   .basePath("/api")
   .route("/auth", authRoutes)
+  .route("/changelog", changelogRoutes)
   .route("/products", productsRoutes)
   .route("/zero-token", zeroTokenRoutes)
   .route("/", subscriptionRoutes);

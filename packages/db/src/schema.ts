@@ -360,6 +360,29 @@ export const releaseItem = pgTable(
 );
 
 // ============================================
+// CHANGELOG SUBSCRIPTION TABLE
+// ============================================
+
+export const changelogSubscription = pgTable(
+  "changelog_subscription",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    subscribedAt: bigint("subscribed_at", { mode: "number" }).notNull(),
+  },
+  (table) => [
+    unique().on(table.userId, table.organizationId),
+    index("changelog_subscription_org_idx").on(table.organizationId),
+    index("changelog_subscription_user_idx").on(table.userId),
+  ]
+);
+
+// ============================================
 // RELATIONS (for Drizzle query builder)
 // ============================================
 
@@ -371,6 +394,7 @@ export const userRelations = relations(user, ({ many }) => ({
   votes: many(vote),
   comments: many(comment),
   notifications: many(notification),
+  changelogSubscriptions: many(changelogSubscription),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -393,6 +417,7 @@ export const organizationRelations = relations(organization, ({ many }) => ({
   boards: many(board),
   tags: many(tag),
   releases: many(release),
+  changelogSubscriptions: many(changelogSubscription),
 }));
 
 export const memberRelations = relations(member, ({ one }) => ({
@@ -535,3 +560,17 @@ export const subscriptionRelations = relations(subscription, ({ one }) => ({
     references: [organization.id],
   }),
 }));
+
+export const changelogSubscriptionRelations = relations(
+  changelogSubscription,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [changelogSubscription.userId],
+      references: [user.id],
+    }),
+    organization: one(organization, {
+      fields: [changelogSubscription.organizationId],
+      references: [organization.id],
+    }),
+  })
+);

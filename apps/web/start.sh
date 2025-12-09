@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "🚀 Starting Reflect OS Zero..."
+echo "🚀 Starting Reflet Zero..."
 echo "📋 Environment:"
 echo "   NODE_ENV: ${NODE_ENV:-development}"
 echo "   PORT: ${PORT:-3000}"

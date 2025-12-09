@@ -1,5 +1,10 @@
 import { checkout, polar, portal, webhooks } from "@polar-sh/better-auth";
 import { Polar } from "@polar-sh/sdk";
+import {
+  ResetPasswordTemplate,
+  sendEmail,
+  VerifyEmailTemplate,
+} from "@repo/email";
 import { betterAuth } from "better-auth";
 import { organization } from "better-auth/plugins";
 import { Pool } from "pg";
@@ -331,6 +336,17 @@ const getTrustedOrigins = (): string[] => {
   return [...new Set(origins)];
 };
 
+// Helper to generate a unique slug from a name
+const generateUniqueSlug = (name: string): string => {
+  const baseSlug = name
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+  // Add a short random suffix to ensure uniqueness
+  const suffix = Math.random().toString(36).substring(2, 8);
+  return `${baseSlug}-${suffix}`;
+};
+
 export const auth = betterAuth({
   database: dbPool,
   baseURL: env.BETTER_AUTH_URL,
@@ -338,6 +354,97 @@ export const auth = betterAuth({
   plugins: [organization(), ...polarPlugins],
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+    // biome-ignore lint/suspicious/useAwait: intentionally not awaiting to prevent timing attacks
+    sendResetPassword: async ({ user, url }) => {
+      // Fire and forget to prevent timing attacks - don't await
+      sendEmail({
+        to: user.email,
+        subject: "Reset your password",
+        template: ResetPasswordTemplate({
+          userName: user.name,
+          resetUrl: url,
+        }),
+        config: {
+          apiKey: env.RESEND_API_KEY ?? "",
+          fromAddress: env.EMAIL_FROM_ADDRESS ?? "onboarding@resend.dev",
+          fromName: env.EMAIL_FROM_NAME ?? "Reflet",
+          isDevelopment: !isProduction,
+        },
+      }).catch((err: unknown) => {
+        console.error("[Auth] Failed to send reset password email:", err);
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      // Replace the default callback URL (/) with /dashboard
+      const verificationUrl = url.replace(
+        "callbackURL=%2F",
+        "callbackURL=%2Fdashboard"
+      );
+
+      const result = await sendEmail({
+        to: user.email,
+        subject: "Verify your email address",
+        template: VerifyEmailTemplate({
+          userName: user.name,
+          verificationUrl,
+        }),
+        config: {
+          apiKey: env.RESEND_API_KEY ?? "",
+          fromAddress: env.EMAIL_FROM_ADDRESS ?? "onboarding@resend.dev",
+          fromName: env.EMAIL_FROM_NAME ?? "Reflet",
+          isDevelopment: !isProduction,
+        },
+      });
+
+      if (!result.success) {
+        console.error(
+          "[Auth] Failed to send verification email:",
+          result.error
+        );
+        // Always throw the error so the frontend knows the email wasn't sent
+        // The frontend will handle showing appropriate messages
+        throw new Error(result.error || "Verification email could not be sent");
+      }
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // Automatically create a personal organization for new users
+          try {
+            const orgName = user.name ? `${user.name}'s Space` : "My Space";
+            const orgSlug = generateUniqueSlug(
+              user.name || user.email.split("@")[0]
+            );
+
+            // Use the internal API to create an organization for the user
+            await auth.api.createOrganization({
+              body: {
+                name: orgName,
+                slug: orgSlug,
+                userId: user.id,
+              },
+            });
+
+            console.log(
+              `[Auth] Created personal organization "${orgName}" for user ${user.id}`
+            );
+          } catch (error) {
+            // Log error but don't fail the user creation
+            console.error(
+              `[Auth] Failed to create personal organization for user ${user.id}:`,
+              error
+            );
+          }
+        },
+      },
+    },
   },
   advanced: {
     defaultCookieAttributes: {

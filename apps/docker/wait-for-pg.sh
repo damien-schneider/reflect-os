@@ -7,7 +7,7 @@ MAX_RETRIES=30
 RETRY_COUNT=0
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-  if docker compose --env-file ../../.env -f ./docker-compose.yml exec -T zstart_postgres pg_isready -U user --dbname=postgres > /dev/null 2>&1; then
+  if docker compose -f ./docker-compose.yml exec -T zstart_postgres pg_isready -U user --dbname=postgres > /dev/null 2>&1; then
     echo "✅ PostgreSQL is ready!"
     exit 0
   fi

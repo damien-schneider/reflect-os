@@ -1,0 +1,28 @@
+# Database Migrations Dockerfile
+# Lightweight init container that runs Drizzle migrations and exits
+# This follows the "init container" pattern - runs once, exits on success
+
+FROM oven/bun:1-alpine
+
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY package.json bun.lock ./
+COPY packages/db/package.json ./packages/db/
+
+# Install dependencies (only what's needed for migrations)
+RUN bun install --ignore-scripts
+
+# Copy database package source and migrations
+COPY packages/db ./packages/db
+
+# Build the database package (compiles TypeScript schema)
+RUN cd packages/db && bun run build
+
+WORKDIR /app/packages/db
+
+# Run migrations and exit
+# drizzle-kit migrate will:
+# - Apply all pending migrations from ./migrations folder
+# - Exit 0 on success, non-zero on failure
+CMD ["bunx", "drizzle-kit", "migrate"]

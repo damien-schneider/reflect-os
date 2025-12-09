@@ -46,6 +46,21 @@ services:
     networks:
       - reflect-network
 
+  # Database Migrations (init container - runs once and exits)
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
+    networks:
+      - reflect-network
+    # Init container: runs once, must complete successfully
+    restart: "no"
+
   # Zero Cache Server (sync server for Rocicorp Zero)
   zero-cache:
     build:
@@ -55,6 +70,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
     expose:
       - "4848"
     environment:
@@ -87,6 +104,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
     expose:
       - "3001"
     environment:

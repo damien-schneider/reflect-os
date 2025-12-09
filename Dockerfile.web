@@ -16,6 +16,7 @@ COPY package.json bun.lock* ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/db/package.json ./packages/db/
+COPY packages/email/package.json ./packages/email/
 
 # Install dependencies
 RUN bun install

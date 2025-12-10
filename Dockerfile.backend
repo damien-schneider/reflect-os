@@ -16,12 +16,6 @@ RUN bun install --ignore-scripts
 
 # Build stage
 FROM base AS builder
-ARG RESEND_API_KEY
-ARG EMAIL_FROM_ADDRESS
-ARG EMAIL_FROM_NAME
-ENV RESEND_API_KEY=${RESEND_API_KEY}
-ENV EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS}
-ENV EMAIL_FROM_NAME=${EMAIL_FROM_NAME}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -30,9 +24,8 @@ RUN cd packages/db && bun run build
 RUN cd packages/email && bun run build
 
 # Build the backend
+# Note: env validation happens at runtime via t3-env when server starts
 WORKDIR /app/apps/backend
-# Import env.ts to trigger t3-env validation (fails if RESEND vars missing)
-RUN bun -e "import('./src/env.ts')"
 RUN bun build src/server.ts --outdir dist --target bun
 
 # Production stage

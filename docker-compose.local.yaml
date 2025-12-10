@@ -72,10 +72,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-      args:
-        RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
-        EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?EMAIL_FROM_ADDRESS is required}
-        EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Reflet}
     restart: unless-stopped
     depends_on:
       postgres:

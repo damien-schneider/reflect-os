@@ -1,6 +1,10 @@
 // Client exports
 
-export type { SendEmailOptions, SendEmailResult } from "./client";
+export type {
+  ResendErrorCode,
+  SendEmailOptions,
+  SendEmailResult,
+} from "./client";
 export { sendBatchEmails, sendEmail } from "./client";
 export type { EmailConfig } from "./config";
 // Config exports

@@ -10,11 +10,33 @@ export type SendEmailOptions = {
   config?: Partial<EmailConfig>;
 };
 
-export type SendEmailResult = {
-  success: boolean;
-  id?: string;
-  error?: string;
-};
+/**
+ * Resend API error codes from:
+ * https://resend.com/docs/api-reference/errors
+ */
+export type ResendErrorCode =
+  | "validation_error"
+  | "invalid_from_address"
+  | "missing_api_key"
+  | "rate_limit_exceeded"
+  | "application_error"
+  | "internal_server_error";
+
+export type SendEmailResult =
+  | {
+      success: true;
+      id?: string;
+      error?: undefined;
+      errorCode?: undefined;
+      statusCode?: undefined;
+    }
+  | {
+      success: false;
+      id?: undefined;
+      error: string;
+      errorCode?: ResendErrorCode;
+      statusCode?: number;
+    };
 
 let resendClient: Resend | null = null;
 
@@ -24,6 +46,56 @@ function getResendClient(apiKey: string): Resend {
   }
   return resendClient;
 }
+
+type ResendErrorPayload = {
+  message?: string;
+  name?: ResendErrorCode | string;
+  statusCode?: number;
+};
+
+const testModeAddressPattern =
+  /only send testing emails to your own email address\s*\(([^)]+)\)/i;
+
+/**
+ * Normalize Resend SDK errors to a consistent SendEmailResult format.
+ * Extracts HTTP status codes and error codes from the Resend API response.
+ * For validation_error in test mode, includes the allowed test address in guidance.
+ *
+ * @see https://resend.com/docs/api-reference/errors
+ */
+const normalizeResendError = (error: unknown): SendEmailResult => {
+  const payload = (error as ResendErrorPayload) ?? {};
+  const statusCode = Number.isInteger(payload.statusCode)
+    ? Number(payload.statusCode)
+    : undefined;
+  const rawMessage = payload.message ?? "Failed to send email";
+  const errorCode = payload.name as ResendErrorCode | undefined;
+
+  // Enhance validation_error messages with actionable guidance for test mode
+  if (
+    errorCode === "validation_error" &&
+    rawMessage.toLowerCase().includes("testing")
+  ) {
+    const allowedAddress = testModeAddressPattern.exec(rawMessage)?.[1];
+    const guidance = allowedAddress
+      ? `Email sending is restricted in Resend test mode. Use the authorized test address ${allowedAddress} or verify a domain and update the From address.`
+      : "Email sending is restricted in Resend test mode. Use the authorized test address or verify a domain and update the From address.";
+
+    return {
+      success: false,
+      statusCode: statusCode ?? 403,
+      errorCode,
+      error: guidance,
+    };
+  }
+
+  return {
+    success: false,
+    statusCode,
+    errorCode,
+    error: rawMessage,
+  };
+};
 
 /**
  * Send an email using Resend with a React Email template
@@ -66,10 +138,7 @@ export async function sendEmail(
 
     if (error) {
       console.error("[email] Failed to send email:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
+      return normalizeResendError(error);
     }
 
     return {
@@ -77,12 +146,9 @@ export async function sendEmail(
       id: data?.id,
     };
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    console.error("[email] Error sending email:", errorMessage);
-    return {
-      success: false,
-      error: errorMessage,
-    };
+    const normalizedError = normalizeResendError(err);
+    console.error("[email] Error sending email:", normalizedError.error);
+    return normalizedError;
   }
 }
 

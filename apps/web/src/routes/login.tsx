@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { getSignUpErrorMessage } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -67,10 +68,7 @@ function Login() {
           },
           onError: (ctx) => {
             console.error("Sign up error:", ctx.error);
-            setError(
-              ctx.error.message ||
-                "Could not create account. Try a different email."
-            );
+            setError(getSignUpErrorMessage(ctx.error));
             setIsLoading(false);
           },
         }

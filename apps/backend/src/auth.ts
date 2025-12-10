@@ -380,6 +380,18 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
+      class VerificationEmailError extends Error {
+        status?: number;
+        code?: string;
+
+        constructor(message: string, status?: number, code?: string) {
+          super(message);
+          this.name = "VerificationEmailError";
+          this.status = status;
+          this.code = code;
+        }
+      }
+
       // Replace the default callback URL (/) with /dashboard
       const verificationUrl = url.replace(
         "callbackURL=%2F",
@@ -407,8 +419,15 @@ export const auth = betterAuth({
           result.error
         );
         // Always throw the error so the frontend knows the email wasn't sent
+        // Include status/code metadata so clients can present actionable UI
         // The frontend will handle showing appropriate messages
-        throw new Error(result.error || "Verification email could not be sent");
+        const statusCode = (result as { statusCode?: number }).statusCode;
+        const errorCode = (result as { errorCode?: string }).errorCode;
+        throw new VerificationEmailError(
+          result.error || "Verification email could not be sent",
+          statusCode ?? 502,
+          errorCode ?? "VERIFICATION_EMAIL_FAILED"
+        );
       }
     },
   },

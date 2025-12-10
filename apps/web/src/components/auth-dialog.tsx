@@ -15,6 +15,7 @@ import {
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
 import { authClient } from "@/lib/auth-client";
+import { getSignUpErrorMessage } from "@/lib/auth-errors";
 
 type AuthDialogProps = {
   open: boolean;
@@ -98,18 +99,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
           },
           onError: (ctx) => {
             console.error("Sign up error:", ctx.error);
-            // Provide more helpful error messages based on error type
-            let errorMessage = ctx.error.message;
-            if (
-              errorMessage?.toLowerCase().includes("verification") ||
-              errorMessage?.toLowerCase().includes("email")
-            ) {
-              errorMessage =
-                "Could not send verification email. Please try again or use a different email.";
-            } else if (!errorMessage) {
-              errorMessage = "Could not create account. Please try again.";
-            }
-            setError(errorMessage);
+            setError(getSignUpErrorMessage(ctx.error));
             setIsLoading(false);
           },
         }

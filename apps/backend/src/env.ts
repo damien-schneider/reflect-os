@@ -113,7 +113,9 @@ export const env = createEnv({
      * Resend API key for sending emails
      * Get this from your Resend dashboard at https://resend.com
      */
-    RESEND_API_KEY: z.string().min(1).optional(),
+    RESEND_API_KEY: z
+      .string({ error: "RESEND_API_KEY is required" })
+      .min(1, "RESEND_API_KEY is required"),
 
     /**
      * Email sender address
@@ -121,7 +123,9 @@ export const env = createEnv({
      * Use your verified domain email for production
      * @example "noreply@yourdomain.com"
      */
-    EMAIL_FROM_ADDRESS: z.email().optional(),
+    EMAIL_FROM_ADDRESS: z
+      .string({ error: "EMAIL_FROM_ADDRESS is required" })
+      .email("EMAIL_FROM_ADDRESS must be a valid email"),
 
     /**
      * Email sender name displayed to recipients
@@ -134,6 +138,5 @@ export const env = createEnv({
   // Skip validation during build
   skipValidation:
     !!process.env.SKIP_ENV_VALIDATION ||
-    process.env.npm_lifecycle_event === "lint" ||
-    process.env.npm_lifecycle_event === "build",
+    process.env.npm_lifecycle_event === "lint",
 });

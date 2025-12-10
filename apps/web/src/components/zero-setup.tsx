@@ -15,7 +15,11 @@ type ZeroState = {
 };
 
 // Fetch Zero token from API (type-safe)
-async function fetchZeroToken(): Promise<string | null> {
+// Returns { token, isUnauthorized } to distinguish auth errors from other failures
+async function fetchZeroToken(): Promise<{
+  token: string | null;
+  isUnauthorized: boolean;
+}> {
   try {
     console.log("[ZeroSetup] Fetching Zero auth token...");
     const res = await api.api["zero-token"].$get();
@@ -24,19 +28,28 @@ async function fetchZeroToken(): Promise<string | null> {
       const data = await res.json();
       if ("token" in data) {
         console.log("[ZeroSetup] ✅ Zero token obtained successfully");
-        return data.token;
+        return { token: data.token, isUnauthorized: false };
       }
     }
-    const errorText = await res.text();
-    console.error(
-      "[ZeroSetup] ❌ Failed to fetch Zero token:",
-      res.status,
-      errorText
-    );
-    return null;
+
+    // Check if this is an auth error (401) - this is expected during sign-out
+    const isUnauthorized = res.status === 401;
+    if (isUnauthorized) {
+      console.log(
+        "[ZeroSetup] Session expired or user signed out, token unavailable"
+      );
+    } else {
+      const errorText = await res.text();
+      console.error(
+        "[ZeroSetup] ❌ Failed to fetch Zero token:",
+        res.status,
+        errorText
+      );
+    }
+    return { token: null, isUnauthorized };
   } catch (err) {
     console.error("[ZeroSetup] ❌ Error fetching Zero token:", err);
-    return null;
+    return { token: null, isUnauthorized: false };
   }
 }
 
@@ -62,7 +75,17 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const token = await fetchZeroToken();
+    const { token, isUnauthorized } = await fetchZeroToken();
+
+    // If unauthorized (e.g., during sign-out), return undefined to signal
+    // that auth is no longer available rather than throwing an error
+    if (isUnauthorized) {
+      console.log(
+        "[ZeroSetup] Auth no longer valid, returning undefined for Zero"
+      );
+      return;
+    }
+
     if (!token) {
       throw new Error("Failed to fetch Zero authentication token");
     }
@@ -104,8 +127,21 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
 
       // For authenticated users, verify we can get a token before showing as ready
       try {
-        const token = await fetchZeroToken();
+        const { token, isUnauthorized } = await fetchZeroToken();
         if (isCancelled) {
+          return;
+        }
+
+        // If unauthorized, the session likely expired or user signed out
+        // Fall back to anonymous mode gracefully
+        if (isUnauthorized) {
+          console.log(
+            "[ZeroSetup] Session no longer valid, falling back to anonymous"
+          );
+          setState({
+            status: "ready",
+            userID: "anon",
+          });
           return;
         }
 

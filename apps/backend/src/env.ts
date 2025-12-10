@@ -65,7 +65,7 @@ export const env = createEnv({
         }
         return url;
       })
-      .pipe(z.string().url("BETTER_AUTH_URL must be a valid URL")),
+      .pipe(z.url("BETTER_AUTH_URL must be a valid URL")),
 
     /**
      * Node environment
@@ -123,9 +123,7 @@ export const env = createEnv({
      * Use your verified domain email for production
      * @example "noreply@yourdomain.com"
      */
-    EMAIL_FROM_ADDRESS: z
-      .string({ error: "EMAIL_FROM_ADDRESS is required" })
-      .email("EMAIL_FROM_ADDRESS must be a valid email"),
+    EMAIL_FROM_ADDRESS: z.email("EMAIL_FROM_ADDRESS must be a valid email"),
 
     /**
      * Email sender name displayed to recipients

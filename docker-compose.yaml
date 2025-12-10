@@ -107,6 +107,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+      args:
+        RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
+        EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?EMAIL_FROM_ADDRESS is required}
+        EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Reflet}
     restart: unless-stopped
     depends_on:
       postgres:
@@ -126,9 +130,9 @@ services:
       POLAR_ACCESS_TOKEN: ${POLAR_ACCESS_TOKEN:-}
       POLAR_WEBHOOK_SECRET: ${POLAR_WEBHOOK_SECRET:-}
       POLAR_ENVIRONMENT: ${POLAR_ENVIRONMENT:-sandbox}
-      # Email (optional - for verification & notifications)
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
+      # Email (required - for verification & notifications)
+      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?EMAIL_FROM_ADDRESS is required}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Reflet}
       # Server config
       PORT: "3001"

@@ -72,6 +72,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+      args:
+        RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
+        EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?EMAIL_FROM_ADDRESS is required}
+        EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Reflet}
     restart: unless-stopped
     depends_on:
       postgres:
@@ -84,9 +88,9 @@ services:
       ZERO_AUTH_SECRET: testsecretkey
       BETTER_AUTH_SECRET: testbetterauthsecret
       BETTER_AUTH_URL: http://localhost:3000
-      # Email (optional - test mode)
-      # RESEND_API_KEY: ""
-      # EMAIL_FROM_ADDRESS: "onboarding@resend.dev"
+      # Email (required for build/runtime)
+      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?EMAIL_FROM_ADDRESS is required}
       EMAIL_FROM_NAME: "Reflet"
       PORT: "3001"
     ports:

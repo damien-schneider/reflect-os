@@ -15,11 +15,17 @@ const BACKEND_PORT = process.env.BACKEND_PORT ?? "3001";
 export default defineConfig({
   build: {
     target: "es2022",
+    rollupOptions: {
+      // Externalize Node.js built-ins that should not be bundled for browser
+      external: ["node:module", "node:async_hooks"],
+    },
   },
   optimizeDeps: {
     esbuildOptions: {
       target: "es2022",
     },
+    // Exclude packages that import Node.js built-ins
+    exclude: ["@polar-sh/better-auth"],
   },
   server: {
     allowedHosts: [".ngrok-free.app", ".ngrok-free.dev", ".ngrok.io"],

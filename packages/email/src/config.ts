@@ -1,8 +1,6 @@
 /**
  * Email configuration
- *
- * Development: Uses Resend's test domain (onboarding@resend.dev)
- * Production: Uses custom domain from EMAIL_FROM_ADDRESS env var
+ * Requires Resend credentials to be present at startup.
  */
 
 export type EmailConfig = {
@@ -12,14 +10,20 @@ export type EmailConfig = {
   isDevelopment: boolean;
 };
 
-const RESEND_DEV_FROM = "onboarding@resend.dev";
 const DEFAULT_FROM_NAME = "Reflet";
 
 export function getEmailConfig(): EmailConfig {
-  const apiKey = process.env.RESEND_API_KEY ?? "";
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is required to send email");
+  }
+
   const isDevelopment = process.env.NODE_ENV !== "production";
-  const fromAddress =
-    process.env.EMAIL_FROM_ADDRESS ?? (isDevelopment ? RESEND_DEV_FROM : "");
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS;
+  if (!fromAddress) {
+    throw new Error("EMAIL_FROM_ADDRESS is required to send email");
+  }
+
   const fromName = process.env.EMAIL_FROM_NAME ?? DEFAULT_FROM_NAME;
 
   return {

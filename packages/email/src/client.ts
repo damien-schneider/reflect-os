@@ -46,18 +46,11 @@ export async function sendEmail(
   const config = { ...getEmailConfig(), ...options.config };
 
   if (!config.apiKey) {
-    console.warn("[email] RESEND_API_KEY not set, skipping email send");
-    return {
-      success: false,
-      error: "RESEND_API_KEY not configured",
-    };
+    throw new Error("RESEND_API_KEY is required to send email");
   }
 
   if (!config.fromAddress) {
-    return {
-      success: false,
-      error: "EMAIL_FROM_ADDRESS not configured",
-    };
+    throw new Error("EMAIL_FROM_ADDRESS is required to send email");
   }
 
   const client = getResendClient(config.apiKey);
@@ -101,14 +94,6 @@ export async function sendBatchEmails(
   emails: Omit<SendEmailOptions, "config">[]
 ): Promise<SendEmailResult[]> {
   const config = getEmailConfig();
-
-  if (!config.apiKey) {
-    console.warn("[email] RESEND_API_KEY not set, skipping batch email send");
-    return emails.map(() => ({
-      success: false,
-      error: "RESEND_API_KEY not configured",
-    }));
-  }
 
   // Send emails in parallel with a concurrency limit
   const results = await Promise.all(

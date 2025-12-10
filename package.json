@@ -39,10 +39,10 @@
     "dotenv-cli": "^11.0.0",
     "husky": "^9.1.7",
     "turbo": "^2.5.4",
-    "ultracite": "6.3.8"
+    "ultracite": "6.3.10"
   },
   "dependencies": {
-    "sst": "3.9.33"
+    "sst": "3.17.25"
   },
   "trustedDependencies": [
     "@rocicorp/zero-sqlite3"

@@ -366,9 +366,9 @@ export const auth = betterAuth({
           resetUrl: url,
         }),
         config: {
-          apiKey: env.RESEND_API_KEY ?? "",
-          fromAddress: env.EMAIL_FROM_ADDRESS ?? "onboarding@resend.dev",
-          fromName: env.EMAIL_FROM_NAME ?? "Reflet",
+          apiKey: env.RESEND_API_KEY,
+          fromAddress: env.EMAIL_FROM_ADDRESS,
+          fromName: env.EMAIL_FROM_NAME,
           isDevelopment: !isProduction,
         },
       }).catch((err: unknown) => {
@@ -394,9 +394,9 @@ export const auth = betterAuth({
           verificationUrl,
         }),
         config: {
-          apiKey: env.RESEND_API_KEY ?? "",
-          fromAddress: env.EMAIL_FROM_ADDRESS ?? "onboarding@resend.dev",
-          fromName: env.EMAIL_FROM_NAME ?? "Reflet",
+          apiKey: env.RESEND_API_KEY,
+          fromAddress: env.EMAIL_FROM_ADDRESS,
+          fromName: env.EMAIL_FROM_NAME,
           isDevelopment: !isProduction,
         },
       });

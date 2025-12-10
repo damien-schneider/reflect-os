@@ -1,3 +1,4 @@
+// TODO: Think maybe of removing completely and directly call the backend endpoint.
 // Production server for the web application
 // Serves static frontend and proxies API requests to backend
 

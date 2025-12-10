@@ -20,6 +20,8 @@
 #   EMAIL_FROM_ADDRESS - Sender email (e.g., noreply@yourdomain.com)
 #   EMAIL_FROM_NAME - Sender display name
 
+# TODO: Improvements: use secrets instead of environment vars for sensitive data (keeping the build check and t3-oss/env-core validation working.)
+
 services:
   # PostgreSQL Database
   postgres:

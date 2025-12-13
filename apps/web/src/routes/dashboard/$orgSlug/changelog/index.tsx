@@ -6,7 +6,14 @@ import {
   useParams,
 } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { Calendar, ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  ExternalLink,
+  Pencil,
+  Plus,
+  Settings,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -20,6 +27,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { randID } from "@/rand";
 import type { Schema } from "@/schema";
 
@@ -120,6 +133,23 @@ function DashboardChangelogIndex() {
               </Link>
             </Button>
           )}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button asChild variant="outline">
+                  <Link
+                    params={{ orgSlug }}
+                    to="/dashboard/$orgSlug/changelog/settings"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Settings</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button onClick={createNewRelease}>
             <Plus className="mr-2 h-4 w-4" />
             New Release

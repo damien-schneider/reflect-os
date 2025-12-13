@@ -17,7 +17,7 @@ type ParsedVersion = {
 };
 
 // Regex to match semver versions with optional prefix
-const VERSION_REGEX = /^([^\d]*)(\d+)\.(\d+)\.(\d+)/;
+const VERSION_REGEX = /^([^\d]*)(\d+)\.(\d+)\.(\d+)/u;
 
 /**
  * Parse a version string like "v1.2.3" or "1.2.3" into components

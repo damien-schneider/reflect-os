@@ -39,6 +39,7 @@ import { Route as OrgSlugBoardSlugFeedbackIdRouteImport } from './routes/$orgSlu
 import { Route as DashboardOrgSlugBoardSlugRouteRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/route'
 import { Route as DashboardOrgSlugChangelogIndexRouteImport } from './routes/dashboard/$orgSlug/changelog/index'
 import { Route as DashboardOrgSlugBoardSlugIndexRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/index'
+import { Route as DashboardOrgSlugChangelogSettingsRouteImport } from './routes/dashboard/$orgSlug/changelog/settings'
 import { Route as DashboardOrgSlugChangelogReleaseIdRouteImport } from './routes/dashboard/$orgSlug/changelog/$releaseId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -198,6 +199,12 @@ const DashboardOrgSlugBoardSlugIndexRoute =
     path: '/',
     getParentRoute: () => DashboardOrgSlugBoardSlugRouteRoute,
   } as any)
+const DashboardOrgSlugChangelogSettingsRoute =
+  DashboardOrgSlugChangelogSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => DashboardOrgSlugChangelogRoute,
+  } as any)
 const DashboardOrgSlugChangelogReleaseIdRoute =
   DashboardOrgSlugChangelogReleaseIdRouteImport.update({
     id: '/$releaseId',
@@ -235,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/$orgSlug/$boardSlug/': typeof OrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/': typeof DashboardOrgSlugIndexRoute
   '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
+  '/dashboard/$orgSlug/changelog/settings': typeof DashboardOrgSlugChangelogSettingsRoute
   '/dashboard/$orgSlug/$boardSlug/': typeof DashboardOrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/changelog/': typeof DashboardOrgSlugChangelogIndexRoute
 }
@@ -262,6 +270,7 @@ export interface FileRoutesByTo {
   '/$orgSlug/$boardSlug': typeof OrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug': typeof DashboardOrgSlugIndexRoute
   '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
+  '/dashboard/$orgSlug/changelog/settings': typeof DashboardOrgSlugChangelogSettingsRoute
   '/dashboard/$orgSlug/$boardSlug': typeof DashboardOrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogIndexRoute
 }
@@ -296,6 +305,7 @@ export interface FileRoutesById {
   '/$orgSlug/$boardSlug/': typeof OrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/': typeof DashboardOrgSlugIndexRoute
   '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
+  '/dashboard/$orgSlug/changelog/settings': typeof DashboardOrgSlugChangelogSettingsRoute
   '/dashboard/$orgSlug/$boardSlug/': typeof DashboardOrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/changelog/': typeof DashboardOrgSlugChangelogIndexRoute
 }
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/$orgSlug/$boardSlug/'
     | '/dashboard/$orgSlug/'
     | '/dashboard/$orgSlug/changelog/$releaseId'
+    | '/dashboard/$orgSlug/changelog/settings'
     | '/dashboard/$orgSlug/$boardSlug/'
     | '/dashboard/$orgSlug/changelog/'
   fileRoutesByTo: FileRoutesByTo
@@ -358,6 +369,7 @@ export interface FileRouteTypes {
     | '/$orgSlug/$boardSlug'
     | '/dashboard/$orgSlug'
     | '/dashboard/$orgSlug/changelog/$releaseId'
+    | '/dashboard/$orgSlug/changelog/settings'
     | '/dashboard/$orgSlug/$boardSlug'
     | '/dashboard/$orgSlug/changelog'
   id:
@@ -391,6 +403,7 @@ export interface FileRouteTypes {
     | '/$orgSlug/$boardSlug/'
     | '/dashboard/$orgSlug/'
     | '/dashboard/$orgSlug/changelog/$releaseId'
+    | '/dashboard/$orgSlug/changelog/settings'
     | '/dashboard/$orgSlug/$boardSlug/'
     | '/dashboard/$orgSlug/changelog/'
   fileRoutesById: FileRoutesById
@@ -617,6 +630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOrgSlugBoardSlugIndexRouteImport
       parentRoute: typeof DashboardOrgSlugBoardSlugRouteRoute
     }
+    '/dashboard/$orgSlug/changelog/settings': {
+      id: '/dashboard/$orgSlug/changelog/settings'
+      path: '/settings'
+      fullPath: '/dashboard/$orgSlug/changelog/settings'
+      preLoaderRoute: typeof DashboardOrgSlugChangelogSettingsRouteImport
+      parentRoute: typeof DashboardOrgSlugChangelogRoute
+    }
     '/dashboard/$orgSlug/changelog/$releaseId': {
       id: '/dashboard/$orgSlug/changelog/$releaseId'
       path: '/$releaseId'
@@ -695,6 +715,7 @@ const DashboardOrgSlugBoardSlugRouteRouteWithChildren =
 
 interface DashboardOrgSlugChangelogRouteChildren {
   DashboardOrgSlugChangelogReleaseIdRoute: typeof DashboardOrgSlugChangelogReleaseIdRoute
+  DashboardOrgSlugChangelogSettingsRoute: typeof DashboardOrgSlugChangelogSettingsRoute
   DashboardOrgSlugChangelogIndexRoute: typeof DashboardOrgSlugChangelogIndexRoute
 }
 
@@ -702,6 +723,8 @@ const DashboardOrgSlugChangelogRouteChildren: DashboardOrgSlugChangelogRouteChil
   {
     DashboardOrgSlugChangelogReleaseIdRoute:
       DashboardOrgSlugChangelogReleaseIdRoute,
+    DashboardOrgSlugChangelogSettingsRoute:
+      DashboardOrgSlugChangelogSettingsRoute,
     DashboardOrgSlugChangelogIndexRoute: DashboardOrgSlugChangelogIndexRoute,
   }
 

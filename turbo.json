@@ -94,6 +94,20 @@
     "db:seed": {
       "cache": false,
       "passThroughEnv": ["ZERO_UPSTREAM_DB"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "test:watch": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "e2e": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "env": ["NODE_ENV"]
     }
   }
 }

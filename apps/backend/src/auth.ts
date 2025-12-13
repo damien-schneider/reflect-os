@@ -11,10 +11,13 @@ import { Pool } from "pg";
 import { env } from "./env";
 
 const isProduction = env.NODE_ENV === "production";
+const allowDevUnverifiedSignup =
+  !isProduction && env.DEV_AUTH_ALLOW_UNVERIFIED_SIGNUP === "true";
 
 console.log("Better Auth initialized with:", {
   baseURL: env.BETTER_AUTH_URL,
   isProduction,
+  allowDevUnverifiedSignup,
   databaseConnected: !!env.ZERO_UPSTREAM_DB,
 });
 
@@ -354,7 +357,7 @@ export const auth = betterAuth({
   plugins: [organization(), ...polarPlugins],
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: !allowDevUnverifiedSignup,
     // biome-ignore lint/suspicious/useAwait: intentionally not awaiting to prevent timing attacks
     sendResetPassword: async ({ user, url }) => {
       // Fire and forget to prevent timing attacks - don't await
@@ -377,7 +380,7 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: !allowDevUnverifiedSignup,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       class VerificationEmailError extends Error {

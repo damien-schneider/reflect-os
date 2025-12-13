@@ -12,6 +12,8 @@ export const clientEnv = createEnv({
   client: clientSchema,
   runtimeEnv: {
     VITE_PUBLIC_ZERO_SERVER: import.meta.env.VITE_PUBLIC_ZERO_SERVER,
+    VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION: import.meta.env
+      .VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION,
   },
   emptyStringAsUndefined: true,
   skipValidation: false,

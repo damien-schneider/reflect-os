@@ -39,8 +39,8 @@ export function useOrganizations() {
       setNewOrgSlug(
         newOrgName
           .toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/[^a-z0-9-]/g, "")
+          .replace(/\s+/gu, "-")
+          .replace(/[^a-z0-9-]/gu, "")
       );
     }
   }, [newOrgName]);
@@ -57,7 +57,7 @@ export function useOrganizations() {
     try {
       await authClient.organization.create({
         name: newOrgName,
-        slug: newOrgSlug || newOrgName.toLowerCase().replace(/\s+/g, "-"),
+        slug: newOrgSlug || newOrgName.toLowerCase().replace(/\s+/gu, "-"),
       });
       setNewOrgName("");
       setNewOrgSlug("");

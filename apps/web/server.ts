@@ -35,11 +35,29 @@ app.all("/api/*", async (c) => {
       duplex: "half",
     });
 
+    // Important: Node/undici fetch treats `set-cookie` specially.
+    // When proxying, we must explicitly forward all Set-Cookie headers
+    // or auth sessions won't persist in the browser.
+    const proxiedHeaders = new Headers(response.headers);
+    const getSetCookie = (
+      response.headers as unknown as {
+        getSetCookie?: () => string[];
+      }
+    ).getSetCookie;
+    if (typeof getSetCookie === "function") {
+      const cookies = getSetCookie.call(response.headers);
+      if (Array.isArray(cookies)) {
+        for (const cookie of cookies) {
+          proxiedHeaders.append("set-cookie", cookie);
+        }
+      }
+    }
+
     // Forward the response
     return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
-      headers: response.headers,
+      headers: proxiedHeaders,
     });
   } catch (error) {
     console.error("API proxy error:", error);

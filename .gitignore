@@ -48,3 +48,10 @@ apps/*/.env.*.local
 packages/*/.env
 packages/*/.env.local
 packages/*/.env.*.local
+
+# Testing
+coverage
+.nyc_output
+playwright-report
+test-results
+.vitest

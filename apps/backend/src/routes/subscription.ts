@@ -4,27 +4,17 @@
  * Handles subscription management: ensuring customers, syncing, and checking status.
  */
 
-import { Polar } from "@polar-sh/sdk";
 import { Hono } from "hono";
 import {
   auth,
-  polarClient as authPolarClient,
   dbPool,
   mapProductToTier,
+  polarClient,
   updateOrgSubscription,
   upsertSubscription,
 } from "../auth";
-import { env } from "../env";
 
 const app = new Hono();
-
-// Initialize Polar client
-const polarClient = env.POLAR_ACCESS_TOKEN
-  ? new Polar({
-      accessToken: env.POLAR_ACCESS_TOKEN,
-      server: env.POLAR_ENVIRONMENT === "production" ? "production" : "sandbox",
-    })
-  : null;
 
 // =============================================================================
 // ENSURE CUSTOMER
@@ -105,7 +95,7 @@ app.post("/ensure-customer", async (c) => {
 // =============================================================================
 
 app.post("/sync-subscription", async (c) => {
-  if (!authPolarClient) {
+  if (!polarClient) {
     return c.json({ error: "Polar not configured" }, 500);
   }
 
@@ -152,7 +142,7 @@ app.post("/sync-subscription", async (c) => {
     let customerId: string | null = null;
 
     try {
-      const customers = await authPolarClient.customers.list({
+      const customers = await polarClient.customers.list({
         email: customerEmail,
       });
 
@@ -177,7 +167,7 @@ app.post("/sync-subscription", async (c) => {
     }
 
     // Get active subscriptions for this customer
-    const subscriptions = await authPolarClient.subscriptions.list({
+    const subscriptions = await polarClient.subscriptions.list({
       customerId,
       active: true,
     });
@@ -206,7 +196,7 @@ app.post("/sync-subscription", async (c) => {
 
     if (!targetSubscription) {
       // Check if subscription exists but is not active
-      const allSubscriptions = await authPolarClient.subscriptions.list({
+      const allSubscriptions = await polarClient.subscriptions.list({
         customerId,
       });
 
@@ -329,7 +319,7 @@ app.post("/sync-subscription", async (c) => {
 // =============================================================================
 
 app.post("/check-subscription", async (c) => {
-  if (!authPolarClient) {
+  if (!polarClient) {
     return c.json({ error: "Polar not configured" }, 500);
   }
 
@@ -366,7 +356,7 @@ app.post("/check-subscription", async (c) => {
     let customerId: string | null = null;
 
     try {
-      const customers = await authPolarClient.customers.list({
+      const customers = await polarClient.customers.list({
         email: customerEmail,
       });
 
@@ -385,7 +375,7 @@ app.post("/check-subscription", async (c) => {
     }
 
     // Get active subscriptions for this customer
-    const subscriptions = await authPolarClient.subscriptions.list({
+    const subscriptions = await polarClient.subscriptions.list({
       customerId,
       active: true,
     });

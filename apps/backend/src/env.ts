@@ -13,7 +13,21 @@ export const env = createEnv({
         (url) =>
           url.startsWith("postgresql://") || url.startsWith("postgres://"),
         "ZERO_UPSTREAM_DB must be a PostgreSQL connection string"
-      ),
+      )
+      .refine((url) => {
+        if (process.env.NODE_ENV !== "production") {
+          return true;
+        }
+        // Reject default/template credentials in production
+        const insecurePatterns = [
+          "user:password@",
+          "postgres:password@",
+          "@localhost",
+          "@127.0.0.1",
+        ];
+        return !insecurePatterns.some((pattern) => url.includes(pattern));
+      }, "ZERO_UPSTREAM_DB contains default/insecure credentials. " +
+        "Use strong credentials and a production database host in production."),
 
     /**
      * Secret key for Zero JWT authentication (min 32 chars for security)
@@ -24,7 +38,23 @@ export const env = createEnv({
       .refine(
         (val) => process.env.NODE_ENV !== "production" || val.length >= 32,
         "ZERO_AUTH_SECRET must be at least 32 characters in production"
-      ),
+      )
+      .refine((val) => {
+        if (process.env.NODE_ENV !== "production") {
+          return true;
+        }
+        // Reject template/default values in production
+        const insecurePatterns = [
+          "your-zero-auth-secret",
+          "testsecretkey",
+          "test-secret",
+          "secret",
+        ];
+        return !insecurePatterns.some((pattern) =>
+          val.toLowerCase().includes(pattern)
+        );
+      }, "ZERO_AUTH_SECRET contains a default/template value. " +
+        "Generate a strong random secret for production (min 32 chars)."),
 
     /**
      * Path to Zero replica SQLite file (for local development)
@@ -49,7 +79,23 @@ export const env = createEnv({
       .refine(
         (val) => process.env.NODE_ENV !== "production" || val.length >= 32,
         "BETTER_AUTH_SECRET must be at least 32 characters in production"
-      ),
+      )
+      .refine((val) => {
+        if (process.env.NODE_ENV !== "production") {
+          return true;
+        }
+        // Reject template/default values in production
+        const insecurePatterns = [
+          "your-better-auth-secret",
+          "testbetterauthsecret",
+          "test-secret",
+          "secret",
+        ];
+        return !insecurePatterns.some((pattern) =>
+          val.toLowerCase().includes(pattern)
+        );
+      }, "BETTER_AUTH_SECRET contains a default/template value. " +
+        "Generate a strong random secret for production (min 32 chars)."),
 
     /**
      * Base URL for Better Auth callbacks
@@ -130,6 +176,14 @@ export const env = createEnv({
      * @example "Reflet"
      */
     EMAIL_FROM_NAME: z.string().optional().default("Reflet"),
+
+    /**
+     * Development-only flag to bypass email verification for local testing
+     * WARNING: Never enable in production
+     */
+    DEV_AUTH_ALLOW_UNVERIFIED_SIGNUP: z
+      .enum(["true", "false"])
+      .default("false"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

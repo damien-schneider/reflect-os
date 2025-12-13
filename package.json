@@ -32,14 +32,30 @@
     "docker:clean": "bun --filter @repo/docker clean",
     "zero:clean": "source .env && rm -rf \"${ZERO_REPLICA_FILE}\"*",
     "tunnel": "ngrok http 5173",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "turbo test",
+    "test:watch": "turbo test:watch",
+    "e2e:dev": "bunx playwright test --project=chromium",
+    "e2e:dev:headed": "bunx playwright test --project=chromium --headed",
+    "e2e:dev:debug": "bunx playwright test --project=chromium --debug",
+    "e2e:dev:ui": "bunx playwright test --ui",
+    "e2e:build:ui": "PLAYWRIGHT_BUILD_MODE=1 bunx playwright test --ui",
+    "e2e:report": "bunx playwright show-report",
+    "e2e:build": "PLAYWRIGHT_BUILD_MODE=1 bunx playwright test",
+    "e2e:build:headed": "PLAYWRIGHT_BUILD_MODE=1 bunx playwright test --headed"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.8",
+    "@playwright/test": "^1.57.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@vitest/ui": "^4.0.15",
     "dotenv-cli": "^11.0.0",
     "husky": "^9.1.7",
+    "jsdom": "^27.3.0",
     "turbo": "^2.5.4",
-    "ultracite": "6.3.10"
+    "ultracite": "6.3.10",
+    "vitest": "^4.0.15"
   },
   "dependencies": {
     "sst": "3.17.25"

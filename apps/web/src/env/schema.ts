@@ -39,6 +39,15 @@ export const clientSchema = {
    * @note Can use __VITE_PUBLIC_ZERO_SERVER__ placeholder for Docker runtime injection
    */
   VITE_PUBLIC_ZERO_SERVER: urlOrPlaceholder,
+
+  /**
+   * Whether email verification is required for sign-up flows
+   * Defaults to true; set to false locally to bypass email verification in E2E
+   */
+  VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((val) => val === "true"),
 } as const;
 
 // ============================================
@@ -77,6 +86,20 @@ export const serverSchema = {
       (url) => url.startsWith("postgresql://") || url.startsWith("postgres://"),
       "ZERO_UPSTREAM_DB must be a PostgreSQL connection string"
     )
+    .refine((url) => {
+      if (process.env.NODE_ENV !== "production") {
+        return true;
+      }
+      // Reject default/template credentials in production
+      const insecurePatterns = [
+        "user:password@",
+        "postgres:password@",
+        "@localhost",
+        "@127.0.0.1",
+      ];
+      return !insecurePatterns.some((pattern) => url.includes(pattern));
+    }, "ZERO_UPSTREAM_DB contains default/insecure credentials. " +
+      "Use strong credentials and a production database host in production.")
     .optional(),
 
   /**
@@ -85,6 +108,29 @@ export const serverSchema = {
   ZERO_AUTH_SECRET: z
     .string()
     .min(1, "ZERO_AUTH_SECRET is required")
+    .refine((val) => {
+      if (process.env.NODE_ENV !== "production") {
+        return true;
+      }
+      // Must be at least 32 chars in production
+      return val.length >= 32;
+    }, "ZERO_AUTH_SECRET must be at least 32 characters in production")
+    .refine((val) => {
+      if (process.env.NODE_ENV !== "production") {
+        return true;
+      }
+      // Reject template/default values in production
+      const insecurePatterns = [
+        "your-zero-auth-secret",
+        "testsecretkey",
+        "test-secret",
+        "secret",
+      ];
+      return !insecurePatterns.some((pattern) =>
+        val.toLowerCase().includes(pattern)
+      );
+    }, "ZERO_AUTH_SECRET contains a default/template value. " +
+      "Generate a strong random secret for production (min 32 chars).")
     .optional(),
 
   /**
@@ -104,6 +150,29 @@ export const serverSchema = {
   BETTER_AUTH_SECRET: z
     .string()
     .min(1, "BETTER_AUTH_SECRET is required")
+    .refine((val) => {
+      if (process.env.NODE_ENV !== "production") {
+        return true;
+      }
+      // Must be at least 32 chars in production
+      return val.length >= 32;
+    }, "BETTER_AUTH_SECRET must be at least 32 characters in production")
+    .refine((val) => {
+      if (process.env.NODE_ENV !== "production") {
+        return true;
+      }
+      // Reject template/default values in production
+      const insecurePatterns = [
+        "your-better-auth-secret",
+        "testbetterauthsecret",
+        "test-secret",
+        "secret",
+      ];
+      return !insecurePatterns.some((pattern) =>
+        val.toLowerCase().includes(pattern)
+      );
+    }, "BETTER_AUTH_SECRET contains a default/template value. " +
+      "Generate a strong random secret for production (min 32 chars).")
     .optional(),
 
   /**

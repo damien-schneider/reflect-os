@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
 import { getSignUpErrorMessage } from "@/lib/auth-errors";
 
@@ -20,6 +21,8 @@ function Login() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
+  const requiresEmailVerification =
+    clientEnv.VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION;
 
   const validateForm = () => {
     if (!email.trim()) {
@@ -60,11 +63,38 @@ function Login() {
           name,
         },
         {
-          onSuccess: () => {
-            setSuccess("Account created! Check your email to verify.");
-            setTimeout(() => {
+          onSuccess: async () => {
+            const successMessage = requiresEmailVerification
+              ? "Account created! Check your email to verify."
+              : "Account created! Redirecting...";
+            setSuccess(successMessage);
+            if (requiresEmailVerification) {
+              setIsLoading(false);
               navigate({ to: "/check-email", search: { email } });
-            }, 500);
+              return;
+            }
+
+            try {
+              await authClient.signIn.email(
+                {
+                  email,
+                  password,
+                },
+                {
+                  onSuccess: () => {
+                    navigate({ to: "/dashboard" });
+                  },
+                  onError: (ctx) => {
+                    setError(
+                      ctx.error.message ||
+                        "Signed up but could not sign in automatically."
+                    );
+                  },
+                }
+              );
+            } finally {
+              setIsLoading(false);
+            }
           },
           onError: (ctx) => {
             console.error("Sign up error:", ctx.error);

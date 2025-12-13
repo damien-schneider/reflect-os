@@ -1,7 +1,8 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, Building2, Loader2, Plus, RefreshCw } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { OnboardingPage } from "@/components/onboarding-page";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import type { Schema } from "@/schema";
@@ -195,31 +196,21 @@ function DashboardIndex() {
     );
   }
 
-  // No organizations - show welcome screen
+  // No organizations - show onboarding page to create first organization
   if (!organizations || organizations.length === 0) {
+    const handleOrganizationCreated = (slug: string) => {
+      navigate({
+        to: "/dashboard/$orgSlug",
+        params: { orgSlug: slug },
+        replace: true,
+      });
+    };
+
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center p-8">
-        <div className="max-w-md space-y-6 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <Building2 className="h-8 w-8 text-primary" />
-          </div>
-
-          <div>
-            <h1 className="font-bold text-2xl">Welcome to the Dashboard</h1>
-            <p className="mt-2 text-muted-foreground">
-              Get started by creating your first organization to manage feedback
-              and roadmaps.
-            </p>
-          </div>
-
-          <Button asChild className="gap-2" size="lg">
-            <Link to="/dashboard/account">
-              <Plus className="h-4 w-4" />
-              Create Organization
-            </Link>
-          </Button>
-        </div>
-      </div>
+      <OnboardingPage
+        onOrganizationCreated={handleOrganizationCreated}
+        userName={session?.user?.name ?? null}
+      />
     );
   }
 

@@ -14,6 +14,7 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
+import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
 import { getSignUpErrorMessage } from "@/lib/auth-errors";
 
@@ -31,6 +32,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const requiresEmailVerification =
+    clientEnv.VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION;
 
   const resetForm = () => {
     setEmail("");
@@ -88,14 +91,40 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
           name,
         },
         {
-          onSuccess: () => {
-            setSuccess("Account created! Check your email.");
+          onSuccess: async () => {
+            const successMessage = requiresEmailVerification
+              ? "Account created! Check your email."
+              : "Account created! Redirecting...";
+            setSuccess(successMessage);
             handleOpenChange(false);
-            // Redirect to check-email page since verification is required
-            navigate({
-              to: "/check-email",
-              search: { email },
-            });
+
+            if (requiresEmailVerification) {
+              setIsLoading(false);
+              navigate({
+                to: "/check-email",
+                search: { email },
+              });
+              return;
+            }
+
+            try {
+              await authClient.signIn.email(
+                { email, password },
+                {
+                  onSuccess: () => {
+                    navigate({ to: "/dashboard" });
+                  },
+                  onError: (ctx) => {
+                    setError(
+                      ctx.error.message ||
+                        "Signed up but could not sign in automatically."
+                    );
+                  },
+                }
+              );
+            } finally {
+              setIsLoading(false);
+            }
           },
           onError: (ctx) => {
             console.error("Sign up error:", ctx.error);

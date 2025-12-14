@@ -16,17 +16,34 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: password
     command: |
-      postgres 
+      postgres
       -c wal_level=logical
-      -c max_wal_senders=10 
-      -c max_replication_slots=5 
-      -c hot_standby=on 
+      -c max_wal_senders=10
+      -c max_replication_slots=5
+      -c hot_standby=on
       -c hot_standby_feedback=on
     volumes:
       - zstart_pgdata:/var/lib/postgresql/data
       # Note: Database schema is managed by Drizzle. Use `bun db:push` to create tables
       # and `bun db:seed` to seed the database after the container is running.
 
+  drizzle-gateway:
+    image: ghcr.io/drizzle-team/gateway:latest
+    restart: always
+    environment:
+      PORT: "4983"
+      STORE_PATH: "/app"
+      MASTERPASS: ${MASTERPASS}
+    volumes:
+      - drizzle-gateway:/app
+    networks:
+      - dokploy-network
+
 volumes:
   zstart_pgdata:
     driver: local
+  drizzle-gateway:
+
+networks:
+  dokploy-network:
+    external: true

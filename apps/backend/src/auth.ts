@@ -382,26 +382,19 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: !allowDevUnverifiedSignup,
     autoSignInAfterVerification: true,
+    // biome-ignore lint/suspicious/useAwait: intentionally fire-and-forget to not block signup
     sendVerificationEmail: async ({ user, url }) => {
-      class VerificationEmailError extends Error {
-        status?: number;
-        code?: string;
-
-        constructor(message: string, status?: number, code?: string) {
-          super(message);
-          this.name = "VerificationEmailError";
-          this.status = status;
-          this.code = code;
-        }
-      }
-
       // Replace the default callback URL (/) with /dashboard
       const verificationUrl = url.replace(
         "callbackURL=%2F",
         "callbackURL=%2Fdashboard"
       );
 
-      const result = await sendEmail({
+      // Fire-and-forget: Don't block signup if email fails
+      // The user can request a new verification email from the check-email page
+      // This prevents signup from appearing to fail when only the email fails
+      // (the account IS created successfully even if email sending fails)
+      sendEmail({
         to: user.email,
         subject: "Verify your email address",
         template: VerifyEmailTemplate({
@@ -414,24 +407,20 @@ export const auth = betterAuth({
           fromName: env.EMAIL_FROM_NAME,
           isDevelopment: !isProduction,
         },
-      });
-
-      if (!result.success) {
-        console.error(
-          "[Auth] Failed to send verification email:",
-          result.error
-        );
-        // Always throw the error so the frontend knows the email wasn't sent
-        // Include status/code metadata so clients can present actionable UI
-        // The frontend will handle showing appropriate messages
-        const statusCode = (result as { statusCode?: number }).statusCode;
-        const errorCode = (result as { errorCode?: string }).errorCode;
-        throw new VerificationEmailError(
-          result.error || "Verification email could not be sent",
-          statusCode ?? 502,
-          errorCode ?? "VERIFICATION_EMAIL_FAILED"
-        );
-      }
+      })
+        .then((result) => {
+          if (result.success) {
+            console.log(`[Auth] Verification email sent to ${user.email}`);
+          } else {
+            console.error(
+              "[Auth] Failed to send verification email:",
+              result.error
+            );
+          }
+        })
+        .catch((err: unknown) => {
+          console.error("[Auth] Error sending verification email:", err);
+        });
     },
   },
   databaseHooks: {

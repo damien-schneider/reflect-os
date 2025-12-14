@@ -2,7 +2,6 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Navigate, useSearch } from "@tanstack/react-router";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AuthGuard } from "@/components/auth-guard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,18 +12,48 @@ import {
 } from "@/components/ui/card";
 import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
+import { requireAuthenticated } from "@/lib/route-guards";
 import type { Schema } from "@/schema";
 
+type SubscriptionSuccessSearch = {
+  checkout_id?: string;
+  customer_session_token?: string;
+};
+
+function SubscriptionSuccessPending() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
 export const Route = createFileRoute("/subscription/success")({
-  component: () => (
-    <AuthGuard>
-      <SubscriptionSuccess />
-    </AuthGuard>
-  ),
-  validateSearch: (search: Record<string, unknown>) => ({
-    checkout_id: search.checkout_id as string | undefined,
-    customer_session_token: search.customer_session_token as string | undefined,
-  }),
+  beforeLoad: async ({ context }) => {
+    await requireAuthenticated({
+      authClient: context.authClient,
+    });
+  },
+  pendingComponent: SubscriptionSuccessPending,
+  validateSearch: (
+    search: Record<string, unknown>
+  ): SubscriptionSuccessSearch => {
+    const checkoutId =
+      typeof search.checkout_id === "string" ? search.checkout_id : undefined;
+    const customerSessionToken =
+      typeof search.customer_session_token === "string"
+        ? search.customer_session_token
+        : undefined;
+
+    return {
+      checkout_id: checkoutId,
+      customer_session_token: customerSessionToken,
+    };
+  },
+  component: SubscriptionSuccess,
 });
 
 function SubscriptionSuccess() {
@@ -56,35 +85,21 @@ function SubscriptionSuccess() {
     }
 
     const syncSubscription = async () => {
-      setSyncStatus("syncing");
-      try {
-        const response = await api.api["sync-subscription"].$post({
-          json: { organizationId: firstOrg.id },
-        });
+      const response = await api.api["sync-subscription"].$post({
+        json: { organizationId: firstOrg.id },
+      });
 
-        const data = await response.json();
-
-        if (response.ok && "synced" in data && data.synced) {
-          console.log(
-            "[Success Page] Subscription synced:",
-            "subscription" in data ? data.subscription : null
-          );
-          setSyncStatus("success");
-        } else {
-          // Not an error - just no subscription to sync
-          console.log(
-            "[Success Page] Sync result:",
-            "message" in data ? data.message : "No message"
-          );
-          setSyncStatus("success");
-        }
-      } catch (error) {
-        console.error("[Success Page] Sync failed:", error);
-        setSyncStatus("error");
-      }
+      await response.json();
+      setSyncStatus("success");
     };
 
-    syncSubscription();
+    setSyncStatus("syncing");
+    syncSubscription().catch((caughtError: unknown) => {
+      if (import.meta.env.DEV) {
+        console.error("[Subscription Success] Sync failed", caughtError);
+      }
+      setSyncStatus("error");
+    });
   }, [firstOrg?.id, syncStatus]);
 
   // Auto redirect countdown (starts after sync attempt)
@@ -106,7 +121,6 @@ function SubscriptionSuccess() {
     return () => clearInterval(timer);
   }, [firstOrg, syncStatus]);
 
-  // Loading state
   if (isSessionPending || isOrgsPending || syncStatus === "syncing") {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -122,21 +136,20 @@ function SubscriptionSuccess() {
     );
   }
 
-  // No session - shouldn't happen with AuthGuard
+  // Should not happen due to beforeLoad guard, but keep defensive.
   if (!session) {
-    return <Navigate to="/login" />;
+    return <Navigate replace to="/login" />;
   }
 
-  // No organizations - redirect to create one
   if (!firstOrg) {
-    return <Navigate to="/dashboard/account" />;
+    return <Navigate replace to="/dashboard/account" />;
   }
 
-  // Auto redirect when countdown reaches 0
   if (redirectCountdown === 0) {
     return (
       <Navigate
         params={{ orgSlug: firstOrg.slug }}
+        replace
         to="/dashboard/$orgSlug/subscription"
       />
     );

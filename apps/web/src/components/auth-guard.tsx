@@ -1,6 +1,6 @@
-import { useNavigate } from "@tanstack/react-router";
+import { Navigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { type ReactNode, useEffect } from "react";
+import type { ReactNode } from "react";
 import { authClient } from "@/lib/auth-client";
 
 type AuthGuardProps = {
@@ -9,13 +9,6 @@ type AuthGuardProps = {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { data: session, isPending } = authClient.useSession();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!(isPending || session)) {
-      navigate({ to: "/login" });
-    }
-  }, [session, isPending, navigate]);
 
   if (isPending) {
     return (
@@ -26,7 +19,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!session) {
-    return null;
+    return <Navigate replace to="/login" />;
   }
 
   return <>{children}</>;

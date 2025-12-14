@@ -3,11 +3,17 @@ import { createRoot } from "react-dom/client";
 import "@/index.css";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
+import { authClient } from "@/lib/auth-client";
 // Import the generated route tree
 import { routeTree } from "@/routeTree.gen";
 
 // Create a new router instance
-const router = createRouter({ routeTree });
+const router = createRouter({
+  routeTree,
+  context: {
+    authClient,
+  },
+});
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {

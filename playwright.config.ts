@@ -19,6 +19,8 @@ const isBuildMode = !!process.env.PLAYWRIGHT_BUILD_MODE;
 
 export default defineConfig({
   testDir: "./apps/web/e2e",
+  /* Match *.e2e.ts files */
+  testMatch: "**/*.e2e.ts",
   /* Run tests sequentially in build mode for stability */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

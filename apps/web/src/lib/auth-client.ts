@@ -8,3 +8,5 @@ export const authClient = createAuthClient({
   baseURL: "", // Empty string = same origin
   plugins: [organizationClient(), polarClient()],
 });
+
+export type AuthClient = typeof authClient;

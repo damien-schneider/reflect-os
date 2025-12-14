@@ -7,8 +7,20 @@ import { Label } from "@/components/ui/label";
 import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
 import { getSignUpErrorMessage } from "@/lib/auth-errors";
+import { redirectIfAuthenticated } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/login")({
+  beforeLoad: async ({ context }) => {
+    await redirectIfAuthenticated({
+      authClient: context.authClient,
+      to: "/dashboard",
+    });
+  },
+  pendingComponent: () => (
+    <div className="flex min-h-[80vh] items-center justify-center p-4">
+      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+    </div>
+  ),
   component: Login,
 });
 

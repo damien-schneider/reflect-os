@@ -167,6 +167,26 @@ services:
     networks:
       - reflect-network
 
+  # Drizzle Gateway for database management
+  drizzle-gateway:
+    image: ghcr.io/drizzle-team/gateway:latest
+    restart: unless-stopped
+    environment:
+      PORT: "4983"
+      STORE_PATH: "/app"
+      MASTERPASS: ${MASTERPASS:?MASTERPASS is required}
+    volumes:
+      - drizzle_gateway_data:/app
+    networks:
+      - reflect-network
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.drizzle-gateway.rule=Host(`drizzle.reflet.app`)"
+        - "traefik.http.routers.drizzle-gateway.tls=true"
+        - "traefik.http.routers.drizzle-gateway.tls.certresolver=letsencrypt"
+        - "traefik.http.services.drizzle-gateway.loadbalancer.server.port=4983"
+
 volumes:
   # PostgreSQL data - backs up the entire database
   postgres_data:
@@ -174,6 +194,9 @@ volumes:
   # Zero cache replica - can be regenerated but speeds up restarts
   zero_data:
     name: reflect-zero-data
+  # Drizzle Gateway data - stores gateway configuration
+  drizzle_gateway_data:
+    name: reflect-drizzle-gateway-data
 
 networks:
   reflect-network:

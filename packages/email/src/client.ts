@@ -1,3 +1,4 @@
+import { render } from "@react-email/render";
 import type { ReactElement } from "react";
 import { Resend } from "resend";
 import { type EmailConfig, formatFromAddress, getEmailConfig } from "./config";
@@ -128,11 +129,14 @@ export async function sendEmail(
   const client = getResendClient(config.apiKey);
 
   try {
+    // Render React template to HTML first to avoid React 19 compatibility issues
+    const html = await render(options.template);
+
     const { data, error } = await client.emails.send({
       from: formatFromAddress(config),
       to: Array.isArray(options.to) ? options.to : [options.to],
       subject: options.subject,
-      react: options.template,
+      html,
       replyTo: options.replyTo,
     });
 

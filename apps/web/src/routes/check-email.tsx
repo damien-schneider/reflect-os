@@ -104,8 +104,9 @@ function CheckEmail() {
             <div>
               <CardTitle>Check your email</CardTitle>
               <CardDescription>
-                We sent a verification link to your inbox. Click it to finish
-                setting up your account.
+                We've sent a verification link to your inbox. Click it to finish
+                setting up your account. If you don't see it, you can request a
+                new link below.
               </CardDescription>
             </div>
           </div>
@@ -127,7 +128,7 @@ function CheckEmail() {
           {resendSuccess && (
             <div className="flex items-center gap-2 text-green-600 text-sm">
               <CheckCircle2 className="h-4 w-4" />
-              <span>Verification email sent successfully!</span>
+              <span>A new verification email has been sent!</span>
             </div>
           )}
 
@@ -141,9 +142,10 @@ function CheckEmail() {
               <div>
                 <p className="font-medium">Development Mode</p>
                 <p className="text-amber-700 dark:text-amber-300">
-                  Emails may not be sent in development unless you use your
-                  verified Resend email address. You can manually verify users
-                  in the database.
+                  Emails are only sent to verified Resend email addresses in
+                  development. If you're not using a verified address, the email
+                  won't be sent but you can still test the flow using the resend
+                  button.
                 </p>
               </div>
             </div>

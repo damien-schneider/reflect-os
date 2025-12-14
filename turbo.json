@@ -7,11 +7,7 @@
       "outputs": ["dist/**"],
       "env": ["NODE_ENV", "VITE_PUBLIC_ZERO_SERVER"]
     },
-    "@repo/docker#dev": {
-      "cache": false
-    },
     "@repo/db#db:push": {
-      "dependsOn": ["@repo/docker#dev"],
       "cache": false,
       "passThroughEnv": ["ZERO_UPSTREAM_DB"]
     },
@@ -88,12 +84,12 @@
       "cache": false,
       "passThroughEnv": ["ZERO_UPSTREAM_DB"]
     },
-    "db:generate": {
-      "outputs": ["migrations/**"]
-    },
     "db:seed": {
       "cache": false,
       "passThroughEnv": ["ZERO_UPSTREAM_DB"]
+    },
+    "db:generate": {
+      "outputs": ["migrations/**"]
     },
     "test": {
       "dependsOn": ["^build"],

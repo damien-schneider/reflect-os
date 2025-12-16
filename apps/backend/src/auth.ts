@@ -10,6 +10,7 @@ import { organization } from "better-auth/plugins";
 import { Pool } from "pg";
 import { env } from "./env";
 import { PLAN_LIMITS, type SubscriptionTier } from "./tiers.config";
+import { transformVerificationUrl } from "./utils/email-verification";
 
 const isProduction = env.NODE_ENV === "production";
 const allowDevUnverifiedSignup =
@@ -20,10 +21,6 @@ const isEmailEnabled = !!env.RESEND_API_KEY;
 
 // If email is not enabled, we should skip email verification
 const skipEmailVerification = !isEmailEnabled || allowDevUnverifiedSignup;
-
-// Regex to match default callback URL (/) at end of query string
-// Used to replace default "/" with "/dashboard" in verification URLs
-const DEFAULT_CALLBACK_URL_REGEX = /callbackURL=%2F(&|$)/;
 
 console.log("Better Auth initialized with:", {
   baseURL: env.BETTER_AUTH_URL,
@@ -532,12 +529,21 @@ export const auth = betterAuth({
         );
         return;
       }
-      // Replace the default callback URL (/) with /dashboard
-      // Use regex with end anchor to avoid partial matches like %2Fdashboard -> %2Fdashboarddashboard
-      const verificationUrl = url.replace(
-        DEFAULT_CALLBACK_URL_REGEX,
-        "callbackURL=%2Fdashboard$1"
-      );
+      // Transform URL to ensure callbackURL is set correctly
+      const transformed = transformVerificationUrl(url);
+      const verificationUrl = transformed.url;
+
+      // Log transformation details for debugging
+      if (transformed.error) {
+        console.error(
+          `[Auth] URL transformation error for ${user.email}: ${transformed.error}`
+        );
+        console.error(`[Auth] Original URL: ${url}`);
+      } else {
+        console.log(
+          `[Auth] Verification URL for ${user.email}: callbackURL="${transformed.originalCallbackURL}" -> URL: ${verificationUrl}`
+        );
+      }
 
       // Fire-and-forget: Don't block signup if email fails
       // The user can request a new verification email from the check-email page
@@ -559,16 +565,33 @@ export const auth = betterAuth({
       })
         .then((result) => {
           if (result.success) {
-            console.log(`[Auth] Verification email sent to ${user.email}`);
+            console.log(`[Auth] Verification email sent to ${user.email}`, {
+              emailId: result.id,
+              userId: user.id,
+              verificationUrl,
+            });
           } else {
             console.error(
-              "[Auth] Failed to send verification email:",
-              result.error
+              `[Auth] Failed to send verification email to ${user.email}`,
+              {
+                error: result.error,
+                errorCode: result.errorCode,
+                statusCode: result.statusCode,
+                userId: user.id,
+                verificationUrl,
+              }
             );
           }
         })
         .catch((err: unknown) => {
-          console.error("[Auth] Error sending verification email:", err);
+          console.error(
+            `[Auth] Error sending verification email to ${user.email}`,
+            {
+              error: err instanceof Error ? err.message : String(err),
+              userId: user.id,
+              verificationUrl,
+            }
+          );
         });
     },
   },

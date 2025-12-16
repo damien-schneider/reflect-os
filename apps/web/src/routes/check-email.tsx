@@ -133,7 +133,13 @@ function CheckEmail() {
           )}
 
           {resendError && (
-            <p className="text-destructive text-sm">{resendError}</p>
+            <div className="flex items-start gap-2 rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <div>
+                <p className="font-medium">Failed to send email</p>
+                <p className="text-destructive/80">{resendError}</p>
+              </div>
+            </div>
           )}
 
           {isDevelopment && (

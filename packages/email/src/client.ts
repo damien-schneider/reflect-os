@@ -1,13 +1,26 @@
-import { render } from "@react-email/render";
 import type { ReactElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { Resend } from "resend";
 import { type EmailConfig, formatFromAddress, getEmailConfig } from "./config";
+
+/**
+ * Render a React element to HTML string.
+ * Uses react-dom/server directly for Bun + React 19 compatibility.
+ * The @react-email/render package has issues with the way Bun loads react-dom/server.
+ */
+function renderEmailTemplate(template: ReactElement): string {
+  const html = renderToStaticMarkup(template);
+  // Add the XHTML doctype that email clients expect
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">${html}`;
+}
 
 export type SendEmailOptions = {
   to: string | string[];
   subject: string;
   template: ReactElement;
   replyTo?: string;
+  /** Optional tags for categorization and analytics */
+  tags?: Array<{ name: string; value: string }>;
   config?: Partial<EmailConfig>;
 };
 
@@ -122,7 +135,7 @@ export async function sendEmail(
   // In development without API key, log the email instead
   if (!config.apiKey) {
     if (config.isDevelopment) {
-      const html = await render(options.template);
+      const html = renderEmailTemplate(options.template);
       console.log("\n📧 [DEV MODE] Email would be sent:");
       console.log(
         `   To: ${Array.isArray(options.to) ? options.to.join(", ") : options.to}`
@@ -143,8 +156,8 @@ export async function sendEmail(
   const client = getResendClient(config.apiKey);
 
   try {
-    // Render React template to HTML first to avoid React 19 compatibility issues
-    const html = await render(options.template);
+    // Render React template to HTML using our Bun-compatible render function
+    const html = await renderEmailTemplate(options.template);
 
     const { data, error } = await client.emails.send({
       from: formatFromAddress(config),
@@ -152,6 +165,7 @@ export async function sendEmail(
       subject: options.subject,
       html,
       replyTo: options.replyTo,
+      tags: options.tags,
     });
 
     if (error) {
@@ -171,18 +185,55 @@ export async function sendEmail(
 }
 
 /**
- * Send emails to multiple recipients (batch send)
+ * Send emails to multiple recipients using Resend's batch API
+ * More efficient than sending individual emails - up to 100 emails per batch.
  * Each recipient gets their own email (not CC'd)
+ *
+ * @see https://resend.com/docs/api-reference/emails/send-batch-emails
  */
 export async function sendBatchEmails(
   emails: Omit<SendEmailOptions, "config">[]
 ): Promise<SendEmailResult[]> {
   const config = getEmailConfig();
 
-  // Send emails in parallel with a concurrency limit
-  const results = await Promise.all(
-    emails.map((email) => sendEmail({ ...email, config }))
-  );
+  // In development without API key, send emails individually (for logging)
+  if (!config.apiKey) {
+    return Promise.all(emails.map((email) => sendEmail({ ...email, config })));
+  }
 
-  return results;
+  const client = getResendClient(config.apiKey);
+
+  try {
+    // Render all templates to HTML
+    const emailPayloads = await Promise.all(
+      emails.map(async (email) => ({
+        from: formatFromAddress(config),
+        to: Array.isArray(email.to) ? email.to : [email.to],
+        subject: email.subject,
+        html: renderEmailTemplate(email.template),
+        replyTo: email.replyTo,
+        tags: email.tags,
+      }))
+    );
+
+    // Use Resend's native batch API for efficiency
+    const { data, error } = await client.batch.send(emailPayloads);
+
+    if (error) {
+      console.error("[email] Batch send failed:", error);
+      const normalizedError = normalizeResendError(error);
+      // Return same error for all emails in batch
+      return emails.map(() => normalizedError);
+    }
+
+    // Map batch response to individual results
+    return (data?.data ?? []).map((item) => ({
+      success: true as const,
+      id: item.id,
+    }));
+  } catch (err) {
+    const normalizedError = normalizeResendError(err);
+    console.error("[email] Batch send error:", normalizedError.error);
+    return emails.map(() => normalizedError);
+  }
 }

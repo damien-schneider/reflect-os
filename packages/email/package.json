@@ -32,7 +32,6 @@
     "resend": "^6.6.0"
   },
   "devDependencies": {
-    "@react-email/render": "^2.0.0",
     "@types/node": "^24.10.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

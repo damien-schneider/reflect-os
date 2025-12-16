@@ -21,6 +21,10 @@ const isEmailEnabled = !!env.RESEND_API_KEY;
 // If email is not enabled, we should skip email verification
 const skipEmailVerification = !isEmailEnabled || allowDevUnverifiedSignup;
 
+// Regex to match default callback URL (/) at end of query string
+// Used to replace default "/" with "/dashboard" in verification URLs
+const DEFAULT_CALLBACK_URL_REGEX = /callbackURL=%2F(&|$)/;
+
 console.log("Better Auth initialized with:", {
   baseURL: env.BETTER_AUTH_URL,
   isProduction,
@@ -529,9 +533,10 @@ export const auth = betterAuth({
         return;
       }
       // Replace the default callback URL (/) with /dashboard
+      // Use regex with end anchor to avoid partial matches like %2Fdashboard -> %2Fdashboarddashboard
       const verificationUrl = url.replace(
-        "callbackURL=%2F",
-        "callbackURL=%2Fdashboard"
+        DEFAULT_CALLBACK_URL_REGEX,
+        "callbackURL=%2Fdashboard$1"
       );
 
       // Fire-and-forget: Don't block signup if email fails

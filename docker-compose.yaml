@@ -13,13 +13,14 @@
 #   zero-cache → beta-zero.reflet.app:4848
 #
 # Optional:
+#   POSTGRES_USER - Database username (default: reflect_user)
 #   POLAR_ACCESS_TOKEN - For billing integration
 #   POLAR_WEBHOOK_SECRET - For billing webhooks
 #   POLAR_ENVIRONMENT - sandbox or production
 #   RESEND_API_KEY - For sending emails (verification, notifications)
 #   EMAIL_FROM_ADDRESS - Sender email (e.g., noreply@yourdomain.com)
 #   EMAIL_FROM_NAME - Sender display name
-# TODO: Make the username of the Postgres as a env variable to improve security.
+
 # TODO: Improvements: use secrets instead of environment vars for sensitive data (keeping the build check and t3-oss/env-core validation working.)
 
 services:
@@ -28,7 +29,7 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-reflect_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: reflect
     volumes:
@@ -44,7 +45,8 @@ services:
       - "-c"
       - "max_wal_senders=10"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d reflect"]
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reflect_user} -d reflect"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -60,7 +62,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
     networks:
       - reflect-network
     # Init container: runs once, must complete successfully
@@ -85,9 +87,9 @@ services:
       - "4848"
     environment:
       # Database connections
-      ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
-      ZERO_CVR_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
-      ZERO_CHANGE_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_CVR_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_CHANGE_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
       # Authentication
       ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
       ZERO_ADMIN_PASSWORD: ${ZERO_ADMIN_PASSWORD:-admin}
@@ -119,7 +121,7 @@ services:
       - "3001"
     environment:
       # Database connection
-      ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
       # Auth secrets
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${PUBLIC_URL:?PUBLIC_URL is required - set in Dokploy UI}
@@ -161,7 +163,7 @@ services:
       # Internal API URL for server-side proxy (Docker network, NOT browser)
       INTERNAL_API_URL: http://backend:3001
       # Server-side environment
-      ZERO_UPSTREAM_DB: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${PUBLIC_URL}
       ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET}
@@ -175,7 +177,7 @@ services:
   #   - Host: postgres (internal Docker network hostname)
   #   - Port: 5432
   #   - Database: reflect
-  #   - User: postgres
+  #   - User: (your POSTGRES_USER value, default: reflect_user)
   #   - Password: (your POSTGRES_PASSWORD value)
   drizzle-gateway:
     image: ghcr.io/drizzle-team/gateway:latest

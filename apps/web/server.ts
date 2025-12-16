@@ -19,9 +19,14 @@ console.log(`Web server configuration:
 const app = new Hono();
 
 // Proxy API requests to backend (using internal Docker URL)
+// Must be registered before static file serving
 app.all("/api/*", async (c) => {
   const url = new URL(c.req.url);
   const backendUrl = `${env.INTERNAL_API_URL}${url.pathname}${url.search}`;
+
+  console.log(
+    `[Proxy] ${c.req.method} ${url.pathname}${url.search} -> ${backendUrl}`
+  );
 
   try {
     const response = await fetch(backendUrl, {
@@ -34,6 +39,8 @@ app.all("/api/*", async (c) => {
       // @ts-expect-error - duplex is needed for streaming request bodies
       duplex: "half",
     });
+
+    console.log(`[Proxy] Response: ${response.status} ${response.statusText}`);
 
     // Important: Node/undici fetch treats `set-cookie` specially.
     // When proxying, we must explicitly forward all Set-Cookie headers
@@ -60,15 +67,15 @@ app.all("/api/*", async (c) => {
       headers: proxiedHeaders,
     });
   } catch (error) {
-    console.error("API proxy error:", error);
+    console.error("[Proxy] Error:", error);
     return c.json({ error: "Backend unavailable" }, 503);
   }
 });
 
-// Serve static files from dist directory
+// Serve static files from dist directory (for assets, js, css, etc.)
 app.use("/*", serveStatic({ root: "./dist" }));
 
-// Fallback to index.html for SPA routing
+// Fallback to index.html for SPA routing (client-side routes)
 app.get("*", serveStatic({ path: "./dist/index.html" }));
 
 console.log(`🚀 Web server starting on http://localhost:${env.PORT}`);

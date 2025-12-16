@@ -21,7 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BoardEditDialog } from "@/features/board/components/board-edit-dialog";
-import type { Board, Schema } from "@/schema";
+import { mutators } from "@/mutators";
+import type { Board } from "@/schema";
 
 type BoardActionsProps = {
   board: Board;
@@ -34,7 +35,7 @@ export function BoardActions({
   organizationId,
   orgSlug,
 }: BoardActionsProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
   const navigate = useNavigate();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -43,7 +44,7 @@ export function BoardActions({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await z.mutate.board.delete({ id: board.id });
+      await zero.mutate(mutators.board.delete({ id: board.id }));
       // Navigate back to dashboard after deletion
       navigate({
         to: "/dashboard/$orgSlug",

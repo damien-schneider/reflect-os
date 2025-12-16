@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 type VoteButtonProps = {
   feedbackId: string;
@@ -25,16 +26,14 @@ export function VoteButton({
   size = "md",
   className,
 }: VoteButtonProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
   const { openAuthDialog } = useAuthDialog();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
 
   // Check if user has voted
   const [votes] = useQuery(
-    z.query.vote
-      .where("feedbackId", "=", feedbackId)
-      .where("userId", "=", userId ?? "")
+    zql.vote.where("feedbackId", feedbackId).where("userId", userId ?? "")
   );
 
   const hasVoted = votes && votes.length > 0;
@@ -49,25 +48,31 @@ export function VoteButton({
 
     if (hasVoted && userVote) {
       // Remove vote
-      await z.mutate.vote.delete({ id: userVote.id });
+      await zero.mutate(mutators.vote.delete({ id: userVote.id }));
       // Decrement vote count
-      await z.mutate.feedback.update({
-        id: feedbackId,
-        voteCount: Math.max(0, voteCount - 1),
-      });
+      await zero.mutate(
+        mutators.feedback.update({
+          id: feedbackId,
+          voteCount: Math.max(0, voteCount - 1),
+        })
+      );
     } else {
       // Add vote
-      await z.mutate.vote.insert({
-        id: randID(),
-        feedbackId,
-        userId,
-        createdAt: Date.now(),
-      });
+      await zero.mutate(
+        mutators.vote.insert({
+          id: randID(),
+          feedbackId,
+          userId,
+          createdAt: Date.now(),
+        })
+      );
       // Increment vote count
-      await z.mutate.feedback.update({
-        id: feedbackId,
-        voteCount: voteCount + 1,
-      });
+      await zero.mutate(
+        mutators.feedback.update({
+          id: feedbackId,
+          voteCount: voteCount + 1,
+        })
+      );
     }
   };
 

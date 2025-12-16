@@ -158,16 +158,31 @@ This project uses **Drizzle ORM** for database migrations and a **native Zero sc
 3. Update permissions in `apps/web/src/schema.ts` if needed (for new tables)
 4. Run `bun db:push` (dev) or `bun db:generate && bun db:migrate` (prod)
 
+### Dev Workflow
+
+The `bun run dev` command automatically:
+1. Kills any existing dev processes
+2. Starts Docker containers (PostgreSQL)
+3. Waits for PostgreSQL to be healthy
+4. Runs `db:push` to apply schema changes
+5. Starts all dev services (vite, zero-cache, backend)
+
+This ensures Zero cache always has the correct schema when starting.
+
 ### Setup New Database
 
 ```bash
+# Start development (recommended - handles everything automatically)
+bun run dev
+
+# Or manually:
 # Start PostgreSQL
-bun dev:db-up
+docker compose -f docker-compose.dev.yaml up -d
 
 # Push schema to database (creates all tables)
 bun db:push
 
-# Seed with test data
+# Seed with test data (optional)
 bun db:seed
 ```
 

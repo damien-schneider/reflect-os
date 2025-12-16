@@ -24,8 +24,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Schema, Tag } from "@/schema";
+import type { Tag } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug/admin/tags")({
   component: AdminTags,
@@ -46,17 +48,15 @@ const COLOR_PALETTE = [
 
 function AdminTags() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Get tags
   const [tags] = useQuery(
-    z.query.tag
-      .where("organizationId", "=", org?.id ?? "")
-      .orderBy("createdAt", "desc")
+    zql.tag.where("organizationId", org?.id ?? "").orderBy("createdAt", "desc")
   );
 
   // Modal state
@@ -91,21 +91,25 @@ function AdminTags() {
 
     try {
       if (editingTag) {
-        await z.mutate.tag.update({
-          id: editingTag.id,
-          name: name.trim(),
-          color,
-        });
+        await zero.mutate(
+          mutators.tag.update({
+            id: editingTag.id,
+            name: name.trim(),
+            color,
+          })
+        );
       } else {
-        await z.mutate.tag.insert({
-          id: randID(),
-          organizationId: org.id,
-          name: name.trim(),
-          color,
-          isDoneStatus: false,
-          isRoadmapLane: false,
-          createdAt: Date.now(),
-        });
+        await zero.mutate(
+          mutators.tag.insert({
+            id: randID(),
+            organizationId: org.id,
+            name: name.trim(),
+            color,
+            isDoneStatus: false,
+            isRoadmapLane: false,
+            createdAt: Date.now(),
+          })
+        );
       }
 
       setShowModal(false);
@@ -119,7 +123,7 @@ function AdminTags() {
     if (!tagToDelete) {
       return;
     }
-    await z.mutate.tag.delete({ id: tagToDelete.id });
+    await zero.mutate(mutators.tag.delete({ id: tagToDelete.id }));
     setTagToDelete(null);
   };
 

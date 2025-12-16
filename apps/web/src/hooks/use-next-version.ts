@@ -1,5 +1,5 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
-import type { Schema } from "@/schema";
+import { useQuery } from "@rocicorp/zero/react";
+import { zql } from "@/zero-schema";
 
 type VersionIncrement = "patch" | "minor" | "major";
 
@@ -81,16 +81,14 @@ function compareVersions(a: ParsedVersion, b: ParsedVersion): number {
  * Hook to get the next suggested version for a release
  */
 export function useNextVersion(organizationId: string | undefined) {
-  const z = useZero<Schema>();
-
   // Get all releases for this organization
   const [releases] = useQuery(
-    z.query.release.where("organizationId", "=", organizationId ?? "__none__")
+    zql.release.where("organizationId", organizationId ?? "__none__")
   );
 
   // Get the organization to access changelog settings
   const [orgs] = useQuery(
-    z.query.organization.where("id", "=", organizationId ?? "__none__")
+    zql.organization.where("id", organizationId ?? "__none__")
   );
   const org = orgs?.[0];
   const settings = org?.changelogSettings as ChangelogSettings | undefined;

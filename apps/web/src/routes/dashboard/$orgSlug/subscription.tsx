@@ -1,4 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import {
   AlertCircle,
@@ -42,7 +42,7 @@ import {
   useSubscriptionCheckout,
   useSubscriptionSync,
 } from "@/features/subscription";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/subscription")({
   component: DashboardSubscription,
@@ -50,14 +50,10 @@ export const Route = createFileRoute("/dashboard/$orgSlug/subscription")({
 
 function DashboardSubscription() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
 
   // Get organization with members and boards for usage stats
   const [orgs] = useQuery(
-    z.query.organization
-      .where("slug", "=", orgSlug)
-      .related("members")
-      .related("boards")
+    zql.organization.where("slug", orgSlug).related("members").related("boards")
   );
   const org = orgs?.[0];
 

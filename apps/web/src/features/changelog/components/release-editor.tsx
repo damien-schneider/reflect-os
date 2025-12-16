@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ChangelogItemSelector } from "@/features/changelog/components/changelog-item-selector";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Release, ReleaseItem, Schema } from "@/schema";
+import type { Release, ReleaseItem } from "@/schema";
+import { zql } from "@/zero-schema";
 
 type ReleaseEditorProps = {
   organizationId: string;
@@ -22,7 +24,7 @@ export function ReleaseEditor({
   onClose,
   onSave,
 }: ReleaseEditorProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
   const isEditing = !!release;
 
   // Form state
@@ -35,7 +37,7 @@ export function ReleaseEditor({
 
   // Get current release items if editing
   const [releaseItemsData] = useQuery(
-    z.query.releaseItem.where("releaseId", "=", release?.id ?? "")
+    zql.releaseItem.where("releaseId", "=", release?.id ?? "")
   );
 
   // Safely convert to array - only use items if actually editing
@@ -62,33 +64,37 @@ export function ReleaseEditor({
 
       if (isEditing) {
         // Update existing release
-        z.mutate.release.update({
-          id: releaseId,
-          title: title.trim(),
-          description: description.trim() || null,
-          version: version.trim() || null,
-          publishedAt: isPublished ? (release?.publishedAt ?? now) : null,
-          updatedAt: now,
-        });
+        zero.mutate(
+          mutators.release.update({
+            id: releaseId,
+            title: title.trim(),
+            description: description.trim() || undefined,
+            version: version.trim() || undefined,
+            publishedAt: isPublished ? (release?.publishedAt ?? now) : null,
+            updatedAt: now,
+          })
+        );
       } else {
         // Create new release
-        z.mutate.release.insert({
-          id: releaseId,
-          organizationId,
-          title: title.trim(),
-          description: description.trim() || null,
-          version: version.trim() || null,
-          publishedAt: isPublished ? now : null,
-          createdAt: now,
-          updatedAt: now,
-        });
+        zero.mutate(
+          mutators.release.insert({
+            id: releaseId,
+            organizationId,
+            title: title.trim(),
+            description: description.trim() || undefined,
+            version: version.trim() || undefined,
+            publishedAt: isPublished ? now : null,
+            createdAt: now,
+            updatedAt: now,
+          })
+        );
       }
 
       // Update release items
       // First, delete removed items
       for (const item of releaseItems) {
         if (!selectedFeedbackIds.includes(item.feedbackId)) {
-          z.mutate.releaseItem.delete({ id: item.id });
+          zero.mutate(mutators.releaseItem.delete({ id: item.id }));
         }
       }
 
@@ -96,12 +102,14 @@ export function ReleaseEditor({
       const existingFeedbackIds = releaseItems.map((ri) => ri.feedbackId);
       for (const feedbackId of selectedFeedbackIds) {
         if (!existingFeedbackIds.includes(feedbackId)) {
-          z.mutate.releaseItem.insert({
-            id: randID(),
-            releaseId,
-            feedbackId,
-            createdAt: now,
-          });
+          zero.mutate(
+            mutators.releaseItem.insert({
+              id: randID(),
+              releaseId,
+              feedbackId,
+              createdAt: now,
+            })
+          );
         }
       }
 

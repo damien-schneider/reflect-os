@@ -20,8 +20,10 @@ import {
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Comment, Schema } from "@/schema";
+import type { Comment } from "@/zero-schema";
+import { zql } from "@/zero-schema";
 
 type CommentWithRelations = Comment & {
   author?: { id: string; name: string } | null;
@@ -41,15 +43,15 @@ export function CommentThread({
   isOrgMember = false,
   className,
 }: CommentThreadProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
   const { openAuthDialog } = useAuthDialog();
 
   // Get all comments for the feedback
   const [comments] = useQuery(
-    z.query.comment
-      .where("feedbackId", "=", feedbackId)
+    zql.comment
+      .where("feedbackId", feedbackId)
       .where("parentId", "IS", null)
       .related("author")
       .related("replies", (q) => q.related("author"))
@@ -65,25 +67,27 @@ export function CommentThread({
 
     setIsSubmitting(true);
     try {
-      await z.mutate.comment.insert({
-        id: randID(),
-        feedbackId,
-        authorId: userId,
-        body: newComment,
-        isOfficial: isOrgMember,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
+      await zero.mutate(
+        mutators.comment.insert({
+          id: randID(),
+          feedbackId,
+          authorId: userId,
+          body: newComment,
+          isOfficial: isOrgMember,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        })
+      );
 
       // Update comment count
-      const [feedback] = await z.query.feedback
-        .where("id", "=", feedbackId)
-        .run();
+      const [feedback] = await zero.run(zql.feedback.where("id", feedbackId));
       if (feedback) {
-        await z.mutate.feedback.update({
-          id: feedbackId,
-          commentCount: (feedback.commentCount ?? 0) + 1,
-        });
+        await zero.mutate(
+          mutators.feedback.update({
+            id: feedbackId,
+            commentCount: (feedback.commentCount ?? 0) + 1,
+          })
+        );
       }
 
       setNewComment("");
@@ -176,7 +180,7 @@ function CommentItem({
   currentUserId,
   depth = 0,
 }: CommentItemProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.body);
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -186,25 +190,27 @@ function CommentItem({
   const canEdit = isAuthor || isOrgMember;
 
   const handleSaveEdit = async () => {
-    await z.mutate.comment.update({
-      id: comment.id,
-      body: editContent,
-      updatedAt: Date.now(),
-    });
+    await zero.mutate(
+      mutators.comment.update({
+        id: comment.id,
+        body: editContent,
+        updatedAt: Date.now(),
+      })
+    );
     setIsEditing(false);
   };
 
   const handleDelete = async () => {
-    await z.mutate.comment.delete({ id: comment.id });
+    await zero.mutate(mutators.comment.delete({ id: comment.id }));
     // Update comment count
-    const [feedback] = await z.query.feedback
-      .where("id", "=", feedbackId)
-      .run();
+    const [feedback] = await zero.run(zql.feedback.where("id", feedbackId));
     if (feedback) {
-      await z.mutate.feedback.update({
-        id: feedbackId,
-        commentCount: Math.max(0, (feedback.commentCount ?? 1) - 1),
-      });
+      await zero.mutate(
+        mutators.feedback.update({
+          id: feedbackId,
+          commentCount: Math.max(0, (feedback.commentCount ?? 1) - 1),
+        })
+      );
     }
   };
 
@@ -213,16 +219,18 @@ function CommentItem({
       return;
     }
 
-    await z.mutate.comment.insert({
-      id: randID(),
-      feedbackId,
-      authorId: currentUserId,
-      body: replyContent,
-      isOfficial: isOrgMember,
-      parentId: comment.id,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
+    await zero.mutate(
+      mutators.comment.insert({
+        id: randID(),
+        feedbackId,
+        authorId: currentUserId,
+        body: replyContent,
+        isOfficial: isOrgMember,
+        parentId: comment.id,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      })
+    );
 
     setReplyContent("");
     setShowReplyForm(false);

@@ -21,8 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Schema, Tag } from "@/schema";
+import type { Tag } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/tags")({
   component: DashboardTags,
@@ -43,17 +45,15 @@ const COLOR_PALETTE = [
 
 function DashboardTags() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Get tags
   const [tags] = useQuery(
-    z.query.tag
-      .where("organizationId", "=", org?.id ?? "")
-      .orderBy("createdAt", "desc")
+    zql.tag.where("organizationId", org?.id ?? "").orderBy("createdAt", "desc")
   );
 
   // Modal state
@@ -100,31 +100,35 @@ function DashboardTags() {
       );
 
       if (editingTag) {
-        await z.mutate.tag.update({
-          id: editingTag.id,
-          name: name.trim(),
-          color,
-          isDoneStatus,
-          isRoadmapLane,
-          // Set lane order if becoming a roadmap lane
-          laneOrder:
-            isRoadmapLane && !editingTag.isRoadmapLane
-              ? maxOrder + 1000
-              : isRoadmapLane
-                ? editingTag.laneOrder
-                : null,
-        });
+        await zero.mutate(
+          mutators.tag.update({
+            id: editingTag.id,
+            name: name.trim(),
+            color,
+            isDoneStatus,
+            isRoadmapLane,
+            // Set lane order if becoming a roadmap lane
+            laneOrder:
+              isRoadmapLane && !editingTag.isRoadmapLane
+                ? maxOrder + 1000
+                : isRoadmapLane
+                  ? (editingTag.laneOrder ?? undefined)
+                  : undefined,
+          })
+        );
       } else {
-        await z.mutate.tag.insert({
-          id: randID(),
-          organizationId: org.id,
-          name: name.trim(),
-          color,
-          isDoneStatus,
-          isRoadmapLane,
-          laneOrder: isRoadmapLane ? maxOrder + 1000 : null,
-          createdAt: Date.now(),
-        });
+        await zero.mutate(
+          mutators.tag.insert({
+            id: randID(),
+            organizationId: org.id,
+            name: name.trim(),
+            color,
+            isDoneStatus,
+            isRoadmapLane,
+            laneOrder: isRoadmapLane ? maxOrder + 1000 : undefined,
+            createdAt: Date.now(),
+          })
+        );
       }
 
       setShowModal(false);
@@ -140,7 +144,7 @@ function DashboardTags() {
     ) {
       return;
     }
-    await z.mutate.tag.delete({ id: tag.id });
+    await zero.mutate(mutators.tag.delete({ id: tag.id }));
   };
 
   return (

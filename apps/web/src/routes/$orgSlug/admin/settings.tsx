@@ -1,14 +1,15 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { ExternalLink, Globe, Lock } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import type { Schema } from "@/schema";
+import { mutators } from "@/mutators";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug/admin/settings")({
   component: AdminSettings,
@@ -16,10 +17,10 @@ export const Route = createFileRoute("/$orgSlug/admin/settings")({
 
 function AdminSettings() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Form state
@@ -41,18 +42,17 @@ function AdminSettings() {
   }, [org, initialized]);
 
   // Auto-save individual fields
-  const saveField = useCallback(
-    async (field: string, value: unknown) => {
-      if (!org) {
-        return;
-      }
-      await z.mutate.organization.update({
+  const saveField = async (field: string, value: unknown) => {
+    if (!org) {
+      return;
+    }
+    await zero.mutate(
+      mutators.organization.update({
         id: org.id,
         [field]: value,
-      });
-    },
-    [org, z.mutate.organization]
-  );
+      })
+    );
+  };
 
   if (!org) {
     return (
@@ -164,10 +164,12 @@ function AdminSettings() {
               checked={org.isPublic ?? false}
               id="public-toggle"
               onCheckedChange={async (checked) => {
-                await z.mutate.organization.update({
-                  id: org.id,
-                  isPublic: checked,
-                });
+                await zero.mutate(
+                  mutators.organization.update({
+                    id: org.id,
+                    isPublic: checked,
+                  })
+                );
               }}
             />
           </div>

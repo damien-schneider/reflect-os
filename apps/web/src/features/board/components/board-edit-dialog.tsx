@@ -13,8 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Board, Schema } from "@/schema";
+import type { Board } from "@/schema";
 
 type BoardEditDialogProps = {
   open: boolean;
@@ -33,7 +34,7 @@ export function BoardEditDialog({
   orgSlug,
   onSuccess,
 }: BoardEditDialogProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Form state
   const [name, setName] = useState("");
@@ -71,26 +72,30 @@ export function BoardEditDialog({
     try {
       if (isEditing && board) {
         // Update existing board
-        await z.mutate.board.update({
-          id: board.id,
-          name: name.trim(),
-          slug: slug.trim().toLowerCase(),
-          description: description.trim() || undefined,
-          isPublic,
-          updatedAt: Date.now(),
-        });
+        await zero.mutate(
+          mutators.board.update({
+            id: board.id,
+            name: name.trim(),
+            slug: slug.trim().toLowerCase(),
+            description: description.trim() || undefined,
+            isPublic,
+            updatedAt: Date.now(),
+          })
+        );
       } else {
         // Create new board
-        await z.mutate.board.insert({
-          id: randID(),
-          organizationId,
-          name: name.trim(),
-          slug: slug.trim().toLowerCase(),
-          description: description.trim() || undefined,
-          isPublic,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        });
+        await zero.mutate(
+          mutators.board.insert({
+            id: randID(),
+            organizationId,
+            name: name.trim(),
+            slug: slug.trim().toLowerCase(),
+            description: description.trim() || undefined,
+            isPublic,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          })
+        );
       }
 
       onOpenChange(false);

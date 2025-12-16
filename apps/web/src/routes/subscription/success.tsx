@@ -1,4 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Navigate, useSearch } from "@tanstack/react-router";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ import {
 import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 import { requireAuthenticated } from "@/lib/route-guards";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 type SubscriptionSuccessSearch = {
   checkout_id?: string;
@@ -32,10 +32,8 @@ function SubscriptionSuccessPending() {
 }
 
 export const Route = createFileRoute("/subscription/success")({
-  beforeLoad: async ({ context }) => {
-    await requireAuthenticated({
-      authClient: context.authClient,
-    });
+  beforeLoad: async () => {
+    await requireAuthenticated();
   },
   pendingComponent: SubscriptionSuccessPending,
   validateSearch: (
@@ -62,7 +60,6 @@ function SubscriptionSuccess() {
     authClient.useSession();
   const { data: organizations, isPending: isOrgsPending } =
     authClient.useListOrganizations();
-  const z = useZero<Schema>();
 
   const [redirectCountdown, setRedirectCountdown] = useState(5);
   const [syncStatus, setSyncStatus] = useState<
@@ -73,9 +70,7 @@ function SubscriptionSuccess() {
   const firstOrg = organizations?.[0];
 
   // Query the organization to verify subscription was updated
-  const [orgs] = useQuery(
-    z.query.organization.where("id", "=", firstOrg?.id ?? "")
-  );
+  const [orgs] = useQuery(zql.organization.where("id", firstOrg?.id ?? ""));
   const org = orgs?.[0];
 
   // Auto-sync subscription on mount (catches webhook failures)

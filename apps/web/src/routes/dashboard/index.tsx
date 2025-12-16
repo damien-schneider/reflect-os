@@ -1,11 +1,11 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { OnboardingPage } from "@/components/onboarding-page";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardIndex,
@@ -25,7 +25,6 @@ function DashboardIndex() {
   } = authClient.useListOrganizations();
   const { data: session } = authClient.useSession();
   const hasRedirected = useRef(false);
-  const z = useZero<Schema>();
   const [syncAttempts, setSyncAttempts] = useState(0);
   const [syncTimedOut, setSyncTimedOut] = useState(false);
   const [syncStartTime] = useState(() => Date.now());
@@ -37,9 +36,7 @@ function DashboardIndex() {
   // Query Zero member table to see if the org membership is synced
   // Member table has simpler permissions (allowIfLoggedIn) than organization table
   const [zeroMembers, { type: queryStatus }] = useQuery(
-    z.query.member
-      .where("organizationId", "=", firstOrgId)
-      .where("userId", "=", userId)
+    zql.member.where("organizationId", firstOrgId).where("userId", userId)
   );
   const zeroOrgSynced = zeroMembers && zeroMembers.length > 0;
   const zeroQueryComplete = queryStatus === "complete";

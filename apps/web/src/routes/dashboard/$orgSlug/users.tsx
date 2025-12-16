@@ -17,7 +17,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Schema } from "@/schema";
+import { mutators } from "@/mutators";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/users")({
   component: DashboardUsers,
@@ -25,25 +26,23 @@ export const Route = createFileRoute("/dashboard/$orgSlug/users")({
 
 function DashboardUsers() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Get members with user data
   const [members] = useQuery(
-    z.query.member.where("organizationId", "=", org?.id ?? "").related("user")
+    zql.member.where("organizationId", org?.id ?? "").related("user")
   );
 
   // Get all users who have submitted feedback in this org's boards
-  const [boards] = useQuery(
-    z.query.board.where("organizationId", "=", org?.id ?? "")
-  );
+  const [boards] = useQuery(zql.board.where("organizationId", org?.id ?? ""));
   const boardIds = boards?.map((b) => b.id) ?? [];
 
   const [feedbacks] = useQuery(
-    z.query.feedback
+    zql.feedback
       .where("boardId", "IN", boardIds.length > 0 ? boardIds : [""])
       .related("author")
   );
@@ -51,7 +50,7 @@ function DashboardUsers() {
   // Unique users from feedback
   const feedbackUserIds = [...new Set(feedbacks?.map((f) => f.authorId) ?? [])];
   const [feedbackUsers] = useQuery(
-    z.query.user.where(
+    zql.user.where(
       "id",
       "IN",
       feedbackUserIds.length > 0 ? feedbackUserIds : [""]
@@ -64,10 +63,12 @@ function DashboardUsers() {
       return;
     }
 
-    await z.mutate.user.update({
-      id: userId,
-      bannedAt: isBanned ? undefined : Date.now(),
-    });
+    await zero.mutate(
+      mutators.user.update({
+        id: userId,
+        bannedAt: isBanned ? undefined : Date.now(),
+      })
+    );
   };
 
   return (

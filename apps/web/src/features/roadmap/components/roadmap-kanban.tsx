@@ -19,7 +19,8 @@ import {
   ROADMAP_LANES,
   type RoadmapLaneWithBacklog,
 } from "@/lib/constants";
-import type { Schema, Tag } from "@/schema";
+import { mutators } from "@/mutators";
+import type { Tag } from "@/schema";
 
 // Feedback item with roadmap fields
 export type RoadmapFeedbackItem = {
@@ -62,7 +63,7 @@ export function RoadmapKanban({
   customLanes,
   organizationId: _organizationId,
 }: RoadmapKanbanProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
   const [activeItem, setActiveItem] = useState<RoadmapFeedbackItem | null>(
     null
   );
@@ -189,13 +190,15 @@ export function RoadmapKanban({
 
     // If dropping into backlog, remove from roadmap
     if (targetLane === "backlog") {
-      z.mutate.feedback.update({
-        id: draggedItem.id,
-        roadmapLane: null,
-        roadmapOrder: null,
-        completedAt: null, // Clear completion date when moving to backlog
-        updatedAt: Date.now(),
-      });
+      zero.mutate(
+        mutators.feedback.update({
+          id: draggedItem.id,
+          roadmapLane: null,
+          roadmapOrder: null,
+          completedAt: null, // Clear completion date when moving to backlog
+          updatedAt: Date.now(),
+        })
+      );
       return;
     }
 
@@ -250,7 +253,7 @@ export function RoadmapKanban({
       updateData.completedAt = null;
     }
 
-    z.mutate.feedback.update(updateData);
+    zero.mutate(mutators.feedback.update(updateData));
   };
 
   // Build lane display config including backlog

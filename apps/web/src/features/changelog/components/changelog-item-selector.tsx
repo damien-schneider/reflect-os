@@ -1,8 +1,8 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { format } from "date-fns";
 import { Check, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 type ChangelogItemSelectorProps = {
   organizationId: string;
@@ -18,15 +18,13 @@ export function ChangelogItemSelector({
   onSelectionChange,
   completedAfter,
 }: ChangelogItemSelectorProps) {
-  const z = useZero<Schema>();
-
   // Get all boards for this organization
   const [boards] = useQuery(
-    z.query.board.where("organizationId", "=", organizationId)
+    zql.board.where("organizationId", "=", organizationId)
   );
 
   // Get all completed feedback (items with completedAt set) across all boards
-  const [allFeedback] = useQuery(z.query.feedback.related("board"));
+  const [allFeedback] = useQuery(zql.feedback.related("board"));
 
   // Filter to only completed items from this org's boards
   const completedItems = (() => {

@@ -1,4 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import {
   createFileRoute,
   Link,
@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug/admin")({
   component: AdminLayout,
@@ -32,21 +32,18 @@ const adminNavItems = [
 
 function AdminLayout() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
 
   // Get organization
-  const [orgs, orgsResult] = useQuery(
-    z.query.organization.where("slug", "=", orgSlug)
-  );
+  const [orgs, orgsResult] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Check if user is admin/owner
   const [members, membersResult] = useQuery(
-    z.query.member
-      .where("organizationId", "=", org?.id ?? "")
-      .where("userId", "=", session?.user?.id ?? "")
+    zql.member
+      .where("organizationId", org?.id ?? "")
+      .where("userId", session?.user?.id ?? "")
   );
   const memberRole = members?.[0]?.role;
   const isAdmin = memberRole === "admin" || memberRole === "owner";

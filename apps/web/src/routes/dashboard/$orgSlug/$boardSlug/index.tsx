@@ -28,7 +28,7 @@ import {
   useFeedbackFilters,
 } from "@/features/feedback/hooks/use-feedback-filters";
 import { RoadmapKanban } from "@/features/roadmap/components/roadmap-kanban";
-import type { Schema } from "@/schema";
+import { mutators } from "@/mutators";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/$boardSlug/")({
   component: DashboardBoardIndex,
@@ -74,7 +74,7 @@ function DashboardBoardIndex() {
     orgSlug: string;
     boardSlug: string;
   };
-  const z = useZero<Schema>();
+  const zero = useZero();
   const navigate = useNavigate();
 
   // Slug edit dialog state
@@ -108,7 +108,7 @@ function DashboardBoardIndex() {
         onSlugClick={() => setShowSlugDialog(true)}
         onTitleSave={(newName) => {
           if (board) {
-            z.mutate.board.update({ id: board.id, name: newName });
+            zero.mutate(mutators.board.update({ id: board.id, name: newName }));
           }
         }}
         org={org}
@@ -141,7 +141,7 @@ function DashboardBoardIndex() {
           currentSlug={board.slug}
           onOpenChange={setShowSlugDialog}
           onSave={(newSlug) => {
-            z.mutate.board.update({ id: board.id, slug: newSlug });
+            zero.mutate(mutators.board.update({ id: board.id, slug: newSlug }));
             navigate({
               to: "/dashboard/$orgSlug/$boardSlug",
               params: { orgSlug, boardSlug: newSlug },

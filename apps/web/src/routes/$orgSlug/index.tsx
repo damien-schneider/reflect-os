@@ -1,10 +1,10 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowRight, Globe, Loader2, MessageSquare } from "lucide-react";
 import { AdminFloatingBar } from "@/components/admin-floating-bar";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug/")({
   component: OrgDashboard,
@@ -12,27 +12,24 @@ export const Route = createFileRoute("/$orgSlug/")({
 
 function OrgDashboard() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
   const { data: session, isPending: sessionPending } = authClient.useSession();
 
   // Get organization
   const [orgs, { type: orgQueryStatus }] = useQuery(
-    z.query.organization.where("slug", "=", orgSlug)
+    zql.organization.where("slug", orgSlug)
   );
   const org = orgs?.[0];
 
   // Check if user is a member
   const [members, { type: memberQueryStatus }] = useQuery(
-    z.query.member
-      .where("organizationId", "=", org?.id ?? "")
-      .where("userId", "=", session?.user?.id ?? "")
+    zql.member
+      .where("organizationId", org?.id ?? "")
+      .where("userId", session?.user?.id ?? "")
   );
   const isMember = members && members.length > 0;
 
   // Get boards for this org (public boards for non-members, all boards for members)
-  const [boards] = useQuery(
-    z.query.board.where("organizationId", "=", org?.id ?? "")
-  );
+  const [boards] = useQuery(zql.board.where("organizationId", org?.id ?? ""));
 
   // Filter boards based on membership - non-members only see public boards
   const visibleBoards = isMember ? boards : boards?.filter((b) => b.isPublic);

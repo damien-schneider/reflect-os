@@ -1,4 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, ChevronUp, MessageSquare, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/features/feedback/components/status-badge";
 import type { FeedbackStatus } from "@/lib/constants";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/u/$userId")({
   component: UserProfile,
@@ -14,16 +14,15 @@ export const Route = createFileRoute("/u/$userId")({
 
 function UserProfile() {
   const { userId } = Route.useParams();
-  const z = useZero<Schema>();
 
   // Get user info
-  const [users] = useQuery(z.query.user.where("id", "=", userId));
+  const [users] = useQuery(zql.user.where("id", userId));
   const user = users?.[0];
 
   // Get user's public feedback (from public boards only)
   const [allFeedback] = useQuery(
-    z.query.feedback
-      .where("authorId", "=", userId)
+    zql.feedback
+      .where("authorId", userId)
       .related("board")
       .orderBy("createdAt", "desc")
   );
@@ -32,12 +31,12 @@ function UserProfile() {
   const publicFeedback = allFeedback?.filter((f) => f.board?.isPublic) ?? [];
 
   // Get user's votes
-  const [votes] = useQuery(z.query.vote.where("userId", "=", userId));
+  const [votes] = useQuery(zql.vote.where("userId", userId));
 
   // Get user's comments on public feedback
   const [allComments] = useQuery(
-    z.query.comment
-      .where("authorId", "=", userId)
+    zql.comment
+      .where("authorId", userId)
       .related("feedback", (fb) => fb.one().related("board"))
       .orderBy("createdAt", "desc")
   );

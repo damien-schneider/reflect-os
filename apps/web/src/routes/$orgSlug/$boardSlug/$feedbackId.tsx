@@ -1,4 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Lock, Pin } from "lucide-react";
@@ -11,7 +11,7 @@ import { TagSelector } from "@/features/feedback/components/tag-selector";
 import { VoteButton } from "@/features/feedback/components/vote-button";
 import { AddToRoadmap } from "@/features/roadmap/components/add-to-roadmap";
 import { authClient } from "@/lib/auth-client";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug/$boardSlug/$feedbackId")({
   component: FeedbackDetail,
@@ -23,33 +23,30 @@ function FeedbackDetail() {
     boardSlug: string;
     feedbackId: string;
   };
-  const z = useZero<Schema>();
   const { data: session } = authClient.useSession();
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Get board
   const [boards] = useQuery(
-    z.query.board
-      .where("organizationId", "=", org?.id ?? "")
-      .where("slug", "=", boardSlug)
+    zql.board.where("organizationId", org?.id ?? "").where("slug", boardSlug)
   );
   const board = boards?.[0];
 
   // Check if user is org member
   const [members] = useQuery(
-    z.query.member
-      .where("organizationId", "=", org?.id ?? "")
-      .where("userId", "=", session?.user?.id ?? "")
+    zql.member
+      .where("organizationId", org?.id ?? "")
+      .where("userId", session?.user?.id ?? "")
   );
   const isOrgMember = members && members.length > 0;
 
   // Get feedback with related data
   const [feedbacks] = useQuery(
-    z.query.feedback
-      .where("id", "=", feedbackId)
+    zql.feedback
+      .where("id", feedbackId)
       .related("author")
       .related("feedbackTags", (q) => q.related("tag"))
   );
@@ -58,11 +55,11 @@ function FeedbackDetail() {
   // Get admin notes (only visible to org members)
   const [adminNotes] = useQuery(
     isOrgMember
-      ? z.query.adminNote
-          .where("feedbackId", "=", feedbackId)
+      ? zql.adminNote
+          .where("feedbackId", feedbackId)
           .orderBy("createdAt", "desc")
           .related("author")
-      : z.query.adminNote.where("id", "=", "") // Empty query if not member
+      : zql.adminNote.where("id", "") // Empty query if not member
   );
 
   // User is org member for admin note visibility

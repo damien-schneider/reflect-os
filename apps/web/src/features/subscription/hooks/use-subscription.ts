@@ -1,10 +1,11 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
-import type { Schema, Subscription } from "@/zero-schema";
+import type { Subscription } from "@/zero-schema";
+import { zql } from "@/zero-schema";
 import type { SubscriptionStatus } from "../status.config";
 import {
   currentPlanLimitsAtom,
@@ -28,13 +29,10 @@ import {
  */
 export function useSubscription() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string };
-  const z = useZero<Schema>();
 
   // Query organization with subscription
   const [orgs] = useQuery(
-    z.query.organization
-      .where("slug", "=", orgSlug ?? "")
-      .related("subscriptions")
+    zql.organization.where("slug", orgSlug ?? "").related("subscriptions")
   );
   const org = orgs?.[0];
 
@@ -95,12 +93,11 @@ export function useSubscription() {
  */
 export function useCanManageSubscription() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string };
-  const z = useZero<Schema>();
   const { data: session } = authClient.useSession();
 
   // Get the organization
   const [orgs] = useQuery(
-    z.query.organization.where("slug", "=", orgSlug ?? "").related("members")
+    zql.organization.where("slug", orgSlug ?? "").related("members")
   );
   const org = orgs?.[0];
 
@@ -127,12 +124,9 @@ export function useCanManageSubscription() {
  */
 export function useSubscriptionCheckout() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string };
-  const z = useZero<Schema>();
 
   // Get organization ID and current tier
-  const [orgs] = useQuery(
-    z.query.organization.where("slug", "=", orgSlug ?? "")
-  );
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug ?? ""));
   const org = orgs?.[0];
   const currentTier = (org?.subscriptionTier ?? "free") as SubscriptionTier;
 
@@ -228,11 +222,8 @@ export function useSubscriptionCheckout() {
  */
 export function useCustomerPortal() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string };
-  const z = useZero<Schema>();
 
-  const [orgs] = useQuery(
-    z.query.organization.where("slug", "=", orgSlug ?? "")
-  );
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug ?? ""));
   const org = orgs?.[0];
 
   const openPortal = async () => {
@@ -325,11 +316,8 @@ const SYNC_COOLDOWN_MS = 10_000;
  */
 export function useSubscriptionSync() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string };
-  const z = useZero<Schema>();
 
-  const [orgs] = useQuery(
-    z.query.organization.where("slug", "=", orgSlug ?? "")
-  );
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug ?? ""));
   const org = orgs?.[0];
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -357,7 +345,7 @@ export function useSubscriptionSync() {
     return () => clearInterval(timer);
   }, [cooldownRemaining]);
 
-  const syncSubscription = useCallback(async () => {
+  const syncSubscription = async () => {
     if (!org?.id) {
       setSyncResult({ status: "error", message: "Organization not found" });
       return;
@@ -413,7 +401,7 @@ export function useSubscriptionSync() {
     } finally {
       setIsSyncing(false);
     }
-  }, [org?.id]);
+  };
 
   const isOnCooldown = cooldownRemaining > 0;
   const cooldownSeconds = Math.ceil(cooldownRemaining / 1000);

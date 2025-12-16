@@ -19,7 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LANE_OPTIONS, type RoadmapLane } from "@/lib/constants";
-import type { Schema } from "@/schema";
+import { mutators } from "@/mutators";
+import { zql } from "@/zero-schema";
 
 type AddToRoadmapProps = {
   feedbackId: string;
@@ -32,7 +33,7 @@ export function AddToRoadmap({
   currentLane,
   onSuccess,
 }: AddToRoadmapProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
   const [open, setOpen] = useState(false);
   const [lane, setLane] = useState<RoadmapLane>(
     (currentLane as RoadmapLane) || "later"
@@ -43,7 +44,7 @@ export function AddToRoadmap({
 
   // Get existing feedback items on roadmap to calculate sort order
   const [existingFeedbacks] = useQuery(
-    z.query.feedback.where("roadmapLane", "=", lane)
+    zql.feedback.where("roadmapLane", "=", lane)
   );
 
   const handleAddToRoadmap = async () => {
@@ -55,12 +56,14 @@ export function AddToRoadmap({
         0
       );
 
-      await z.mutate.feedback.update({
-        id: feedbackId,
-        roadmapLane: lane,
-        roadmapOrder: maxOrder + 1000,
-        updatedAt: Date.now(),
-      });
+      await zero.mutate(
+        mutators.feedback.update({
+          id: feedbackId,
+          roadmapLane: lane,
+          roadmapOrder: maxOrder + 1000,
+          updatedAt: Date.now(),
+        })
+      );
 
       setOpen(false);
       onSuccess?.();
@@ -72,12 +75,14 @@ export function AddToRoadmap({
   const handleRemoveFromRoadmap = async () => {
     setIsSubmitting(true);
     try {
-      await z.mutate.feedback.update({
-        id: feedbackId,
-        roadmapLane: null,
-        roadmapOrder: null,
-        updatedAt: Date.now(),
-      });
+      await zero.mutate(
+        mutators.feedback.update({
+          id: feedbackId,
+          roadmapLane: null,
+          roadmapOrder: null,
+          updatedAt: Date.now(),
+        })
+      );
 
       setOpen(false);
       onSuccess?.();
@@ -89,11 +94,13 @@ export function AddToRoadmap({
   const handleUpdateLane = async () => {
     setIsSubmitting(true);
     try {
-      await z.mutate.feedback.update({
-        id: feedbackId,
-        roadmapLane: lane,
-        updatedAt: Date.now(),
-      });
+      await zero.mutate(
+        mutators.feedback.update({
+          id: feedbackId,
+          roadmapLane: lane,
+          updatedAt: Date.now(),
+        })
+      );
 
       setOpen(false);
       onSuccess?.();

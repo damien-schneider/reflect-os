@@ -28,8 +28,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/")({
   component: DashboardOrgIndex,
@@ -37,25 +38,23 @@ export const Route = createFileRoute("/dashboard/$orgSlug/")({
 
 function DashboardOrgIndex() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
+  const zero = useZero();
   const navigate = useNavigate();
   const { data: session, isPending: sessionPending } = authClient.useSession();
 
   // Get organization
   const [orgs, { type: orgQueryStatus }] = useQuery(
-    z.query.organization.where("slug", "=", orgSlug)
+    zql.organization.where("slug", orgSlug)
   );
   const org = orgs?.[0];
 
   // Get all boards for this org
-  const [boards] = useQuery(
-    z.query.board.where("organizationId", "=", org?.id ?? "")
-  );
+  const [boards] = useQuery(zql.board.where("organizationId", org?.id ?? ""));
 
   // Get recent feedback across all boards
   const boardIds = boards?.map((b) => b.id) ?? [];
   const [recentFeedback] = useQuery(
-    z.query.feedback
+    zql.feedback
       .where("boardId", "IN", boardIds.length > 0 ? boardIds : [""])
       .orderBy("createdAt", "desc")
       .limit(5)
@@ -72,10 +71,12 @@ function DashboardOrgIndex() {
     if (!org) {
       return;
     }
-    await z.mutate.organization.update({
-      id: org.id,
-      isPublic: checked,
-    });
+    await zero.mutate(
+      mutators.organization.update({
+        id: org.id,
+        isPublic: checked,
+      })
+    );
   };
 
   // Handle board visibility toggle
@@ -83,11 +84,13 @@ function DashboardOrgIndex() {
     boardId: string,
     checked: boolean
   ) => {
-    await z.mutate.board.update({
-      id: boardId,
-      isPublic: checked,
-      updatedAt: Date.now(),
-    });
+    await zero.mutate(
+      mutators.board.update({
+        id: boardId,
+        isPublic: checked,
+        updatedAt: Date.now(),
+      })
+    );
   };
 
   // Create a new board and navigate to it
@@ -97,16 +100,18 @@ function DashboardOrgIndex() {
     }
     const boardId = randID();
     const slug = `board-${randID()}`;
-    z.mutate.board.insert({
-      id: boardId,
-      name: "Untitled Board",
-      slug,
-      description: "",
-      isPublic: false,
-      organizationId: org.id,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
+    zero.mutate(
+      mutators.board.insert({
+        id: boardId,
+        name: "Untitled Board",
+        slug,
+        description: "",
+        isPublic: false,
+        organizationId: org.id,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      })
+    );
     navigate({
       to: "/dashboard/$orgSlug/$boardSlug",
       params: { orgSlug, boardSlug: slug },

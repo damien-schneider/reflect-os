@@ -152,16 +152,19 @@ export const env = createEnv({
       .default("sandbox"),
 
     // ============================================
-    // EMAIL (RESEND)
+    // EMAIL (RESEND) - Optional
+    // If not configured, email features are disabled:
+    // - Email verification is skipped
+    // - Password reset emails won't be sent
+    // - Organization invites won't be sent
     // ============================================
 
     /**
      * Resend API key for sending emails
      * Get this from your Resend dashboard at https://resend.com
+     * Optional: If not set, email features are disabled
      */
-    RESEND_API_KEY: z
-      .string({ error: "RESEND_API_KEY is required" })
-      .min(1, "RESEND_API_KEY is required"),
+    RESEND_API_KEY: z.string().min(1).optional(),
 
     /**
      * Email sender address
@@ -169,7 +172,11 @@ export const env = createEnv({
      * Use your verified domain email for production
      * @example "noreply@yourdomain.com"
      */
-    EMAIL_FROM_ADDRESS: z.email("EMAIL_FROM_ADDRESS must be a valid email"),
+    EMAIL_FROM_ADDRESS: z
+      .string()
+      .email("EMAIL_FROM_ADDRESS must be a valid email")
+      .optional()
+      .default("onboarding@resend.dev"),
 
     /**
      * Email sender name displayed to recipients

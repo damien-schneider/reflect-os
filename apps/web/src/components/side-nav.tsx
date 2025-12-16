@@ -55,8 +55,10 @@ import { useLimitCheck } from "@/features/subscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Board, Organization, Schema } from "@/schema";
+import type { Board, Organization } from "@/schema";
+import { zql } from "@/zero-schema";
 
 type SideNavProps = {
   isOpen: boolean;
@@ -132,7 +134,6 @@ function SideNavContent({
   const navigate = useNavigate();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
-  const z = useZero<Schema>();
   const { data: session } = authClient.useSession();
   const { data: organizations } = authClient.useListOrganizations();
 
@@ -142,21 +143,19 @@ function SideNavContent({
     organizations?.find((o) => o.slug === orgSlug) ?? organizations?.[0];
   const effectiveOrgSlug = orgSlug ?? currentOrg?.slug ?? "";
 
-  const [orgs] = useQuery(
-    z.query.organization.where("id", "=", currentOrg?.id ?? "")
-  );
+  const [orgs] = useQuery(zql.organization.where("id", currentOrg?.id ?? ""));
   const orgData = orgs?.[0];
 
   const [boards] = useQuery(
-    z.query.board
-      .where("organizationId", "=", currentOrg?.id ?? "")
+    zql.board
+      .where("organizationId", currentOrg?.id ?? "")
       .related("organization")
   );
 
   const [notifications] = useQuery(
-    z.query.notification
-      .where("userId", "=", session?.user?.id ?? "")
-      .where("isRead", "=", false)
+    zql.notification
+      .where("userId", session?.user?.id ?? "")
+      .where("isRead", false)
   );
 
   const unreadCount = notifications?.length ?? 0;
@@ -247,7 +246,7 @@ function MainNavigation({
   navigate: NavigateFunction;
 }) {
   const [boardsExpanded, setBoardsExpanded] = useState(true);
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Check board limit (client-side for UI feedback)
   const boardCount = boards.length;
@@ -264,16 +263,18 @@ function MainNavigation({
 
     // Use optimistic insert - server validates via push endpoint
     // If server rejects (limit reached), Zero will auto-rollback
-    z.mutate.board.insert({
-      id: boardId,
-      organizationId: currentOrgId,
-      name: "Untitled Board",
-      slug,
-      description: "",
-      isPublic: false,
-      createdAt: now,
-      updatedAt: now,
-    });
+    zero.mutate(
+      mutators.board.insert({
+        id: boardId,
+        organizationId: currentOrgId,
+        name: "Untitled Board",
+        slug,
+        description: "",
+        isPublic: false,
+        createdAt: now,
+        updatedAt: now,
+      })
+    );
 
     // Navigate immediately (optimistic)
     navigate({
@@ -611,7 +612,7 @@ function NotificationButton({ unreadCount }: { unreadCount: number }) {
           <Bell className="h-4 w-4" />
           {unreadCount > 0 ? (
             <Badge
-              className="-top-1 -right-1 absolute flex h-4 w-4 items-center justify-center p-0 text-[10px]"
+              className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center p-0 text-[10px]"
               variant="destructive"
             >
               {unreadCount > 9 ? "9+" : unreadCount}

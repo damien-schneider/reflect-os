@@ -9,15 +9,24 @@ import { betterAuth } from "better-auth";
 import { organization } from "better-auth/plugins";
 import { Pool } from "pg";
 import { env } from "./env";
+import { PLAN_LIMITS, type SubscriptionTier } from "./tiers.config";
 
 const isProduction = env.NODE_ENV === "production";
 const allowDevUnverifiedSignup =
   !isProduction && env.DEV_AUTH_ALLOW_UNVERIFIED_SIGNUP === "true";
 
+// Email is enabled only if RESEND_API_KEY is configured
+const isEmailEnabled = !!env.RESEND_API_KEY;
+
+// If email is not enabled, we should skip email verification
+const skipEmailVerification = !isEmailEnabled || allowDevUnverifiedSignup;
+
 console.log("Better Auth initialized with:", {
   baseURL: env.BETTER_AUTH_URL,
   isProduction,
   allowDevUnverifiedSignup,
+  isEmailEnabled,
+  skipEmailVerification,
   databaseConnected: !!env.ZERO_UPSTREAM_DB,
 });
 
@@ -350,16 +359,145 @@ const generateUniqueSlug = (name: string): string => {
   return `${baseSlug}-${suffix}`;
 };
 
+/**
+ * Get organization subscription tier and member count.
+ * Used for enforcing member limits on invitations.
+ */
+const getOrgMemberLimitInfo = async (
+  organizationId: string
+): Promise<{
+  tier: SubscriptionTier;
+  memberCount: number;
+  maxMembers: number;
+}> => {
+  // Get organization tier
+  const orgResult = await dbPool.query<{ subscription_tier: string | null }>(
+    "SELECT subscription_tier FROM organization WHERE id = $1",
+    [organizationId]
+  );
+
+  if (orgResult.rows.length === 0) {
+    throw new Error("Organization not found");
+  }
+
+  const tier = (orgResult.rows[0].subscription_tier ??
+    "free") as SubscriptionTier;
+  const limits = PLAN_LIMITS[tier] ?? PLAN_LIMITS.free;
+
+  // Get member count
+  const memberResult = await dbPool.query<{ count: string }>(
+    "SELECT COUNT(*) as count FROM member WHERE organization_id = $1",
+    [organizationId]
+  );
+
+  const memberCount = Number.parseInt(memberResult.rows[0].count, 10);
+
+  return {
+    tier,
+    memberCount,
+    maxMembers: limits.membersPerOrg,
+  };
+};
+
+// Build organization plugin with optional invitation email support
+const organizationPluginConfig: Parameters<typeof organization>[0] = {
+  // Organization hooks for enforcing subscription-based member limits
+  organizationHooks: {
+    // Validate member limit before creating an invitation
+    beforeCreateInvitation: async ({ invitation, organization: org }) => {
+      const { tier, memberCount, maxMembers } = await getOrgMemberLimitInfo(
+        org.id
+      );
+
+      // Count pending invitations too
+      const pendingResult = await dbPool.query<{ count: string }>(
+        "SELECT COUNT(*) as count FROM invitation WHERE organization_id = $1 AND status = 'pending'",
+        [org.id]
+      );
+      const pendingCount = Number.parseInt(pendingResult.rows[0].count, 10);
+      const totalPotentialMembers = memberCount + pendingCount;
+
+      if (totalPotentialMembers >= maxMembers) {
+        throw new Error(
+          `Member limit reached. Your ${tier} plan allows up to ${maxMembers} members. ` +
+            `You currently have ${memberCount} members and ${pendingCount} pending invitations. ` +
+            "Please upgrade your subscription to add more members."
+        );
+      }
+
+      console.log(
+        `[Auth] Invitation allowed for org ${org.id}: ` +
+          `${memberCount} members + ${pendingCount} pending / ${maxMembers} max`
+      );
+
+      return { data: invitation };
+    },
+
+    // Validate member limit before accepting an invitation
+    beforeAcceptInvitation: async ({
+      invitation: _invitation,
+      user: _user,
+      organization: org,
+    }) => {
+      const { tier, memberCount, maxMembers } = await getOrgMemberLimitInfo(
+        org.id
+      );
+
+      if (memberCount >= maxMembers) {
+        throw new Error(
+          `This organization has reached its member limit of ${maxMembers} on the ${tier} plan. ` +
+            "The organization owner needs to upgrade the subscription to add more members."
+        );
+      }
+
+      console.log(
+        `[Auth] Invitation acceptance allowed for org ${org.id}: ` +
+          `${memberCount} members / ${maxMembers} max`
+      );
+    },
+  },
+};
+
+// Only configure invitation emails if email is enabled
+if (isEmailEnabled) {
+  // biome-ignore lint/suspicious/useAwait: better-auth expects async function signature
+  organizationPluginConfig.sendInvitationEmail = async (data) => {
+    const inviteLink = `${env.BETTER_AUTH_URL}/accept-invitation/${data.id}`;
+    // For now, just log the invitation - you can add a proper invitation template later
+    console.log(
+      `[Auth] Invitation email to ${data.email} from ${data.inviter.user.email} for org ${data.organization.name}`
+    );
+    console.log(`[Auth] Invitation link: ${inviteLink}`);
+    // TODO: Create and send an InvitationTemplate when needed
+  };
+} else {
+  // When email is disabled, log invitations but don't try to send
+  // biome-ignore lint/suspicious/useAwait: better-auth expects async function signature
+  organizationPluginConfig.sendInvitationEmail = async (data) => {
+    const inviteLink = `${env.BETTER_AUTH_URL}/accept-invitation/${data.id}`;
+    console.log(
+      `[Auth] Email disabled - Invitation for ${data.email} to join ${data.organization.name}`
+    );
+    console.log(`[Auth] Invitation link: ${inviteLink}`);
+  };
+}
+
 export const auth = betterAuth({
   database: dbPool,
   baseURL: env.BETTER_AUTH_URL,
   trustedOrigins: getTrustedOrigins(),
-  plugins: [organization(), ...polarPlugins],
+  plugins: [organization(organizationPluginConfig), ...polarPlugins],
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: !allowDevUnverifiedSignup,
+    requireEmailVerification: !skipEmailVerification,
     // biome-ignore lint/suspicious/useAwait: intentionally not awaiting to prevent timing attacks
     sendResetPassword: async ({ user, url }) => {
+      if (!isEmailEnabled) {
+        console.log(
+          `[Auth] Email disabled - Reset password URL for ${user.email}: ${url}`
+        );
+        return;
+      }
       // Fire and forget to prevent timing attacks - don't await
       sendEmail({
         to: user.email,
@@ -380,10 +518,16 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: !allowDevUnverifiedSignup,
+    sendOnSignUp: !skipEmailVerification,
     autoSignInAfterVerification: true,
     // biome-ignore lint/suspicious/useAwait: intentionally fire-and-forget to not block signup
     sendVerificationEmail: async ({ user, url }) => {
+      if (!isEmailEnabled) {
+        console.log(
+          `[Auth] Email disabled - Verification URL for ${user.email}: ${url}`
+        );
+        return;
+      }
       // Replace the default callback URL (/) with /dashboard
       const verificationUrl = url.replace(
         "callbackURL=%2F",

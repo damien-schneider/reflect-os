@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
 // Define regex at top level for performance
@@ -80,29 +80,26 @@ export function useOnboardingForm(
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const setName = useCallback(
-    (value: string) => {
-      setNameValue(value);
-      setNameError(null);
-      setApiError(null);
+  const setName = (value: string) => {
+    setNameValue(value);
+    setNameError(null);
+    setApiError(null);
 
-      // Auto-generate slug if not manually edited
-      if (!slugManuallyEdited) {
-        setSlugValue(generateSlug(value));
-        setSlugError(null);
-      }
-    },
-    [slugManuallyEdited]
-  );
+    // Auto-generate slug if not manually edited
+    if (!slugManuallyEdited) {
+      setSlugValue(generateSlug(value));
+      setSlugError(null);
+    }
+  };
 
-  const setSlug = useCallback((value: string) => {
+  const setSlug = (value: string) => {
     setSlugManuallyEdited(true);
     setSlugValue(value);
     setSlugError(null);
     setApiError(null);
-  }, []);
+  };
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async () => {
     // Clear previous errors
     setApiError(null);
 
@@ -151,7 +148,7 @@ export function useOnboardingForm(
     } finally {
       setIsSubmitting(false);
     }
-  }, [name, slug, onSuccess]);
+  };
 
   return {
     name,

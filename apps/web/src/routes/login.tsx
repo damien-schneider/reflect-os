@@ -10,9 +10,8 @@ import { getSignUpErrorMessage } from "@/lib/auth-errors";
 import { redirectIfAuthenticated } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/login")({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async () => {
     await redirectIfAuthenticated({
-      authClient: context.authClient,
       to: "/dashboard",
     });
   },

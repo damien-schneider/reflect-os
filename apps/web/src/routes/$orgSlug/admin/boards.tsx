@@ -28,8 +28,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useLimitCheck } from "@/features/subscription";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Board, Schema } from "@/schema";
+import type { Board } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug/admin/boards")({
   component: AdminBoards,
@@ -37,16 +39,16 @@ export const Route = createFileRoute("/$orgSlug/admin/boards")({
 
 function AdminBoards() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Get boards
   const [boards] = useQuery(
-    z.query.board
-      .where("organizationId", "=", org?.id ?? "")
+    zql.board
+      .where("organizationId", org?.id ?? "")
       .orderBy("createdAt", "desc")
   );
 
@@ -89,30 +91,34 @@ function AdminBoards() {
 
     if (editingBoard) {
       // Update existing board
-      z.mutate.board.update({
-        id: editingBoard.id,
-        name: name.trim(),
-        slug: slug.trim().toLowerCase(),
-        description: description.trim() || undefined,
-        isPublic,
-        updatedAt: Date.now(),
-      });
+      zero.mutate(
+        mutators.board.update({
+          id: editingBoard.id,
+          name: name.trim(),
+          slug: slug.trim().toLowerCase(),
+          description: description.trim() || undefined,
+          isPublic,
+          updatedAt: Date.now(),
+        })
+      );
     } else {
       // Create new board optimistically
       // Server validates limits via push endpoint and will rollback if exceeded
       const boardId = randID();
       const now = Date.now();
 
-      z.mutate.board.insert({
-        id: boardId,
-        organizationId: org.id,
-        name: name.trim(),
-        slug: slug.trim().toLowerCase(),
-        description: description.trim() || "",
-        isPublic,
-        createdAt: now,
-        updatedAt: now,
-      });
+      zero.mutate(
+        mutators.board.insert({
+          id: boardId,
+          organizationId: org.id,
+          name: name.trim(),
+          slug: slug.trim().toLowerCase(),
+          description: description.trim() || "",
+          isPublic,
+          createdAt: now,
+          updatedAt: now,
+        })
+      );
     }
 
     setShowCreateModal(false);
@@ -123,7 +129,7 @@ function AdminBoards() {
     if (!boardToDelete) {
       return;
     }
-    await z.mutate.board.delete({ id: boardToDelete.id });
+    await zero.mutate(mutators.board.delete({ id: boardToDelete.id }));
     setBoardToDelete(null);
   };
 

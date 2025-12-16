@@ -84,9 +84,9 @@ services:
       ZERO_AUTH_SECRET: testsecretkey
       BETTER_AUTH_SECRET: testbetterauthsecret
       BETTER_AUTH_URL: http://localhost:3000
-      # Email (required for build/runtime)
-      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
-      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?EMAIL_FROM_ADDRESS is required}
+      # Email (optional for local testing)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-onboarding@resend.dev}
       EMAIL_FROM_NAME: "Reflet"
       PORT: "3001"
     ports:

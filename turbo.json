@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "ui": "stream",
+  "ui": "tui",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -12,7 +12,7 @@
       "passThroughEnv": ["ZERO_UPSTREAM_DB"]
     },
     "@repo/backend#dev": {
-      "dependsOn": ["@repo/db#db:push"],
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true,
       "env": [
@@ -33,24 +33,28 @@
       ]
     },
     "@repo/web#dev:zero-cache": {
-      "dependsOn": ["@repo/db#db:push"],
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true,
       "passThroughEnv": [
         "ZERO_UPSTREAM_DB",
         "ZERO_AUTH_SECRET",
         "ZERO_REPLICA_FILE",
-        "ZERO_LOG_LEVEL"
+        "ZERO_LOG_LEVEL",
+        "ZERO_MUTATE_URL",
+        "ZERO_QUERY_URL",
+        "ZERO_QUERY_FORWARD_COOKIES",
+        "ZERO_MUTATE_FORWARD_COOKIES"
       ]
     },
     "@repo/web#dev:vite": {
-      "dependsOn": ["@repo/db#db:push"],
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true,
       "env": ["VITE_PUBLIC_ZERO_SERVER", "INTERNAL_API_URL", "PORT", "NODE_ENV"]
     },
     "@repo/web#dev": {
-      "dependsOn": ["@repo/db#db:push"],
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true,
       "env": [
@@ -63,7 +67,11 @@
         "ZERO_UPSTREAM_DB",
         "ZERO_AUTH_SECRET",
         "ZERO_REPLICA_FILE",
-        "ZERO_LOG_LEVEL"
+        "ZERO_LOG_LEVEL",
+        "ZERO_MUTATE_URL",
+        "ZERO_QUERY_URL",
+        "ZERO_QUERY_FORWARD_COOKIES",
+        "ZERO_MUTATE_FORWARD_COOKIES"
       ]
     },
     "dev": {

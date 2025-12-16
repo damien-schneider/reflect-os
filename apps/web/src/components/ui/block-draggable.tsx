@@ -95,18 +95,19 @@ function Draggable(props: PlateElementProps) {
 
   const [previewTop, setPreviewTop] = React.useState(0);
 
-  const resetPreview = React.useCallback(() => {
+  const resetPreview = () => {
     if (previewRef.current) {
       previewRef.current.replaceChildren();
       previewRef.current?.classList.add("hidden");
     }
-  }, [previewRef]);
+  };
 
   // clear up virtual multiple preview when drag end
   React.useEffect(() => {
     if (!isDragging) {
       resetPreview();
     }
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React compiler handles memoization
   }, [isDragging, resetPreview]);
 
   React.useEffect(() => {
@@ -170,7 +171,7 @@ function Draggable(props: PlateElementProps) {
       )}
 
       <div
-        className={cn("-left-0 absolute hidden w-full")}
+        className={cn("absolute -left-0 hidden w-full")}
         contentEditable={false}
         ref={previewRef}
         style={{ top: `${-previewTop}px` }}
@@ -210,7 +211,7 @@ function Gutter({
       {...props}
       className={cn(
         "slate-gutterLeft",
-        "-translate-x-full absolute top-0 z-50 flex h-full cursor-text hover:opacity-100 sm:opacity-0",
+        "absolute top-0 z-50 flex h-full -translate-x-full cursor-text hover:opacity-100 sm:opacity-0",
         getPluginByType(editor, element.type)?.node.isContainer
           ? "group-hover/container:opacity-100"
           : "group-hover:opacity-100",

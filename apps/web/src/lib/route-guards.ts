@@ -1,13 +1,7 @@
 import { redirect } from "@tanstack/react-router";
-import type { AuthClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 
-type RequireAuthenticatedOptions = {
-  authClient: AuthClient;
-};
-
-export async function requireAuthenticated({
-  authClient,
-}: RequireAuthenticatedOptions): Promise<void> {
+export async function requireAuthenticated(): Promise<void> {
   const sessionResult = await authClient.getSession();
 
   if (!sessionResult?.data?.user) {
@@ -19,12 +13,10 @@ export async function requireAuthenticated({
 }
 
 type RedirectIfAuthenticatedOptions = {
-  authClient: AuthClient;
   to: string;
 };
 
 export async function redirectIfAuthenticated({
-  authClient,
   to,
 }: RedirectIfAuthenticatedOptions): Promise<void> {
   const sessionResult = await authClient.getSession();

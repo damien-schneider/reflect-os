@@ -1,4 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { useParams } from "@tanstack/react-router";
 import { useAtom, useAtomValue } from "jotai";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/features/feedback/store/atoms";
 import { authClient } from "@/lib/auth-client";
 import type { FeedbackStatus } from "@/lib/constants";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 /**
  * Hook for managing feedback filter state.
@@ -91,24 +91,20 @@ export function useBoardData() {
     orgSlug: string;
     boardSlug: string;
   };
-  const z = useZero<Schema>();
 
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", "=", orgSlug));
   const org = orgs?.[0];
 
   const [boards] = useQuery(
-    z.query.board
+    zql.board
       .where("organizationId", "=", org?.id ?? "")
       .where("slug", "=", boardSlug)
   );
   const board = boards?.[0];
 
-  const [tags] = useQuery(
-    z.query.tag.where("organizationId", "=", org?.id ?? "")
-  );
+  const [tags] = useQuery(zql.tag.where("organizationId", "=", org?.id ?? ""));
 
   return {
-    z,
     org,
     board,
     tags: tags ?? [],
@@ -122,11 +118,11 @@ export function useBoardData() {
  * Combines Zero queries with client-side filtering from atoms.
  */
 export function useFeedbackData(options?: { includeUnapproved?: boolean }) {
-  const { z, board } = useBoardData();
+  const { board } = useBoardData();
   const { sortBy, search, selectedStatuses, selectedTagIds } =
     useFeedbackFilters();
 
-  let feedbackQuery = z.query.feedback
+  let feedbackQuery = zql.feedback
     .where("boardId", "=", board?.id ?? "")
     .related("author")
     .related("feedbackTags", (q) => q.related("tag"));

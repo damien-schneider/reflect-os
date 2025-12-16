@@ -48,7 +48,9 @@ import {
   useNextVersion,
   type VersionIncrement,
 } from "@/hooks/use-next-version";
-import type { Organization, ReleaseItem, Schema } from "@/schema";
+import { mutators } from "@/mutators";
+import type { Organization, ReleaseItem } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute(
   "/dashboard/$orgSlug/changelog/$releaseId"
@@ -62,16 +64,16 @@ function ReleaseDetailPage() {
     releaseId: string;
   };
   const navigate = useNavigate();
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0] as Organization | undefined;
 
   // Get release with related items
   const [releases] = useQuery(
-    z.query.release
-      .where("id", "=", releaseId)
+    zql.release
+      .where("id", releaseId)
       .related("releaseItems", (q) => q.related("feedback"))
   );
   const release = releases?.[0];
@@ -110,11 +112,13 @@ function ReleaseDetailPage() {
     if (!(release && title.trim())) {
       return;
     }
-    z.mutate.release.update({
-      id: release.id,
-      title: title.trim(),
-      updatedAt: Date.now(),
-    });
+    zero.mutate(
+      mutators.release.update({
+        id: release.id,
+        title: title.trim(),
+        updatedAt: Date.now(),
+      })
+    );
     setIsEditingTitle(false);
   };
 
@@ -122,11 +126,13 @@ function ReleaseDetailPage() {
     if (!release) {
       return;
     }
-    z.mutate.release.update({
-      id: release.id,
-      version: version.trim() || null,
-      updatedAt: Date.now(),
-    });
+    zero.mutate(
+      mutators.release.update({
+        id: release.id,
+        version: version.trim() || undefined,
+        updatedAt: Date.now(),
+      })
+    );
   };
 
   const saveDescription = (markdown: string) => {
@@ -134,11 +140,13 @@ function ReleaseDetailPage() {
       return;
     }
     setDescription(markdown);
-    z.mutate.release.update({
-      id: release.id,
-      description: markdown || null,
-      updatedAt: Date.now(),
-    });
+    zero.mutate(
+      mutators.release.update({
+        id: release.id,
+        description: markdown || undefined,
+        updatedAt: Date.now(),
+      })
+    );
   };
 
   const togglePublish = () => {
@@ -146,11 +154,13 @@ function ReleaseDetailPage() {
       return;
     }
     const now = Date.now();
-    z.mutate.release.update({
-      id: release.id,
-      publishedAt: release.publishedAt ? null : now,
-      updatedAt: now,
-    });
+    zero.mutate(
+      mutators.release.update({
+        id: release.id,
+        publishedAt: release.publishedAt ? null : now,
+        updatedAt: now,
+      })
+    );
   };
 
   const handleDelete = () => {
@@ -163,10 +173,10 @@ function ReleaseDetailPage() {
 
     // Delete release items first
     for (const item of releaseItems) {
-      z.mutate.releaseItem.delete({ id: item.id });
+      zero.mutate(mutators.releaseItem.delete({ id: item.id }));
     }
     // Then delete the release
-    z.mutate.release.delete({ id: release.id });
+    zero.mutate(mutators.release.delete({ id: release.id }));
 
     navigate({
       to: "/dashboard/$orgSlug/changelog",
@@ -185,17 +195,21 @@ function ReleaseDetailPage() {
     }
 
     const now = Date.now();
-    z.mutate.releaseItem.insert({
-      id: crypto.randomUUID(),
-      releaseId: release.id,
-      feedbackId,
-      createdAt: now,
-    });
+    zero.mutate(
+      mutators.releaseItem.insert({
+        id: crypto.randomUUID(),
+        releaseId: release.id,
+        feedbackId,
+        createdAt: now,
+      })
+    );
     setSelectedFeedbackIds((prev) => [...prev, feedbackId]);
-    z.mutate.release.update({
-      id: release.id,
-      updatedAt: now,
-    });
+    zero.mutate(
+      mutators.release.update({
+        id: release.id,
+        updatedAt: now,
+      })
+    );
   };
 
   // Add all available items to the release
@@ -210,19 +224,23 @@ function ReleaseDetailPage() {
       (id) => !selectedFeedbackIds.includes(id)
     );
     for (const feedbackId of newIds) {
-      z.mutate.releaseItem.insert({
-        id: crypto.randomUUID(),
-        releaseId: release.id,
-        feedbackId,
-        createdAt: now,
-      });
+      zero.mutate(
+        mutators.releaseItem.insert({
+          id: crypto.randomUUID(),
+          releaseId: release.id,
+          feedbackId,
+          createdAt: now,
+        })
+      );
     }
 
     setSelectedFeedbackIds((prev) => [...prev, ...newIds]);
-    z.mutate.release.update({
-      id: release.id,
-      updatedAt: now,
-    });
+    zero.mutate(
+      mutators.release.update({
+        id: release.id,
+        updatedAt: now,
+      })
+    );
   };
 
   // Remove an item from the release
@@ -232,13 +250,15 @@ function ReleaseDetailPage() {
     }
     const item = releaseItems.find((ri) => ri.feedbackId === feedbackId);
     if (item) {
-      z.mutate.releaseItem.delete({ id: item.id });
+      zero.mutate(mutators.releaseItem.delete({ id: item.id }));
     }
     setSelectedFeedbackIds((prev) => prev.filter((id) => id !== feedbackId));
-    z.mutate.release.update({
-      id: release.id,
-      updatedAt: Date.now(),
-    });
+    zero.mutate(
+      mutators.release.update({
+        id: release.id,
+        updatedAt: Date.now(),
+      })
+    );
   };
 
   if (!release) {
@@ -587,16 +607,13 @@ function CompletedItemsSection({
   onAddAllItems,
   onRemoveItem,
 }: CompletedItemsSectionProps) {
-  const z = useZero<Schema>();
   const [open, setOpen] = useState(false);
 
   // Get all boards for this organization
-  const [boards] = useQuery(
-    z.query.board.where("organizationId", "=", organizationId)
-  );
+  const [boards] = useQuery(zql.board.where("organizationId", organizationId));
 
   // Get all completed feedback across all boards
-  const [allFeedback] = useQuery(z.query.feedback.related("board"));
+  const [allFeedback] = useQuery(zql.feedback.related("board"));
 
   // Filter to only completed items from this org's boards
   const completedItems = (() => {

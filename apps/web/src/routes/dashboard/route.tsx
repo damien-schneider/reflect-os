@@ -5,10 +5,8 @@ import { SideNav } from "@/components/side-nav";
 import { requireAuthenticated } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/dashboard")({
-  beforeLoad: async ({ context }) => {
-    await requireAuthenticated({
-      authClient: context.authClient,
-    });
+  beforeLoad: async () => {
+    await requireAuthenticated();
   },
   pendingComponent: DashboardPending,
   component: DashboardLayout,

@@ -42,11 +42,12 @@ export const clientSchema = {
 
   /**
    * Whether email verification is required for sign-up flows
-   * Defaults to true; set to false locally to bypass email verification in E2E
+   * Defaults to false for out-of-box experience without email service configuration.
+   * Set to "true" when RESEND_API_KEY is configured in production.
    */
   VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION: z
     .enum(["true", "false"])
-    .default("true")
+    .default("false")
     .transform((val) => val === "true"),
 } as const;
 

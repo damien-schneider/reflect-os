@@ -1,5 +1,3 @@
-import type { AuthClient } from "@/lib/auth-client";
-
-export type RouterAppContext = {
-  authClient: AuthClient;
-};
+// Router context type - currently empty as authClient is imported directly where needed
+// This avoids TanStackRouterDevtools serialization issues with Better Auth client
+export type RouterAppContext = Record<string, never>;

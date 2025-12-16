@@ -3,14 +3,15 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Bell, BellOff, Calendar, CheckCircle } from "lucide-react";
 import { nanoid } from "nanoid";
-import { useCallback, useMemo } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
-import type { Schema } from "@/schema";
+import { mutators } from "@/mutators";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug/changelog")({
   component: PublicChangelog,
@@ -18,20 +19,20 @@ export const Route = createFileRoute("/$orgSlug/changelog")({
 
 function PublicChangelog() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Get current user session
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Get published releases for this organization
   const [releasesData] = useQuery(
-    z.query.release
-      .where("organizationId", "=", org?.id ?? "")
+    zql.release
+      .where("organizationId", org?.id ?? "")
       .related("releaseItems", (q) =>
         q.related("feedback", (fq) => fq.related("board"))
       )
@@ -41,46 +42,44 @@ function PublicChangelog() {
   // Get user's changelog subscription for this org
   const subscriptionsQuery =
     userId && org?.id
-      ? z.query.changelogSubscription
-          .where("userId", "=", userId)
-          .where("organizationId", "=", org.id)
-      : z.query.changelogSubscription
-          .where("userId", "=", "__none__")
-          .where("organizationId", "=", "__none__");
+      ? zql.changelogSubscription
+          .where("userId", userId)
+          .where("organizationId", org.id)
+      : zql.changelogSubscription
+          .where("userId", "__none__")
+          .where("organizationId", "__none__");
 
   const [subscriptions] = useQuery(subscriptionsQuery);
   const isSubscribed = subscriptions && subscriptions.length > 0;
 
   // Toggle subscription handler
-  const handleToggleSubscription = useCallback(async () => {
+  const handleToggleSubscription = async () => {
     if (!(userId && org?.id)) {
       return;
     }
 
     if (isSubscribed && subscriptions?.[0]) {
       // Unsubscribe - delete the subscription
-      await z.mutate.changelogSubscription.delete({
-        id: subscriptions[0].id,
-      });
+      await zero.mutate(
+        mutators.changelogSubscription.delete({
+          id: subscriptions[0].id,
+        })
+      );
     } else {
       // Subscribe - create new subscription
-      await z.mutate.changelogSubscription.insert({
-        id: nanoid(),
-        userId,
-        organizationId: org.id,
-        subscribedAt: Date.now(),
-      });
+      await zero.mutate(
+        mutators.changelogSubscription.insert({
+          id: nanoid(),
+          userId,
+          organizationId: org.id,
+          subscribedAt: Date.now(),
+        })
+      );
     }
-  }, [
-    userId,
-    org?.id,
-    isSubscribed,
-    subscriptions,
-    z.mutate.changelogSubscription,
-  ]);
+  };
 
-  // Transform releases to include feedbacks - memoized for performance
-  const releasesWithFeedbacks = useMemo(() => {
+  // Transform releases to include feedbacks
+  const releasesWithFeedbacks = (() => {
     if (!(releasesData && org)) {
       return [];
     }
@@ -99,7 +98,7 @@ function PublicChangelog() {
           feedbacks,
         };
       });
-  }, [releasesData, org]);
+  })();
 
   if (!org) {
     return (

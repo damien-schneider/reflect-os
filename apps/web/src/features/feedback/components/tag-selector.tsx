@@ -9,8 +9,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Schema, Tag } from "@/schema";
+import type { Tag } from "@/schema";
+import { zql } from "@/zero-schema";
 
 type TagSelectorProps = {
   feedbackId: string;
@@ -29,13 +31,11 @@ export function TagSelector({
   editable = true,
   className,
 }: TagSelectorProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
   const [open, setOpen] = useState(false);
 
   // Get all tags for the organization
-  const [tags] = useQuery(
-    z.query.tag.where("organizationId", "=", organizationId)
-  );
+  const [tags] = useQuery(zql.tag.where("organizationId", "=", organizationId));
 
   // Get selected tags
   const selectedTags = tags?.filter((t) => selectedTagIds.includes(t.id)) ?? [];
@@ -45,36 +45,38 @@ export function TagSelector({
 
     if (isSelected) {
       // Remove tag
-      const [feedbackTags] = await z.query.feedbackTag
+      const [feedbackTags] = await zql.feedbackTag
         .where("feedbackId", "=", feedbackId)
         .where("tagId", "=", tag.id)
         .run();
 
       if (feedbackTags) {
-        await z.mutate.feedbackTag.delete({ id: feedbackTags.id });
+        await zero.mutate(mutators.feedbackTag.delete({ id: feedbackTags.id }));
       }
 
       onChange?.(selectedTagIds.filter((id) => id !== tag.id));
     } else {
       // Add tag
-      await z.mutate.feedbackTag.insert({
-        id: randID(),
-        feedbackId,
-        tagId: tag.id,
-      });
+      await zero.mutate(
+        mutators.feedbackTag.insert({
+          id: randID(),
+          feedbackId,
+          tagId: tag.id,
+        })
+      );
 
       onChange?.([...selectedTagIds, tag.id]);
     }
   };
 
   const removeTag = async (tagId: string) => {
-    const [feedbackTags] = await z.query.feedbackTag
+    const [feedbackTags] = await zql.feedbackTag
       .where("feedbackId", "=", feedbackId)
       .where("tagId", "=", tagId)
       .run();
 
     if (feedbackTags) {
-      await z.mutate.feedbackTag.delete({ id: feedbackTags.id });
+      await zero.mutate(mutators.feedbackTag.delete({ id: feedbackTags.id }));
     }
 
     onChange?.(selectedTagIds.filter((id) => id !== tagId));

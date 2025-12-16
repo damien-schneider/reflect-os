@@ -33,8 +33,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/changelog/")({
   component: DashboardChangelogIndex,
@@ -43,16 +44,16 @@ export const Route = createFileRoute("/dashboard/$orgSlug/changelog/")({
 function DashboardChangelogIndex() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
   const navigate = useNavigate();
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   // Get releases for this organization
   const [releasesData] = useQuery(
-    z.query.release
-      .where("organizationId", "=", org?.id ?? "")
+    zql.release
+      .where("organizationId", org?.id ?? "")
       .related("releaseItems")
       .orderBy("createdAt", "desc")
   );
@@ -71,16 +72,18 @@ function DashboardChangelogIndex() {
     const releaseId = randID();
     const now = Date.now();
 
-    await z.mutate.release.insert({
-      id: releaseId,
-      organizationId: org.id,
-      title: "Untitled Release",
-      description: null,
-      version: null,
-      publishedAt: null, // Draft
-      createdAt: now,
-      updatedAt: now,
-    });
+    await zero.mutate(
+      mutators.release.insert({
+        id: releaseId,
+        organizationId: org.id,
+        title: "Untitled Release",
+        description: undefined,
+        version: undefined,
+        publishedAt: null, // Draft
+        createdAt: now,
+        updatedAt: now,
+      })
+    );
 
     // Navigate to the new release detail page
     navigate({
@@ -91,7 +94,7 @@ function DashboardChangelogIndex() {
 
   const confirmDelete = () => {
     if (deleteRelease) {
-      z.mutate.release.delete({ id: deleteRelease.id });
+      zero.mutate(mutators.release.delete({ id: deleteRelease.id }));
       setDeleteRelease(null);
     }
   };

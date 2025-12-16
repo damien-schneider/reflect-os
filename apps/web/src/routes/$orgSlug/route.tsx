@@ -1,4 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import {
   createFileRoute,
   Link,
@@ -10,7 +10,7 @@ import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug")({
   component: OrgLayout,
@@ -23,7 +23,6 @@ const MAX_SYNC_ATTEMPTS = 30;
 
 function OrgLayout() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string };
-  const z = useZero<Schema>();
   const navigate = useNavigate();
   const [syncAttempts, setSyncAttempts] = useState(0);
   const [syncTimedOut, setSyncTimedOut] = useState(false);
@@ -50,15 +49,13 @@ function OrgLayout() {
   // Query Zero member table first - it has simpler permissions (allowIfLoggedIn)
   // This lets us detect sync status even for private organizations
   const [members, { type: memberQueryStatus }] = useQuery(
-    z.query.member
-      .where("organizationId", "=", authOrgId)
-      .where("userId", "=", userId)
+    zql.member.where("organizationId", authOrgId).where("userId", userId)
   );
   const isMember = members && members.length > 0;
 
   // Get organization from Zero for real-time updates (will only work after member syncs)
   const [orgs, { type: queryStatus }] = useQuery(
-    z.query.organization.where("slug", "=", orgSlug ?? "")
+    zql.organization.where("slug", orgSlug ?? "")
   );
   const org = orgs?.[0];
 

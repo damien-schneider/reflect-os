@@ -8,6 +8,7 @@
 
 import {
   boolean,
+  createBuilder,
   createSchema,
   json,
   number,
@@ -633,13 +634,33 @@ export const schema = createSchema({
     subscriptionRelationships,
     changelogSubscriptionRelationships,
   ],
+  // Zero 0.25: Enable legacy queries until full migration to named queries
+  // TODO: Migrate all inline zql.* queries to named queries, then set to false
+  enableLegacyQueries: true,
 });
+
+// ============================================
+// ZQL BUILDER
+// ============================================
+
+// Zero 0.25: Create ZQL builder for type-safe queries
+// Use this in queries.ts to build ZQL expressions
+export const zql = createBuilder(schema);
 
 // ============================================
 // TYPE EXPORTS
 // ============================================
 
 export type Schema = typeof schema;
+
+// Zero 0.25: Register Schema type with DefaultTypes to avoid passing Schema everywhere
+// This allows useZero() instead of useZero<Schema>()
+declare module "@rocicorp/zero" {
+  // biome-ignore lint/style/useConsistentTypeDefinitions: Module augmentation requires interface, not type alias
+  interface DefaultTypes {
+    schema: Schema;
+  }
+}
 
 // Row types for each table - using schema property for proper type inference
 export type User = Row<typeof userTable.schema>;

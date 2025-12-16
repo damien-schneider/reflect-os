@@ -6,7 +6,7 @@ import {
   MailCheck,
   RefreshCw,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -47,7 +47,7 @@ function CheckEmail() {
     return () => clearInterval(timer);
   }, [cooldownRemaining]);
 
-  const handleResendEmail = useCallback(async () => {
+  const handleResendEmail = async () => {
     if (!email || cooldownRemaining > 0 || isResending) {
       return;
     }
@@ -69,7 +69,7 @@ function CheckEmail() {
     }
 
     setIsResending(false);
-  }, [email, cooldownRemaining, isResending]);
+  };
 
   const isResendDisabled = !email || cooldownRemaining > 0 || isResending;
 

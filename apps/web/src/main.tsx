@@ -3,16 +3,15 @@ import { createRoot } from "react-dom/client";
 import "@/index.css";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
-import { authClient } from "@/lib/auth-client";
 // Import the generated route tree
 import { routeTree } from "@/routeTree.gen";
 
 // Create a new router instance
+// Note: authClient is imported directly in route files to avoid
+// TanStackRouterDevtools serialization issues with Better Auth client
 const router = createRouter({
   routeTree,
-  context: {
-    authClient,
-  },
+  context: {},
 });
 
 // Register the router instance for type safety

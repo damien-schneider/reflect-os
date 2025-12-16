@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/button";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { mutators } from "@/mutators";
 import { randID } from "@/rand";
-import type { Schema } from "@/schema";
+import { zql } from "@/zero-schema";
 
 const MAX_VERIFY_ATTEMPTS = 10;
 const VERIFY_DELAY_MS = 300;
@@ -27,19 +28,17 @@ function NewFeedback() {
     boardSlug: string;
   };
   const navigate = useNavigate();
-  const z = useZero<Schema>();
+  const zero = useZero();
   const { data: session } = authClient.useSession();
   const { openAuthDialog } = useAuthDialog();
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
   // Get organization and board
-  const [orgs] = useQuery(z.query.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
   const org = orgs?.[0];
 
   const [boards] = useQuery(
-    z.query.board
-      .where("organizationId", "=", org?.id ?? "")
-      .where("slug", "=", boardSlug)
+    zql.board.where("organizationId", org?.id ?? "").where("slug", boardSlug)
   );
   const board = boards?.[0];
 
@@ -102,29 +101,29 @@ function NewFeedback() {
         requiresApproval,
       });
 
-      await z.mutate.feedback.insert({
-        id: feedbackId,
-        boardId: board.id,
-        title: title.trim(),
-        description,
-        status: board.settings?.defaultStatus ?? "open",
-        authorId: session.user.id,
-        voteCount: 0,
-        commentCount: 0,
-        isApproved: !requiresApproval,
-        isPinned: false,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
+      await zero.mutate(
+        mutators.feedback.insert({
+          id: feedbackId,
+          boardId: board.id,
+          title: title.trim(),
+          description,
+          status: board.settings?.defaultStatus ?? "open",
+          authorId: session.user.id,
+          voteCount: 0,
+          commentCount: 0,
+          isApproved: !requiresApproval,
+          isPinned: false,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        })
+      );
 
       console.log("[NewFeedback] Mutation completed, verifying creation...");
 
       // Verify the feedback was actually created before navigating
       let verified = false;
       for (let i = 0; i < MAX_VERIFY_ATTEMPTS; i++) {
-        const [result] = await z.query.feedback
-          .where("id", "=", feedbackId)
-          .run();
+        const result = await zql.feedback.where("id", feedbackId).one().run();
 
         if (result) {
           console.log("[NewFeedback] ✅ Feedback verified:", result.id);

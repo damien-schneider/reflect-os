@@ -100,6 +100,7 @@ const normalizeResendError = (error: unknown): SendEmailResult => {
 
 /**
  * Send an email using Resend with a React Email template
+ * In development without RESEND_API_KEY, emails are logged to console instead.
  *
  * @example
  * ```ts
@@ -118,8 +119,21 @@ export async function sendEmail(
 ): Promise<SendEmailResult> {
   const config = { ...getEmailConfig(), ...options.config };
 
+  // In development without API key, log the email instead
   if (!config.apiKey) {
-    throw new Error("RESEND_API_KEY is required to send email");
+    if (config.isDevelopment) {
+      const html = await render(options.template);
+      console.log("\n📧 [DEV MODE] Email would be sent:");
+      console.log(
+        `   To: ${Array.isArray(options.to) ? options.to.join(", ") : options.to}`
+      );
+      console.log(`   From: ${formatFromAddress(config)}`);
+      console.log(`   Subject: ${options.subject}`);
+      console.log(`   HTML preview: ${html.substring(0, 200)}...`);
+      console.log("   (Set RESEND_API_KEY to send actual emails)\n");
+      return { success: true, id: "dev-mode-no-send" };
+    }
+    throw new Error("RESEND_API_KEY is required to send email in production");
   }
 
   if (!config.fromAddress) {

@@ -1,6 +1,7 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
+import { useQuery } from "@rocicorp/zero/react";
 import { ReleaseCard } from "@/features/changelog/components/release-card";
-import type { Board, Feedback, Release, Schema } from "@/schema";
+import type { Board, Feedback, Release } from "@/schema";
+import { zql } from "@/zero-schema";
 
 type ReleaseListProps = {
   organizationId: string;
@@ -17,11 +18,9 @@ export function ReleaseList({
   orgSlug,
   showDrafts = false,
 }: ReleaseListProps) {
-  const z = useZero<Schema>();
-
   // Get releases for this organization
   const [releases] = useQuery(
-    z.query.release
+    zql.release
       .where("organizationId", "=", organizationId)
       .related("releaseItems", (q) =>
         q.related("feedback", (fq) => fq.related("board"))

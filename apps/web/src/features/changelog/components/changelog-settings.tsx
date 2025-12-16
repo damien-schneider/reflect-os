@@ -1,6 +1,6 @@
 import { useZero } from "@rocicorp/zero/react";
 import { Hash } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import type { Schema } from "@/schema";
+import { mutators } from "@/mutators";
 
 type ChangelogSettingsProps = {
   org: {
@@ -25,7 +25,7 @@ type ChangelogSettingsProps = {
 };
 
 export function ChangelogSettings({ org }: ChangelogSettingsProps) {
-  const z = useZero<Schema>();
+  const zero = useZero();
 
   // Changelog settings state
   const [autoVersioning, setAutoVersioning] = useState(false);
@@ -49,19 +49,19 @@ export function ChangelogSettings({ org }: ChangelogSettingsProps) {
     }
   }, [org]);
 
-  const saveChangelogSettings = useCallback(
-    async (
-      updates: Partial<{
-        autoVersioning: boolean;
-        versionIncrement: "patch" | "minor" | "major";
-        versionPrefix: string;
-      }>
-    ) => {
-      if (!org) {
-        return;
-      }
-      const currentSettings = org.changelogSettings ?? {};
-      await z.mutate.organization.update({
+  const saveChangelogSettings = async (
+    updates: Partial<{
+      autoVersioning: boolean;
+      versionIncrement: "patch" | "minor" | "major";
+      versionPrefix: string;
+    }>
+  ) => {
+    if (!org) {
+      return;
+    }
+    const currentSettings = org.changelogSettings ?? {};
+    await zero.mutate(
+      mutators.organization.update({
         id: org.id,
         changelogSettings: {
           autoVersioning: currentSettings.autoVersioning ?? false,
@@ -69,10 +69,9 @@ export function ChangelogSettings({ org }: ChangelogSettingsProps) {
           versionPrefix: currentSettings.versionPrefix ?? "v",
           ...updates,
         },
-      });
-    },
-    [org, z.mutate.organization]
-  );
+      })
+    );
+  };
 
   return (
     <div className="space-y-6">

@@ -19,7 +19,7 @@
 #   RESEND_API_KEY - For sending emails (verification, notifications)
 #   EMAIL_FROM_ADDRESS - Sender email (e.g., noreply@yourdomain.com)
 #   EMAIL_FROM_NAME - Sender display name
-
+# TODO: Make the username of the Postgres as a env variable to improve security.
 # TODO: Improvements: use secrets instead of environment vars for sensitive data (keeping the build check and t3-oss/env-core validation working.)
 
 services:
@@ -156,6 +156,8 @@ services:
     environment:
       # Zero server URL (public URL for frontend WebSocket connection)
       VITE_PUBLIC_ZERO_SERVER: ${ZERO_SERVER_URL:?ZERO_SERVER_URL is required - set in Dokploy UI}
+      # Email verification flag (must match backend RESEND_API_KEY presence)
+      VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-true}
       # Internal API URL for server-side proxy (Docker network, NOT browser)
       INTERNAL_API_URL: http://backend:3001
       # Server-side environment
@@ -168,9 +170,19 @@ services:
       - reflect-network
 
   # Drizzle Gateway for database management
+  # Note: Database connection must be configured via the web UI after deployment.
+  # Access the gateway at https://drizzle.reflet.app and use:
+  #   - Host: postgres (internal Docker network hostname)
+  #   - Port: 5432
+  #   - Database: reflect
+  #   - User: postgres
+  #   - Password: (your POSTGRES_PASSWORD value)
   drizzle-gateway:
     image: ghcr.io/drizzle-team/gateway:latest
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       PORT: "4983"
       STORE_PATH: "/app"

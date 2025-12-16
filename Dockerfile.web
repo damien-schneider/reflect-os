@@ -30,6 +30,7 @@ FROM base AS builder
 # Use placeholder value for build - will be replaced at runtime
 # This allows the same image to work with any domain configuration
 ENV VITE_PUBLIC_ZERO_SERVER=__VITE_PUBLIC_ZERO_SERVER__
+ENV VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION=__VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION__
 
 WORKDIR /app
 

@@ -25,6 +25,13 @@ else
   echo "   Zero sync will not work"
 fi
 
+# Inject email verification flag (defaults to "true" in production)
+VITE_EMAIL_VERIFY_VALUE=${VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION:-true}
+echo "   VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION: $VITE_EMAIL_VERIFY_VALUE"
+find /app/dist -name '*.js' -type f | while read file; do
+  sed -i "s|__VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION__|$VITE_EMAIL_VERIFY_VALUE|g" "$file"
+done
+
 # Start the server (migrations are handled by zero-cache or backend)
 echo "✅ Starting web server on port ${PORT:-3000}..."
 exec bun run server.ts

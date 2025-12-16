@@ -10,6 +10,7 @@ import { auth } from "../auth";
 const app = new Hono();
 
 // All auth routes are handled by better-auth
-app.on(["POST", "GET"], "/**", (c) => auth.handler(c.req.raw));
+// Using /* to match all paths under this route (e.g., /verify-email, /sign-in, etc.)
+app.on(["POST", "GET"], "/*", (c) => auth.handler(c.req.raw));
 
 export default app;

@@ -27,6 +27,20 @@ export const urlOrPlaceholder = z
     { message: "Must be a valid URL or a placeholder for runtime injection" }
   );
 
+/**
+ * Boolean string schema that also allows placeholders for Docker runtime injection
+ * At runtime, placeholders get replaced with actual values in start.sh
+ */
+export const boolStringOrPlaceholder = z
+  .union([z.enum(["true", "false"]), z.string().refine(isPlaceholder)])
+  .transform((val) => {
+    // Handle placeholder - treat as true (production default)
+    if (isPlaceholder(val)) {
+      return true;
+    }
+    return val === "true";
+  });
+
 // ============================================
 // CLIENT SCHEMAS (VITE_PUBLIC_*)
 // ============================================
@@ -44,11 +58,10 @@ export const clientSchema = {
    * Whether email verification is required for sign-up flows
    * Defaults to false for out-of-box experience without email service configuration.
    * Set to "true" when RESEND_API_KEY is configured in production.
+   * @note Can use __VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION__ placeholder for Docker runtime injection
    */
-  VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION: z
-    .enum(["true", "false"])
-    .default("false")
-    .transform((val) => val === "true"),
+  VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION:
+    boolStringOrPlaceholder.default(false),
 } as const;
 
 // ============================================

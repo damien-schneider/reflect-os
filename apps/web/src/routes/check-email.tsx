@@ -58,7 +58,7 @@ function CheckEmail() {
 
     const result = await authClient.sendVerificationEmail({
       email,
-      callbackURL: "/dashboard",
+      // callbackURL is handled by the backend to ensure consistency
     });
 
     if (result.error) {

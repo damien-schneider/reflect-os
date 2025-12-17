@@ -38,6 +38,8 @@ app.all("/api/*", async (c) => {
           : undefined,
       // @ts-expect-error - duplex is needed for streaming request bodies
       duplex: "half",
+      // Don't follow redirects - return them to the browser so it can handle them
+      redirect: "manual",
     });
 
     console.log(`[Proxy] Response: ${response.status} ${response.statusText}`);

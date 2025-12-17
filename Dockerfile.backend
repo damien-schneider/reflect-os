@@ -10,6 +10,9 @@ COPY package.json bun.lock ./
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/db/package.json ./packages/db/
 COPY packages/email/package.json ./packages/email/
+COPY packages/auth/package.json ./packages/auth/
+COPY packages/polar/package.json ./packages/polar/
+COPY packages/errors/package.json ./packages/errors/
 # Use --ignore-scripts to skip native module compilation (zero-sqlite3)
 # Backend doesn't need the native sqlite module, only zero-cache does
 RUN bun install --ignore-scripts

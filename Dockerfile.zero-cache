@@ -17,6 +17,9 @@ COPY apps/web/package.json ./apps/web/
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/db/package.json ./packages/db/
 COPY packages/email/package.json ./packages/email/
+COPY packages/auth/package.json ./packages/auth/
+COPY packages/polar/package.json ./packages/polar/
+COPY packages/errors/package.json ./packages/errors/
 
 # Install dependencies
 RUN bun install

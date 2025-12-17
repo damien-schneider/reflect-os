@@ -11,7 +11,6 @@ import { PAID_TIERS, PLAN_TIERS, type SubscriptionTier } from "./tiers.config";
  *
  * @example
  * parseTierFromProductName("Pro Monthly") // "pro"
- * parseTierFromProductName("Team Yearly") // "team"
  * parseTierFromProductName("Invalid") // null
  */
 export function parseTierFromProductName(
@@ -40,7 +39,6 @@ export function parseTierFromProductName(
  *
  * @example
  * parseTierFromProductSlug("pro-monthly") // "pro"
- * parseTierFromProductSlug("team-yearly") // "team"
  * parseTierFromProductSlug("invalid") // null
  */
 export function parseTierFromProductSlug(
@@ -77,16 +75,16 @@ export function isValidTier(tier: string | null): tier is SubscriptionTier {
 /**
  * Get tier from a value with fallback to free.
  * Safe for use with database values that might be null or invalid.
- * Maps legacy "enterprise" tier to "team".
  */
 export function getTierWithFallback(tier: string | null): SubscriptionTier {
   if (!tier) {
     return "free";
   }
+  // TODO: Re-enable team tier when ready
   // Handle legacy enterprise tier -> migrate to team
-  if (tier === "enterprise") {
-    return "team";
-  }
+  // if (tier === "enterprise") {
+  //   return "team";
+  // }
   return isValidTier(tier) ? tier : "free";
 }
 

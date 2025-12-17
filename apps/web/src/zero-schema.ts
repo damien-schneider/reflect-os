@@ -57,7 +57,8 @@ const organizationTable = table("organization")
       .optional()
       .from("changelog_settings"),
     // Subscription fields - synced from Polar webhooks
-    subscriptionTier: string().optional().from("subscription_tier"), // "free" | "pro" | "team"
+    // NOTE: Team tier is currently disabled
+    subscriptionTier: string().optional().from("subscription_tier"), // "free" | "pro"
     subscriptionStatus: string().optional().from("subscription_status"), // "active" | "trialing" | "past_due" | "canceled" | "none"
     subscriptionId: string().optional().from("subscription_id"), // Reference to active subscription
   })

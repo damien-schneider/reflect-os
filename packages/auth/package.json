@@ -1,0 +1,40 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
+    "./organization": {
+      "types": "./dist/organization.d.ts",
+      "import": "./dist/organization.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/email": "workspace:*",
+    "@repo/polar": "workspace:*",
+    "better-auth": "^1.2.23"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.3",
+    "@types/pg": "^8.16.0",
+    "typescript": "^5.5.3"
+  },
+  "peerDependencies": {
+    "pg": "^8.0.0"
+  }
+}

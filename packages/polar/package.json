@@ -1,5 +1,5 @@
 {
-  "name": "@repo/email",
+  "name": "@repo/polar",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,9 +8,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./templates": {
-      "types": "./dist/templates/index.d.ts",
-      "import": "./dist/templates/index.js"
+    "./tiers": {
+      "types": "./dist/tiers.d.ts",
+      "import": "./dist/tiers.js"
     }
   },
   "main": "./dist/index.js",
@@ -18,20 +18,18 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "check-types": "tsc --noEmit",
-    "email:dev": "email dev -p 3002"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@react-email/components": "1.0.1",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
-    "resend": "^6.6.0"
+    "@polar-sh/better-auth": "^1.6.1",
+    "@polar-sh/sdk": "^0.41.5"
   },
   "devDependencies": {
     "@types/node": "^24.10.3",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "react-email": "5.0.8",
+    "@types/pg": "^8.16.0",
     "typescript": "^5.5.3"
+  },
+  "peerDependencies": {
+    "pg": "^8.0.0"
   }
 }

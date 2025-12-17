@@ -219,6 +219,10 @@ export function useSubscriptionCheckout() {
 
 /**
  * Hook to open customer portal for managing subscription.
+ *
+ * This hook ensures the customer exists in Polar before opening the portal.
+ * Users who signed up before Polar was configured will have their customer
+ * record created automatically.
  */
 export function useCustomerPortal() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string };
@@ -227,18 +231,129 @@ export function useCustomerPortal() {
   const org = orgs?.[0];
 
   const openPortal = async () => {
+    console.log("[useCustomerPortal] Starting portal open flow...");
+    console.log("[useCustomerPortal] orgSlug:", orgSlug, "org:", org?.id);
+
     if (!org?.id) {
+      console.error("[useCustomerPortal] Organization not found");
       throw new Error("Organization not found");
     }
 
-    // Call the Polar customer portal endpoint
-    const result = await authClient.customer.portal();
+    // Step 1: Ensure customer exists in Polar before opening portal
+    // This handles users who signed up before Polar was configured
+    console.log("[useCustomerPortal] Step 1: Calling ensure-customer API...");
+    try {
+      const ensureResponse = await api.api["ensure-customer"].$post();
+      console.log(
+        "[useCustomerPortal] ensure-customer response status:",
+        ensureResponse.status
+      );
 
-    if (result?.data?.url) {
-      window.location.href = result.data.url;
+      if (!ensureResponse.ok) {
+        const errorData = await ensureResponse.json();
+        console.error(
+          "[useCustomerPortal] ensure-customer failed:",
+          JSON.stringify(errorData, null, 2)
+        );
+
+        // Extract error code and provide user-friendly message
+        const errorCode =
+          "code" in errorData ? (errorData.code as string) : null;
+        let userMessage =
+          "details" in errorData
+            ? (errorData.details as string)
+            : "Failed to create customer record";
+
+        if (errorCode === "CUSTOMER_ID_MISMATCH") {
+          userMessage =
+            "Your billing account is linked to a different user. Please contact support.";
+        } else if (errorCode === "EXTERNAL_ID_SET_FAILED") {
+          userMessage =
+            "Could not link your account to billing system. Please contact support.";
+        }
+
+        throw new Error(userMessage);
+      }
+
+      const ensureData = await ensureResponse.json();
+      console.log(
+        "[useCustomerPortal] ensure-customer success:",
+        JSON.stringify(ensureData, null, 2)
+      );
+      if ("created" in ensureData && ensureData.created) {
+        console.log("[useCustomerPortal] ✅ Created new Polar customer");
+        // Wait a moment for Polar to propagate the customer data
+        console.log("[useCustomerPortal] Waiting 1s for Polar propagation...");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } else {
+        console.log("[useCustomerPortal] ✅ Customer already exists");
+      }
+    } catch (error) {
+      // If ensure-customer fails, throw a user-friendly error
+      console.error(
+        "[useCustomerPortal] ensure-customer exception:",
+        error instanceof Error ? error.message : error
+      );
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : "Unable to set up subscription management. Please try again later."
+      );
     }
 
-    return result;
+    // Step 2: Open the portal
+    console.log(
+      "[useCustomerPortal] Step 2: Calling authClient.customer.portal()..."
+    );
+    try {
+      const result = await authClient.customer.portal();
+      console.log(
+        "[useCustomerPortal] portal() result:",
+        JSON.stringify(result, null, 2)
+      );
+
+      if (result?.error) {
+        console.error(
+          "[useCustomerPortal] portal() returned error:",
+          result.error
+        );
+        // Extract detailed error information
+        const errorCode = result.error.code ?? "UNKNOWN_ERROR";
+        const errorMessage = result.error.message ?? "Portal access failed";
+        const statusCode = result.error.status ?? 500;
+
+        // Provide more context based on error code
+        let userMessage = errorMessage;
+        if (errorCode === "CUSTOMER_PORTAL_CREATION_FAILED") {
+          userMessage = `Customer portal creation failed. This may happen if your account is not properly linked to the billing system. Please contact support. (Error: ${errorCode}, Status: ${statusCode})`;
+        } else {
+          userMessage = `${errorMessage} (Error: ${errorCode}, Status: ${statusCode})`;
+        }
+
+        throw new Error(userMessage);
+      }
+
+      if (result?.data?.url) {
+        console.log("[useCustomerPortal] ✅ Redirecting to:", result.data.url);
+        window.location.href = result.data.url;
+      } else {
+        console.error("[useCustomerPortal] No URL in portal response");
+        throw new Error("No portal URL returned from billing system");
+      }
+
+      return result;
+    } catch (error) {
+      console.error(
+        "[useCustomerPortal] portal() exception:",
+        error instanceof Error ? error.message : error,
+        error
+      );
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : "Unable to access subscription portal. Please try again later."
+      );
+    }
   };
 
   return {

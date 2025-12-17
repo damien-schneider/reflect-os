@@ -44,7 +44,8 @@ export type PolarProduct = {
 
 /**
  * Products grouped by tier and billing interval.
- * Only paid tiers (pro, team) have products.
+ * Only paid tiers (pro) have products.
+ * NOTE: Team tier is currently disabled.
  */
 export type ProductsByTier = Partial<
   Record<
@@ -81,8 +82,9 @@ export function useProducts() {
           const tier = parseTierFromProductName(product.name);
 
           if (!tier) {
+            // NOTE: Team tier is currently disabled
             warnings.push(
-              `Product "${product.name}" doesn't match any tier. Expected format: "${PLAN_TIERS.pro.label} Monthly", "${PLAN_TIERS.team.label} Yearly", etc.`
+              `Product "${product.name}" doesn't match any tier. Expected format: "${PLAN_TIERS.pro.label} Monthly", "${PLAN_TIERS.pro.label} Yearly", etc.`
             );
             continue;
           }

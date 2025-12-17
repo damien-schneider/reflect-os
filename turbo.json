@@ -28,6 +28,7 @@
         "RESEND_API_KEY",
         "EMAIL_FROM_ADDRESS",
         "EMAIL_FROM_NAME",
+        "DEV_AUTH_ALLOW_UNVERIFIED_SIGNUP",
         "PORT",
         "NODE_ENV"
       ]
@@ -51,7 +52,13 @@
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true,
-      "env": ["VITE_PUBLIC_ZERO_SERVER", "INTERNAL_API_URL", "PORT", "NODE_ENV"]
+      "env": [
+        "VITE_PUBLIC_ZERO_SERVER",
+        "VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION",
+        "INTERNAL_API_URL",
+        "PORT",
+        "NODE_ENV"
+      ]
     },
     "@repo/web#dev": {
       "dependsOn": ["^build"],
@@ -59,6 +66,7 @@
       "persistent": true,
       "env": [
         "VITE_PUBLIC_ZERO_SERVER",
+        "VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION",
         "INTERNAL_API_URL",
         "PORT",
         "NODE_ENV"

@@ -20,7 +20,8 @@ const polarClient = env.POLAR_ACCESS_TOKEN
 
 // Fetch available products from Polar
 // Products should be named: "{Tier} Monthly" or "{Tier} Yearly"
-// e.g., "Pro Monthly", "Pro Yearly", "Team Monthly", "Team Yearly"
+// e.g., "Pro Monthly", "Pro Yearly"
+// NOTE: Team tier is currently disabled
 app.get("/", async (c) => {
   if (!polarClient) {
     return c.json({ error: "Polar not configured", products: [] }, 200);

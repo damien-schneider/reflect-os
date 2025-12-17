@@ -2,11 +2,15 @@
  * Subscription plan constants and feature limits.
  * These define the tiers available and what features each tier unlocks.
  *
+ * NOTE: Team tier is currently DISABLED (search for "TODO: Re-enable")
+ *
  * Polar products should be named: "{Tier} Monthly" or "{Tier} Yearly"
- * e.g., "Pro Monthly", "Pro Yearly", "Team Monthly", "Team Yearly"
+ * e.g., "Pro Monthly", "Pro Yearly"
  */
 
-export type SubscriptionTier = "free" | "pro" | "team";
+// TODO: Re-enable team tier when ready
+// export type SubscriptionTier = "free" | "pro" | "team";
+export type SubscriptionTier = "free" | "pro";
 export type BillingInterval = "month" | "year";
 export type SubscriptionStatus =
   | "active"
@@ -19,7 +23,9 @@ export type SubscriptionStatus =
  * Paid tiers that have Polar products (excludes free).
  * Ordered from lowest to highest tier.
  */
-export const PAID_TIERS: Exclude<SubscriptionTier, "free">[] = ["pro", "team"];
+// TODO: Re-enable team tier when ready
+// export const PAID_TIERS: Exclude<SubscriptionTier, "free">[] = ["pro", "team"];
+export const PAID_TIERS: Exclude<SubscriptionTier, "free">[] = ["pro"];
 
 /**
  * Plan tier configuration with labels and descriptions.
@@ -48,13 +54,14 @@ export const PLAN_TIERS: Record<
     badgeVariant: "default",
     order: 1,
   },
-  team: {
-    label: "Team",
-    description: "Collaboration features for larger teams",
-    color: "text-purple-600 dark:text-purple-400",
-    badgeVariant: "default",
-    order: 2,
-  },
+  // TODO: Re-enable team tier when ready
+  // team: {
+  //   label: "Team",
+  //   description: "Collaboration features for larger teams",
+  //   color: "text-purple-600 dark:text-purple-400",
+  //   badgeVariant: "default",
+  //   order: 2,
+  // },
 };
 
 /**
@@ -94,16 +101,17 @@ export const PLAN_LIMITS: Record<
     sso: false,
     advancedAnalytics: false,
   },
-  team: {
-    boards: 20,
-    membersPerOrg: 50,
-    feedbackPerBoard: 5000,
-    customBranding: true,
-    prioritySupport: true,
-    apiAccess: true,
-    sso: true,
-    advancedAnalytics: true,
-  },
+  // TODO: Re-enable team tier when ready
+  // team: {
+  //   boards: 20,
+  //   membersPerOrg: 50,
+  //   feedbackPerBoard: 5000,
+  //   customBranding: true,
+  //   prioritySupport: true,
+  //   apiAccess: true,
+  //   sso: true,
+  //   advancedAnalytics: true,
+  // },
 };
 
 /**
@@ -185,15 +193,15 @@ export function isValidTier(tier: string | null): tier is SubscriptionTier {
 /**
  * Get tier from a value with fallback to free.
  * Safe for use with database values that might be null or invalid.
- * Maps legacy "enterprise" tier to "team".
  */
 export function getTierWithFallback(tier: string | null): SubscriptionTier {
   if (!tier) {
     return "free";
   }
+  // TODO: Re-enable team tier when ready
   // Handle legacy enterprise tier -> migrate to team
-  if (tier === "enterprise") {
-    return "team";
-  }
+  // if (tier === "enterprise") {
+  //   return "team";
+  // }
   return isValidTier(tier) ? tier : "free";
 }

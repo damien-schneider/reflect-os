@@ -4,13 +4,15 @@
  * ║                                                                            ║
  * ║  This is the MAIN FILE to edit when adding or changing subscription tiers ║
  * ║                                                                            ║
+ * ║  NOTE: Team tier is currently DISABLED (search for "TODO: Re-enable")      ║
+ * ║                                                                            ║
  * ║  When adding a new tier:                                                   ║
  * ║  1. Add the tier key to SubscriptionTier type                              ║
  * ║  2. Add it to PAID_TIERS array (if it's a paid tier)                       ║
  * ║  3. Add configuration to PLAN_TIERS (display info)                         ║
  * ║  4. Add limits to PLAN_LIMITS                                              ║
  * ║  5. Create products in Polar named: "{TierLabel} Monthly/Yearly"           ║
- * ║     e.g., "Pro Monthly", "Pro Yearly", "Team Monthly", "Team Yearly"       ║
+ * ║     e.g., "Pro Monthly", "Pro Yearly"                                      ║
  * ║                                                                            ║
  * ╚═══════════════════════════════════════════════════════════════════════════╝
  */
@@ -23,7 +25,9 @@
  * All available subscription tiers.
  * Add new tier keys here when creating new plans.
  */
-export type SubscriptionTier = "free" | "pro" | "team";
+// TODO: Re-enable team tier when ready
+// export type SubscriptionTier = "free" | "pro" | "team";
+export type SubscriptionTier = "free" | "pro";
 
 /**
  * Billing interval options
@@ -42,7 +46,9 @@ export type BillingInterval = "month" | "year";
  * - "{TierLabel} Monthly" (e.g., "Pro Monthly")
  * - "{TierLabel} Yearly" (e.g., "Pro Yearly")
  */
-export const PAID_TIERS: Exclude<SubscriptionTier, "free">[] = ["pro", "team"];
+// TODO: Re-enable team tier when ready
+// export const PAID_TIERS: Exclude<SubscriptionTier, "free">[] = ["pro", "team"];
+export const PAID_TIERS: Exclude<SubscriptionTier, "free">[] = ["pro"];
 
 // =============================================================================
 // TIER DISPLAY CONFIGURATION
@@ -80,13 +86,14 @@ export const PLAN_TIERS: Record<SubscriptionTier, TierDisplayConfig> = {
     badgeVariant: "default",
     order: 1,
   },
-  team: {
-    label: "Team",
-    description: "Collaboration features for larger teams",
-    color: "text-purple-600 dark:text-purple-400",
-    badgeVariant: "default",
-    order: 2,
-  },
+  // TODO: Re-enable team tier when ready
+  // team: {
+  //   label: "Team",
+  //   description: "Collaboration features for larger teams",
+  //   color: "text-purple-600 dark:text-purple-400",
+  //   badgeVariant: "default",
+  //   order: 2,
+  // },
 };
 
 // =============================================================================
@@ -137,14 +144,15 @@ export const PLAN_LIMITS: Record<SubscriptionTier, TierLimits> = {
     sso: false,
     advancedAnalytics: false,
   },
-  team: {
-    boards: 20,
-    membersPerOrg: 50,
-    feedbackPerBoard: 5000,
-    customBranding: true,
-    prioritySupport: true,
-    apiAccess: true,
-    sso: true,
-    advancedAnalytics: true,
-  },
+  // TODO: Re-enable team tier when ready
+  // team: {
+  //   boards: 20,
+  //   membersPerOrg: 50,
+  //   feedbackPerBoard: 5000,
+  //   customBranding: true,
+  //   prioritySupport: true,
+  //   apiAccess: true,
+  //   sso: true,
+  //   advancedAnalytics: true,
+  // },
 };

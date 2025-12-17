@@ -21,42 +21,220 @@ const app = new Hono();
 // =============================================================================
 
 app.post("/ensure-customer", async (c) => {
+  console.log("[API /ensure-customer] Request received");
+
   if (!polarClient) {
+    console.error(
+      "[API /ensure-customer] Polar not configured - polarClient is null"
+    );
     return c.json({ error: "Polar not configured" }, 500);
   }
 
+  console.log("[API /ensure-customer] polarClient is available");
+
   try {
+    console.log("[API /ensure-customer] Getting session...");
     const session = await auth.api.getSession({
       headers: c.req.raw.headers,
     });
 
     if (!session) {
+      console.error("[API /ensure-customer] No session found");
       return c.json({ error: "Unauthorized" }, 401);
     }
+
+    console.log(
+      "[API /ensure-customer] Session found for user:",
+      session.user.id
+    );
 
     const userId = session.user.id;
     const userEmail = session.user.email;
     const userName = session.user.name;
 
+    console.log("[API /ensure-customer] User details:", {
+      userId,
+      userEmail,
+      userName,
+    });
+
     // Try to find existing customer by email
     try {
+      console.log(
+        "[API /ensure-customer] Searching for existing customer by email:",
+        userEmail
+      );
       const existingCustomers = await polarClient.customers.list({
         email: userEmail,
       });
 
+      console.log(
+        "[API /ensure-customer] Search result:",
+        existingCustomers.result.items.length,
+        "customers found"
+      );
+
       if (existingCustomers.result.items.length > 0) {
+        const existingCustomer = existingCustomers.result.items[0];
         console.log(
-          "[API /ensure-customer] Customer already exists for user:",
-          userId
+          "[API /ensure-customer] ✅ Customer already exists for user:",
+          userId,
+          "customerId:",
+          existingCustomer.id,
+          "externalId:",
+          existingCustomer.externalId
         );
+
+        // IMPORTANT: If the customer exists but doesn't have the correct externalId,
+        // we need to update it so the portal plugin can find them by user ID.
+        // NOTE: According to Polar docs, externalId can only be set once, not updated.
+        // If it's already set to something else, we need to handle that case.
+        if (existingCustomer.externalId !== userId) {
+          // If externalId is null/undefined, we can set it
+          if (existingCustomer.externalId) {
+            // externalId is already set to a different value - we cannot change it
+            console.error(
+              "[API /ensure-customer] ❌ Customer has different externalId that cannot be changed:",
+              existingCustomer.externalId,
+              "expected:",
+              userId
+            );
+
+            // Option 1: Delete the old customer and create new one with correct externalId
+            // This is risky as it may lose subscription history
+            console.log(
+              "[API /ensure-customer] Attempting to delete and recreate customer..."
+            );
+            try {
+              // Delete the existing customer
+              await polarClient.customers.delete({
+                id: existingCustomer.id,
+              });
+              console.log(
+                "[API /ensure-customer] Deleted old customer:",
+                existingCustomer.id
+              );
+
+              // Create new customer with correct externalId
+              const newCustomer = await polarClient.customers.create({
+                externalId: userId,
+                email: userEmail,
+                name: userName ?? undefined,
+              });
+              console.log(
+                "[API /ensure-customer] ✅ Created new customer:",
+                newCustomer.id,
+                "with correct externalId"
+              );
+
+              return c.json({
+                success: true,
+                customerId: newCustomer.id,
+                created: true,
+                recreated: true,
+              });
+            } catch (recreateError) {
+              console.error(
+                "[API /ensure-customer] ❌ Failed to recreate customer:",
+                recreateError
+              );
+              return c.json(
+                {
+                  error:
+                    "Your billing account is linked to a different user ID. Please contact support to resolve this issue.",
+                  details:
+                    recreateError instanceof Error
+                      ? recreateError.message
+                      : "Unknown error",
+                  code: "CUSTOMER_ID_MISMATCH",
+                  existingExternalId: existingCustomer.externalId,
+                  expectedExternalId: userId,
+                },
+                500
+              );
+            }
+          } else {
+            console.log(
+              "[API /ensure-customer] Setting customer externalId (was empty) to",
+              userId
+            );
+            try {
+              await polarClient.customers.update({
+                id: existingCustomer.id,
+                customerUpdate: {
+                  externalId: userId,
+                },
+              });
+              console.log(
+                "[API /ensure-customer] ✅ Customer externalId set successfully"
+              );
+
+              // Verify the update worked by fetching via externalId
+              console.log(
+                "[API /ensure-customer] Verifying update via getExternal..."
+              );
+              const verifyResult = await polarClient.customers.getExternal({
+                externalId: userId,
+              });
+              console.log(
+                "[API /ensure-customer] ✅ Verified customer via externalId:",
+                verifyResult.id,
+                "matches:",
+                verifyResult.id === existingCustomer.id
+              );
+            } catch (updateError) {
+              console.error(
+                "[API /ensure-customer] ❌ Failed to set customer externalId:",
+                updateError
+              );
+              return c.json(
+                {
+                  error:
+                    "Failed to link customer to your account. Please contact support.",
+                  details:
+                    updateError instanceof Error
+                      ? updateError.message
+                      : "Unknown error",
+                  code: "EXTERNAL_ID_SET_FAILED",
+                },
+                500
+              );
+            }
+          }
+        } else {
+          // externalId already matches - verify it works
+          console.log(
+            "[API /ensure-customer] externalId already matches userId, verifying..."
+          );
+          try {
+            const verifyResult = await polarClient.customers.getExternal({
+              externalId: userId,
+            });
+            console.log(
+              "[API /ensure-customer] ✅ Verified customer can be found by externalId:",
+              verifyResult.id
+            );
+          } catch (verifyError) {
+            console.error(
+              "[API /ensure-customer] ❌ Customer cannot be found by externalId despite it being set:",
+              verifyError
+            );
+            // This shouldn't happen, but log it for debugging
+          }
+        }
+
         return c.json({
           success: true,
-          customerId: existingCustomers.result.items[0].id,
+          customerId: existingCustomer.id,
           created: false,
         });
       }
-    } catch {
+    } catch (searchError) {
       // Customer doesn't exist, we'll create one
+      console.log(
+        "[API /ensure-customer] Customer search failed (will create):",
+        searchError
+      );
     }
 
     // Create customer

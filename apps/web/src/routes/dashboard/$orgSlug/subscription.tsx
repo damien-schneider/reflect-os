@@ -361,74 +361,76 @@ function DashboardSubscription() {
       </Card>
 
       {/* Upgrade Options - Show immediately using static config */}
-      {(isFreePlan || (isPaidPlan && tier !== "team")) &&
-        upgradeTiers.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="font-semibold text-lg">
-                {isFreePlan ? "Compare Plans" : "Available Upgrades"}
-              </h2>
+      {/* TODO: Re-enable team tier check when ready */}
+      {/* {(isFreePlan || (isPaidPlan && tier !== "team")) && */}
+      {(isFreePlan || isPaidPlan) && upgradeTiers.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="font-semibold text-lg">
+              {isFreePlan ? "Compare Plans" : "Available Upgrades"}
+            </h2>
 
-              {/* Billing interval toggle */}
-              <div className="flex items-center gap-2 rounded-lg border p-1">
-                <Button
-                  onClick={() => setBillingInterval("month")}
-                  size="sm"
-                  variant={billingInterval === "month" ? "default" : "ghost"}
-                >
-                  Monthly
-                </Button>
-                <Button
-                  onClick={() => setBillingInterval("year")}
-                  size="sm"
-                  variant={billingInterval === "year" ? "default" : "ghost"}
-                >
-                  Yearly
-                  <Badge className="ml-2" variant="secondary">
-                    Save up to 20%
-                  </Badge>
-                </Button>
-              </div>
-            </div>
-
-            <div
-              className={`grid gap-4 ${isFreePlan ? "md:grid-cols-3" : upgradeTiers.length === 1 ? "max-w-md md:grid-cols-1" : "md:grid-cols-2"}`}
-            >
-              {/* Show Free tier card when user is on free plan */}
-              {isFreePlan && <FreeTierCard isCurrent />}
-
-              {upgradeTiers.map((tierKey) => {
-                // Team tier is contact-only (no self-service checkout)
-                if (tierKey === "team") {
-                  return <ContactUsCard key={tierKey} />;
-                }
-
-                const tierProducts = productsByTier[tierKey];
-                const product = tierProducts?.[billingInterval];
-                const monthlyProduct = tierProducts?.month;
-                const yearlyProduct = tierProducts?.year;
-
-                const savings = calculateYearlySavings(
-                  monthlyProduct,
-                  yearlyProduct
-                );
-
-                return (
-                  <PlanCard
-                    billingInterval={billingInterval}
-                    isCheckingOut={isCheckingOut}
-                    isOwner={isOwner}
-                    key={tierKey}
-                    onUpgrade={handleUpgrade}
-                    product={product}
-                    savings={billingInterval === "year" ? savings : null}
-                    tierKey={tierKey}
-                  />
-                );
-              })}
+            {/* Billing interval toggle */}
+            <div className="flex items-center gap-2 rounded-lg border p-1">
+              <Button
+                onClick={() => setBillingInterval("month")}
+                size="sm"
+                variant={billingInterval === "month" ? "default" : "ghost"}
+              >
+                Monthly
+              </Button>
+              <Button
+                onClick={() => setBillingInterval("year")}
+                size="sm"
+                variant={billingInterval === "year" ? "default" : "ghost"}
+              >
+                Yearly
+                <Badge className="ml-2" variant="secondary">
+                  Save up to 20%
+                </Badge>
+              </Button>
             </div>
           </div>
-        )}
+
+          <div
+            className={`grid gap-4 ${isFreePlan ? "md:grid-cols-3" : upgradeTiers.length === 1 ? "max-w-md md:grid-cols-1" : "md:grid-cols-2"}`}
+          >
+            {/* Show Free tier card when user is on free plan */}
+            {isFreePlan && <FreeTierCard isCurrent />}
+
+            {upgradeTiers.map((tierKey) => {
+              // TODO: Re-enable team tier when ready
+              // Team tier is contact-only (no self-service checkout)
+              // if (tierKey === "team") {
+              //   return <ContactUsCard key={tierKey} />;
+              // }
+
+              const tierProducts = productsByTier[tierKey];
+              const product = tierProducts?.[billingInterval];
+              const monthlyProduct = tierProducts?.month;
+              const yearlyProduct = tierProducts?.year;
+
+              const savings = calculateYearlySavings(
+                monthlyProduct,
+                yearlyProduct
+              );
+
+              return (
+                <PlanCard
+                  billingInterval={billingInterval}
+                  isCheckingOut={isCheckingOut}
+                  isOwner={isOwner}
+                  key={tierKey}
+                  onUpgrade={handleUpgrade}
+                  product={product}
+                  savings={billingInterval === "year" ? savings : null}
+                  tierKey={tierKey}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -643,55 +645,56 @@ function FreeTierCard({ isCurrent }: FreeTierCardProps) {
 
 // =============================================================================
 // CONTACT US CARD (for Team tier)
+// TODO: Re-enable team tier when ready
 // =============================================================================
 
-function ContactUsCard() {
-  const tierConfig = PLAN_TIERS.team;
-  const tierLimits = PLAN_LIMITS.team;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className={tierConfig.color}>{tierConfig.label}</CardTitle>
-        <CardDescription>{tierConfig.description}</CardDescription>
-        <div className="mt-2">
-          <span className="font-bold text-3xl">Custom</span>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <ul className="space-y-2 text-sm">
-          <li className="flex items-center gap-2">
-            <Check className="h-4 w-4 shrink-0 text-green-600" />
-            <span>{tierLimits.boards} boards</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <Check className="h-4 w-4 shrink-0 text-green-600" />
-            <span>Up to {tierLimits.membersPerOrg} members</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <Check className="h-4 w-4 shrink-0 text-green-600" />
-            <span>{tierLimits.feedbackPerBoard} feedback items</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <Check className="h-4 w-4 shrink-0 text-green-600" />
-            <span>Custom branding</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <Check className="h-4 w-4 shrink-0 text-green-600" />
-            <span>API access</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <Check className="h-4 w-4 shrink-0 text-green-600" />
-            <span>Priority support</span>
-          </li>
-        </ul>
-        <Button asChild className="w-full" variant="outline">
-          <a href="mailto:contact@reflect-os.com">
-            Contact Us
-            <ExternalLink className="ml-2 h-3 w-3" />
-          </a>
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
+// function ContactUsCard() {
+//   const tierConfig = PLAN_TIERS.team;
+//   const tierLimits = PLAN_LIMITS.team;
+//
+//   return (
+//     <Card>
+//       <CardHeader>
+//         <CardTitle className={tierConfig.color}>{tierConfig.label}</CardTitle>
+//         <CardDescription>{tierConfig.description}</CardDescription>
+//         <div className="mt-2">
+//           <span className="font-bold text-3xl">Custom</span>
+//         </div>
+//       </CardHeader>
+//       <CardContent className="space-y-4">
+//         <ul className="space-y-2 text-sm">
+//           <li className="flex items-center gap-2">
+//             <Check className="h-4 w-4 shrink-0 text-green-600" />
+//             <span>{tierLimits.boards} boards</span>
+//           </li>
+//           <li className="flex items-center gap-2">
+//             <Check className="h-4 w-4 shrink-0 text-green-600" />
+//             <span>Up to {tierLimits.membersPerOrg} members</span>
+//           </li>
+//           <li className="flex items-center gap-2">
+//             <Check className="h-4 w-4 shrink-0 text-green-600" />
+//             <span>{tierLimits.feedbackPerBoard} feedback items</span>
+//           </li>
+//           <li className="flex items-center gap-2">
+//             <Check className="h-4 w-4 shrink-0 text-green-600" />
+//             <span>Custom branding</span>
+//           </li>
+//           <li className="flex items-center gap-2">
+//             <Check className="h-4 w-4 shrink-0 text-green-600" />
+//             <span>API access</span>
+//           </li>
+//           <li className="flex items-center gap-2">
+//             <Check className="h-4 w-4 shrink-0 text-green-600" />
+//             <span>Priority support</span>
+//           </li>
+//         </ul>
+//         <Button asChild className="w-full" variant="outline">
+//           <a href="mailto:contact@reflect-os.com">
+//             Contact Us
+//             <ExternalLink className="ml-2 h-3 w-3" />
+//           </a>
+//         </Button>
+//       </CardContent>
+//     </Card>
+//   );
+// }

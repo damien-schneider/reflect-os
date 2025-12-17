@@ -130,8 +130,9 @@ async function verifySubscriptionLimit(
   // Boolean limits (feature flags)
   if (typeof limit === "boolean") {
     if (!limit) {
+      // NOTE: Team tier is currently disabled
       throw new Error(
-        `This feature requires a ${tier === "free" ? "Pro or Team" : "higher"} plan. Please upgrade your subscription.`
+        `This feature requires a ${tier === "free" ? "Pro" : "higher"} plan. Please upgrade your subscription.`
       );
     }
     return;

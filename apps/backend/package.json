@@ -9,7 +9,7 @@
     "./client": "./src/client.ts"
   },
   "scripts": {
-    "dev": "dotenv -e .env -- bun run --watch src/server.ts",
+    "dev": "dotenv -e ../../.env -- bun run --watch src/server.ts",
     "start": "bun run src/server.ts",
     "build": "bun build src/server.ts --outdir dist --target bun",
     "typecheck": "tsc --noEmit",
@@ -23,8 +23,10 @@
     "@hono/node-server": "^1.13.2",
     "@polar-sh/better-auth": "^1.6.1",
     "@polar-sh/sdk": "^0.41.5",
+    "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/email": "workspace:*",
+    "@repo/polar": "workspace:*",
     "@rocicorp/zero": "0.25",
     "@t3-oss/env-core": "^0.13.8",
     "better-auth": "^1.4.6",

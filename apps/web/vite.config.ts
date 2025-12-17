@@ -18,6 +18,8 @@ import "./src/env/build";
 const BACKEND_PORT = process.env.BACKEND_PORT ?? "3001";
 
 export default defineConfig({
+  // Load .env files from monorepo root instead of app directory
+  envDir: path.resolve(__dirname, "../.."),
   build: {
     target: "es2022",
   },

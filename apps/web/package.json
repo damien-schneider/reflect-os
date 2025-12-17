@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n vite,zero -c blue,green \"vite\" \"dotenv -e .env -- zero-cache-dev\"",
+    "dev": "concurrently -n vite,zero -c blue,green \"vite\" \"dotenv -e ../../.env -- zero-cache-dev\"",
     "dev:vite": "vite",
-    "dev:zero-cache": "dotenv -e .env -- zero-cache-dev",
+    "dev:zero-cache": "dotenv -e ../../.env -- zero-cache-dev",
     "build": "vite build",
     "typecheck": "tsc -b",
     "check-types": "tsc --noEmit",

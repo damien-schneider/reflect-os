@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Resend } from "resend";
-import { type EmailConfig, formatFromAddress, getEmailConfig } from "./config";
+import { type EmailConfig, formatFromAddress, getEmailConfig } from "../config";
 
 /**
  * Render a React element to HTML string.

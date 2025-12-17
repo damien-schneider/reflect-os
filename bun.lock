@@ -27,8 +27,10 @@
         "@hono/node-server": "^1.13.2",
         "@polar-sh/better-auth": "^1.6.1",
         "@polar-sh/sdk": "^0.41.5",
+        "@repo/auth": "workspace:*",
         "@repo/db": "workspace:*",
         "@repo/email": "workspace:*",
+        "@repo/polar": "workspace:*",
         "@rocicorp/zero": "0.25",
         "@t3-oss/env-core": "^0.13.8",
         "better-auth": "^1.4.6",
@@ -143,6 +145,23 @@
         "vitest": "^4.0.15",
       },
     },
+    "packages/auth": {
+      "name": "@repo/auth",
+      "version": "0.0.0",
+      "dependencies": {
+        "@repo/email": "workspace:*",
+        "@repo/polar": "workspace:*",
+        "better-auth": "^1.2.23",
+      },
+      "devDependencies": {
+        "@types/node": "^24.10.3",
+        "@types/pg": "^8.16.0",
+        "typescript": "^5.5.3",
+      },
+      "peerDependencies": {
+        "pg": "^8.0.0",
+      },
+    },
     "packages/db": {
       "name": "@repo/db",
       "version": "0.0.0",
@@ -178,6 +197,22 @@
         "@types/react-dom": "^19.0.0",
         "react-email": "5.0.8",
         "typescript": "^5.5.3",
+      },
+    },
+    "packages/polar": {
+      "name": "@repo/polar",
+      "version": "0.0.0",
+      "dependencies": {
+        "@polar-sh/better-auth": "^1.6.1",
+        "@polar-sh/sdk": "^0.41.5",
+      },
+      "devDependencies": {
+        "@types/node": "^24.10.3",
+        "@types/pg": "^8.16.0",
+        "typescript": "^5.5.3",
+      },
+      "peerDependencies": {
+        "pg": "^8.0.0",
       },
     },
   },
@@ -868,11 +903,15 @@
 
     "@reduxjs/toolkit": ["@reduxjs/toolkit@2.11.1", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "@standard-schema/utils": "^0.3.0", "immer": "^11.0.0", "redux": "^5.0.1", "redux-thunk": "^3.1.0", "reselect": "^5.1.0" }, "peerDependencies": { "react": "^16.9.0 || ^17.0.0 || ^18 || ^19", "react-redux": "^7.2.1 || ^8.1.3 || ^9.0.0" }, "optionalPeers": ["react", "react-redux"] }, "sha512-HjhlEREguAyBTGNzRlGNiDHGQ2EjLSPWwdhhpoEqHYy8hWak3Dp6/fU72OfqVsiMb8S6rbfPsWUF24fxpilrVA=="],
 
+    "@repo/auth": ["@repo/auth@workspace:packages/auth"],
+
     "@repo/backend": ["@repo/backend@workspace:apps/backend"],
 
     "@repo/db": ["@repo/db@workspace:packages/db"],
 
     "@repo/email": ["@repo/email@workspace:packages/email"],
+
+    "@repo/polar": ["@repo/polar@workspace:packages/polar"],
 
     "@repo/web": ["@repo/web@workspace:apps/web"],
 

@@ -12,8 +12,8 @@
  * - Invalid URLs are handled gracefully
  */
 
+import { transformVerificationUrl } from "@repo/auth";
 import { describe, expect, it } from "vitest";
-import { transformVerificationUrl } from "../utils/email-verification";
 
 const BASE_URL = "https://example.com/api/auth/verify-email";
 const TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ.xxx";

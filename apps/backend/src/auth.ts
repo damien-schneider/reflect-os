@@ -124,9 +124,21 @@ const emailHandlers = createEmailHandlers(authConfig);
 // BETTER AUTH INSTANCE
 // =============================================================================
 
+// Regex for removing trailing slashes from URLs (at top level for performance)
+const trailingSlashPattern = /\/$/;
+
+// Build the full base URL including the API auth path
+// Better Auth uses baseURL for generating email links, so it must include the full path
+const getFullBaseUrl = () => {
+  const base = authConfig.baseUrl.replace(trailingSlashPattern, ""); // Remove trailing slash
+  return `${base}/api/auth`;
+};
+
 export const auth = betterAuth({
   database: dbPool,
-  baseURL: authConfig.baseUrl,
+  // Include /api/auth in baseURL so email links are generated correctly
+  // Better Auth uses baseURL for links and basePath for routing
+  baseURL: getFullBaseUrl(),
   basePath: "/api/auth", // Must match the route mount path in routes/index.ts
   trustedOrigins: getTrustedOrigins(),
   plugins: [

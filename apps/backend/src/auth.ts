@@ -127,6 +127,7 @@ const emailHandlers = createEmailHandlers(authConfig);
 export const auth = betterAuth({
   database: dbPool,
   baseURL: authConfig.baseUrl,
+  basePath: "/api/auth", // Must match the route mount path in routes/index.ts
   trustedOrigins: getTrustedOrigins(),
   plugins: [
     organization({
@@ -235,6 +236,27 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
+          // Create Polar customer with error handling (non-blocking)
+          if (polarClient) {
+            try {
+              await polarClient.customers.create({
+                email: user.email,
+                name: user.name ?? user.email,
+                metadata: {
+                  userId: user.id,
+                },
+              });
+              console.log(`[Auth] Created Polar customer for user ${user.id}`);
+            } catch (polarError) {
+              // Log full error server-side only - don't expose to client
+              console.error(
+                `[Auth] Polar customer creation failed for user ${user.id} (server-side only):`,
+                polarError
+              );
+              // Don't throw - signup continues, customer can be created later
+            }
+          }
+
           // Automatically create a personal organization for new users
           try {
             const orgName = user.name ? `${user.name}'s Space` : "My Space";

@@ -33,7 +33,9 @@ export const createPolarPlugins = (
   return [
     polar({
       client,
-      createCustomerOnSignUp: true,
+      // Disable automatic customer creation - we handle it in auth.ts databaseHooks
+      // with proper error handling that logs server-side only
+      createCustomerOnSignUp: false,
       use: [
         checkout({
           // Products will be fetched dynamically - users can pass product ID or slug

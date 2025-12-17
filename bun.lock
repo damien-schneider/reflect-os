@@ -199,6 +199,13 @@
         "typescript": "^5.5.3",
       },
     },
+    "packages/errors": {
+      "name": "@repo/errors",
+      "version": "0.0.0",
+      "devDependencies": {
+        "typescript": "^5.5.3",
+      },
+    },
     "packages/polar": {
       "name": "@repo/polar",
       "version": "0.0.0",
@@ -910,6 +917,8 @@
     "@repo/db": ["@repo/db@workspace:packages/db"],
 
     "@repo/email": ["@repo/email@workspace:packages/email"],
+
+    "@repo/errors": ["@repo/errors@workspace:packages/errors"],
 
     "@repo/polar": ["@repo/polar@workspace:packages/polar"],
 

@@ -22,9 +22,15 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build dependencies first (email package exports from dist/)
+# Build dependencies first (packages export from dist/)
+# Build order matters due to dependencies:
+# - db, email, polar, errors have no local deps
+# - auth depends on email and polar
 RUN cd packages/db && bun run build
 RUN cd packages/email && bun run build
+RUN cd packages/polar && bun run build
+RUN cd packages/errors && bun run build
+RUN cd packages/auth && bun run build
 
 # Build the backend
 # Note: env validation happens at runtime via t3-env when server starts

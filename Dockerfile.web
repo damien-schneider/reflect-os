@@ -37,6 +37,12 @@ ENV VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION=__VITE_PUBLIC_REQUIRE_EMAIL_VERIFICAT
 
 WORKDIR /app
 
+# Copy installed dependencies from base stage
+COPY --from=base /app/node_modules ./node_modules
+
+# Copy source code from base stage
+COPY --from=base /app .
+
 # Build the database package
 RUN cd packages/db && bun run build
 

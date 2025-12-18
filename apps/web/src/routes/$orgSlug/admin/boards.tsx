@@ -29,9 +29,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useLimitCheck } from "@/features/subscription";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Board } from "@/schema";
-import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/$orgSlug/admin/boards")({
   component: AdminBoards,
@@ -42,14 +42,12 @@ function AdminBoards() {
   const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
-  // Get boards
+  // Get boards - note: byOrganizationId doesn't include orderBy, results may need client-side sorting
   const [boards] = useQuery(
-    zql.board
-      .where("organizationId", org?.id ?? "")
-      .orderBy("createdAt", "desc")
+    queries.board.byOrganizationId({ organizationId: org?.id ?? "" })
   );
 
   // Check board limit

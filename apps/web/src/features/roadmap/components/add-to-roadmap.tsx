@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { LANE_OPTIONS, type RoadmapLane } from "@/lib/constants";
 import { mutators } from "@/mutators";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 type AddToRoadmapProps = {
   feedbackId: string;
@@ -44,7 +44,7 @@ export function AddToRoadmap({
 
   // Get existing feedback items on roadmap to calculate sort order
   const [existingFeedbacks] = useQuery(
-    zql.feedback.where("roadmapLane", "=", lane)
+    queries.feedback.byRoadmapLane({ lane })
   );
 
   const handleAddToRoadmap = async () => {

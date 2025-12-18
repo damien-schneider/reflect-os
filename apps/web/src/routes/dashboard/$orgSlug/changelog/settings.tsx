@@ -1,7 +1,7 @@
 import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { ChangelogSettings } from "@/features/changelog/components/changelog-settings";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/changelog/settings")({
   component: ChangelogSettingsPage,
@@ -11,7 +11,7 @@ function ChangelogSettingsPage() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
 
   // Get organization
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
   if (!org) {

@@ -32,6 +32,11 @@ const userQueries = {
     ({ args: { ids } }) =>
       zql.user.where("id", "IN", ids.length > 0 ? ids : [""])
   ),
+
+  /** User by email - used for invitations and user lookup */
+  byEmail: defineQuery(z.object({ email: z.string() }), ({ args: { email } }) =>
+    zql.user.where("email", email)
+  ),
 };
 
 // ============================================
@@ -45,6 +50,13 @@ const organizationQueries = {
 
   bySlug: defineQuery(z.object({ slug: z.string() }), ({ args: { slug } }) =>
     zql.organization.where("slug", slug)
+  ),
+
+  /** Organization with members and boards for subscription page */
+  bySlugWithRelations: defineQuery(
+    z.object({ slug: z.string() }),
+    ({ args: { slug } }) =>
+      zql.organization.where("slug", slug).related("members").related("boards")
   ),
 };
 
@@ -73,6 +85,32 @@ const memberQueries = {
   ),
 
   byUserAndOrg: defineQuery(
+    z.object({ userId: z.string(), organizationId: z.string() }),
+    ({ args: { userId, organizationId } }) =>
+      zql.member.where("userId", userId).where("organizationId", organizationId)
+  ),
+
+  /**
+   * Query for current user's memberships with organization details.
+   * Used for dashboard sync detection and organization listing.
+   * Security: Only returns memberships for the authenticated user (via ctx).
+   */
+  currentUserMemberships: defineQuery(z.object({}), ({ ctx }) => {
+    const userId = getAuthenticatedUserID(ctx);
+    if (!userId) {
+      // Return empty result for unauthenticated users
+      return zql.member.where("id", "");
+    }
+    return zql.member.where("userId", userId).related("organization");
+  }),
+
+  /**
+   * Check if a specific user is a member of an organization.
+   * Used for sync status detection.
+   * Note: This is intentionally permissive - it's used to detect if data is synced,
+   * not for authorization. The mutator layer handles authorization.
+   */
+  checkMembership: defineQuery(
     z.object({ userId: z.string(), organizationId: z.string() }),
     ({ args: { userId, organizationId } }) =>
       zql.member.where("userId", userId).where("organizationId", organizationId)
@@ -118,6 +156,16 @@ const feedbackQueries = {
       )
   ),
 
+  /** Feedback with author and tags (via feedbackTags relation) for detail view */
+  byIdWithAuthorAndTags: defineQuery(
+    z.object({ id: z.string() }),
+    ({ args: { id } }) =>
+      zql.feedback
+        .where("id", id)
+        .related("author")
+        .related("feedbackTags", (q) => q.related("tag"))
+  ),
+
   byBoardId: defineQuery(
     z.object({ boardId: z.string() }),
     ({ args: { boardId } }) =>
@@ -145,6 +193,15 @@ const feedbackQueries = {
     }
   ),
 
+  /** Feedback with author relation - for user management pages */
+  byBoardIdsWithAuthor: defineQuery(
+    z.object({ boardIds: z.array(z.string()) }),
+    ({ args: { boardIds } }) =>
+      zql.feedback
+        .where("boardId", "IN", boardIds.length > 0 ? boardIds : [""])
+        .related("author")
+  ),
+
   byAuthorId: defineQuery(
     z.object({ authorId: z.string() }),
     ({ args: { authorId } }) =>
@@ -155,6 +212,12 @@ const feedbackQueries = {
   ),
 
   withRelations: defineQuery(z.object({}), () => zql.feedback.related("board")),
+
+  /** Feedback by roadmap lane - for calculating sort order */
+  byRoadmapLane: defineQuery(
+    z.object({ lane: z.string() }),
+    ({ args: { lane } }) => zql.feedback.where("roadmapLane", lane)
+  ),
 };
 
 // ============================================
@@ -206,6 +269,17 @@ const commentQueries = {
         .orderBy("createdAt", "asc")
   ),
 
+  /** Top-level comments (parentId IS null) with replies for comment thread */
+  topLevelByFeedbackId: defineQuery(
+    z.object({ feedbackId: z.string() }),
+    ({ args: { feedbackId } }) =>
+      zql.comment
+        .where("feedbackId", feedbackId)
+        .where("parentId", "IS", null)
+        .related("author")
+        .related("replies", (q) => q.related("author"))
+  ),
+
   byAuthorId: defineQuery(
     z.object({ authorId: z.string() }),
     ({ args: { authorId } }) =>
@@ -226,6 +300,15 @@ const tagQueries = {
     ({ args: { organizationId } }) =>
       zql.tag.where("organizationId", organizationId).orderBy("name", "asc")
   ),
+
+  /** Tags ordered by creation date (newest first) - for management UI */
+  byOrganizationIdDesc: defineQuery(
+    z.object({ organizationId: z.string() }),
+    ({ args: { organizationId } }) =>
+      zql.tag
+        .where("organizationId", organizationId)
+        .orderBy("createdAt", "desc")
+  ),
 };
 
 // ============================================
@@ -242,8 +325,10 @@ const adminNoteQueries = {
         .orderBy("createdAt", "desc")
   ),
 
-  // Empty query for when user doesn't have access
-  empty: defineQuery(z.object({}), () => zql.adminNote.where("id", "")),
+  // Empty query for when user doesn't have access - must have same return type as byFeedbackId
+  empty: defineQuery(z.object({ feedbackId: z.string() }), () =>
+    zql.adminNote.where("id", "").related("author").orderBy("createdAt", "desc")
+  ),
 };
 
 // ============================================
@@ -260,8 +345,32 @@ const releaseQueries = {
         .orderBy("createdAt", "desc")
   ),
 
+  /** Releases with release items for changelog management */
+  byOrganizationIdWithItems: defineQuery(
+    z.object({ organizationId: z.string() }),
+    ({ args: { organizationId } }) =>
+      zql.release
+        .where("organizationId", organizationId)
+        .related("releaseItems")
+        .orderBy("createdAt", "desc")
+  ),
+
   byId: defineQuery(z.object({ id: z.string() }), ({ args: { id } }) =>
     zql.release.where("id", id).related("feedbacks")
+  ),
+
+  /** Release with release items for detail view */
+  byIdWithItems: defineQuery(z.object({ id: z.string() }), ({ args: { id } }) =>
+    zql.release.where("id", id).related("releaseItems")
+  ),
+
+  /** Release with release items and their feedback for changelog detail page */
+  byIdWithItemsAndFeedback: defineQuery(
+    z.object({ id: z.string() }),
+    ({ args: { id } }) =>
+      zql.release
+        .where("id", id)
+        .related("releaseItems", (q) => q.related("feedback"))
   ),
 
   published: defineQuery(
@@ -271,6 +380,18 @@ const releaseQueries = {
         .where("organizationId", organizationId)
         .where("publishedAt", "IS NOT", null)
         .related("feedbacks")
+        .orderBy("publishedAt", "desc")
+  ),
+
+  /** All releases (drafts and published) with release items and their feedback */
+  byOrganizationIdWithItemsAndFeedback: defineQuery(
+    z.object({ organizationId: z.string() }),
+    ({ args: { organizationId } }) =>
+      zql.release
+        .where("organizationId", organizationId)
+        .related("releaseItems", (q) =>
+          q.related("feedback", (fq) => fq.related("board"))
+        )
         .orderBy("publishedAt", "desc")
   ),
 };
@@ -294,9 +415,21 @@ const changelogSubscriptionQueries = {
     }
   ),
 
-  // Empty query when no user
-  empty: defineQuery(z.object({}), () =>
-    zql.changelogSubscription.where("id", "")
+  // Empty query when no user - must have same args as byUserAndOrg for type compatibility
+  empty: defineQuery(
+    z.object({ userId: z.string(), organizationId: z.string() }),
+    () => zql.changelogSubscription.where("id", "")
+  ),
+};
+
+// ============================================
+// RELEASE ITEM QUERIES
+// ============================================
+
+const releaseItemQueries = {
+  byReleaseId: defineQuery(
+    z.object({ releaseId: z.string() }),
+    ({ args: { releaseId } }) => zql.releaseItem.where("releaseId", releaseId)
   ),
 };
 
@@ -318,6 +451,18 @@ const notificationQueries = {
       return zql.notification
         .where("userId", userId)
         .orderBy("createdAt", "desc");
+    }
+  ),
+
+  /** Unread notifications for a user */
+  unreadByUserId: defineQuery(
+    z.object({ userId: z.string() }),
+    ({ args: { userId }, ctx }) => {
+      const authenticatedUserId = getAuthenticatedUserID(ctx);
+      if (authenticatedUserId && authenticatedUserId !== userId) {
+        return zql.notification.where("id", "");
+      }
+      return zql.notification.where("userId", userId).where("isRead", false);
     }
   ),
 };
@@ -349,6 +494,7 @@ export const queries = defineQueries({
   tag: tagQueries,
   adminNote: adminNoteQueries,
   release: releaseQueries,
+  releaseItem: releaseItemQueries,
   changelogSubscription: changelogSubscriptionQueries,
   notification: notificationQueries,
   subscription: subscriptionQueries,

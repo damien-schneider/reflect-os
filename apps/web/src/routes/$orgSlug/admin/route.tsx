@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/$orgSlug/admin")({
   component: AdminLayout,
@@ -36,14 +36,17 @@ function AdminLayout() {
     authClient.useSession();
 
   // Get organization
-  const [orgs, orgsResult] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs, orgsResult] = useQuery(
+    queries.organization.bySlug({ slug: orgSlug })
+  );
   const org = orgs?.[0];
 
   // Check if user is admin/owner
   const [members, membersResult] = useQuery(
-    zql.member
-      .where("organizationId", org?.id ?? "")
-      .where("userId", session?.user?.id ?? "")
+    queries.member.checkMembership({
+      userId: session?.user?.id ?? "",
+      organizationId: org?.id ?? "",
+    })
   );
   const memberRole = members?.[0]?.role;
   const isAdmin = memberRole === "admin" || memberRole === "owner";

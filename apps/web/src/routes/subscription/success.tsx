@@ -13,7 +13,7 @@ import {
 import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 import { requireAuthenticated } from "@/lib/route-guards";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 type SubscriptionSuccessSearch = {
   checkout_id?: string;
@@ -70,7 +70,9 @@ function SubscriptionSuccess() {
   const firstOrg = organizations?.[0];
 
   // Query the organization to verify subscription was updated
-  const [orgs] = useQuery(zql.organization.where("id", firstOrg?.id ?? ""));
+  const [orgs] = useQuery(
+    queries.organization.byId({ id: firstOrg?.id ?? "" })
+  );
   const org = orgs?.[0];
 
   // Auto-sync subscription on mount (catches webhook failures)

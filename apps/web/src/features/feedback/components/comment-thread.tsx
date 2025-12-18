@@ -21,8 +21,10 @@ import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Comment } from "@/zero-schema";
+// Note: zql is kept for imperative zero.run() calls only
 import { zql } from "@/zero-schema";
 
 type CommentWithRelations = Comment & {
@@ -49,12 +51,9 @@ export function CommentThread({
   const { openAuthDialog } = useAuthDialog();
 
   // Get all comments for the feedback
+  // Using named query for reactive updates
   const [comments] = useQuery(
-    zql.comment
-      .where("feedbackId", feedbackId)
-      .where("parentId", "IS", null)
-      .related("author")
-      .related("replies", (q) => q.related("author"))
+    queries.comment.topLevelByFeedbackId({ feedbackId })
   );
 
   const [newComment, setNewComment] = useState("");

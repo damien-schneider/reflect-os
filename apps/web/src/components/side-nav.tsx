@@ -56,9 +56,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Board, Organization } from "@/schema";
-import { zql } from "@/zero-schema";
 
 type SideNavProps = {
   isOpen: boolean;
@@ -143,19 +143,17 @@ function SideNavContent({
     organizations?.find((o) => o.slug === orgSlug) ?? organizations?.[0];
   const effectiveOrgSlug = orgSlug ?? currentOrg?.slug ?? "";
 
-  const [orgs] = useQuery(zql.organization.where("id", currentOrg?.id ?? ""));
+  const [orgs] = useQuery(
+    queries.organization.byId({ id: currentOrg?.id ?? "" })
+  );
   const orgData = orgs?.[0];
 
   const [boards] = useQuery(
-    zql.board
-      .where("organizationId", currentOrg?.id ?? "")
-      .related("organization")
+    queries.board.byOrganizationId({ organizationId: currentOrg?.id ?? "" })
   );
 
   const [notifications] = useQuery(
-    zql.notification
-      .where("userId", session?.user?.id ?? "")
-      .where("isRead", false)
+    queries.notification.unreadByUserId({ userId: session?.user?.id ?? "" })
   );
 
   const unreadCount = notifications?.length ?? 0;

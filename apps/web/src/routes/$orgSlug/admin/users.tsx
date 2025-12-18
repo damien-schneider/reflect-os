@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { mutators } from "@/mutators";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/$orgSlug/admin/users")({
   component: AdminUsers,
@@ -29,32 +29,28 @@ function AdminUsers() {
   const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
   // Get members with user data
   const [members] = useQuery(
-    zql.member.where("organizationId", org?.id ?? "").related("user")
+    queries.member.byOrganizationId({ organizationId: org?.id ?? "" })
   );
 
   // Get all users who have submitted feedback in this org's boards
-  const [boards] = useQuery(zql.board.where("organizationId", org?.id ?? ""));
+  const [boards] = useQuery(
+    queries.board.byOrganizationId({ organizationId: org?.id ?? "" })
+  );
   const boardIds = boards?.map((b) => b.id) ?? [];
 
   const [feedbacks] = useQuery(
-    zql.feedback
-      .where("boardId", "IN", boardIds.length > 0 ? boardIds : [""])
-      .related("author")
+    queries.feedback.byBoardIdsWithAuthor({ boardIds })
   );
 
   // Unique users from feedback
   const feedbackUserIds = [...new Set(feedbacks?.map((f) => f.authorId) ?? [])];
   const [feedbackUsers] = useQuery(
-    zql.user.where(
-      "id",
-      "IN",
-      feedbackUserIds.length > 0 ? feedbackUserIds : [""]
-    )
+    queries.user.byIds({ ids: feedbackUserIds })
   );
 
   const handleBanUser = async (userId: string, isBanned: boolean) => {

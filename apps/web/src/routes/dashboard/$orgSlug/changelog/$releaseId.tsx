@@ -49,8 +49,8 @@ import {
   type VersionIncrement,
 } from "@/hooks/use-next-version";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import type { Organization, ReleaseItem } from "@/schema";
-import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute(
   "/dashboard/$orgSlug/changelog/$releaseId"
@@ -67,14 +67,12 @@ function ReleaseDetailPage() {
   const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0] as Organization | undefined;
 
   // Get release with related items
   const [releases] = useQuery(
-    zql.release
-      .where("id", releaseId)
-      .related("releaseItems", (q) => q.related("feedback"))
+    queries.release.byIdWithItemsAndFeedback({ id: releaseId })
   );
   const release = releases?.[0];
 
@@ -610,10 +608,10 @@ function CompletedItemsSection({
   const [open, setOpen] = useState(false);
 
   // Get all boards for this organization
-  const [boards] = useQuery(zql.board.where("organizationId", organizationId));
+  const [boards] = useQuery(queries.board.byOrganizationId({ organizationId }));
 
   // Get all completed feedback across all boards
-  const [allFeedback] = useQuery(zql.feedback.related("board"));
+  const [allFeedback] = useQuery(queries.feedback.withRelations({}));
 
   // Filter to only completed items from this org's boards
   const completedItems = (() => {

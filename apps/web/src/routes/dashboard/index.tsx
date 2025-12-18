@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { OnboardingPage } from "@/components/onboarding-page";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardIndex,
@@ -34,9 +34,9 @@ function DashboardIndex() {
   const userId = session?.user?.id ?? "";
 
   // Query Zero member table to see if the org membership is synced
-  // Member table has simpler permissions (allowIfLoggedIn) than organization table
+  // Uses named query which properly handles permissions in Zero 0.25+
   const [zeroMembers, { type: queryStatus }] = useQuery(
-    zql.member.where("organizationId", firstOrgId).where("userId", userId)
+    queries.member.checkMembership({ userId, organizationId: firstOrgId })
   );
   const zeroOrgSynced = zeroMembers && zeroMembers.length > 0;
   const zeroQueryComplete = queryStatus === "complete";

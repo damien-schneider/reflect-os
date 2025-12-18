@@ -2,16 +2,18 @@
  * Zero Setup Component
  *
  * Zero 0.25 Authentication:
- * - JWT-based auth for zero-cache websocket connection (provides authData.sub)
- * - Cookie forwarding for query/mutate HTTP endpoints (provides session cookies)
+ * - Cookie-based auth: cookies are forwarded to query/mutate endpoints via zero-cache
+ * - ZERO_QUERY_FORWARD_COOKIES and ZERO_MUTATE_FORWARD_COOKIES must be set to "true"
+ * - Your query/mutate endpoints extract the session from cookies and pass as context
  *
- * This dual approach is needed because:
- * 1. Zero-cache needs authData.sub to apply row-level permissions on sync
- * 2. Query/mutate endpoints need session cookies for server-side validation
+ * This is simpler than JWT-based auth as:
+ * 1. No token endpoint needed
+ * 2. Session management is handled by better-auth cookies
+ * 3. Zero-cache forwards cookies automatically
  *
  * References:
  * - https://zero.rocicorp.dev/docs/auth
- * - https://github.com/rocicorp/ztunes (reference implementation)
+ * - https://github.com/rocicorp/zslack (reference implementation)
  */
 
 import { useConnectionState, ZeroProvider } from "@rocicorp/zero/react";
@@ -30,7 +32,6 @@ import "@/zero-context";
 type ZeroState = {
   status: "loading" | "ready" | "error";
   userID: string;
-  authToken: string | undefined;
   error?: string;
 };
 
@@ -38,7 +39,6 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<ZeroState>({
     status: "loading",
     userID: "anon",
-    authToken: undefined,
   });
 
   const { data: session, isPending } = authClient.useSession();
@@ -61,7 +61,7 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const initZero = async () => {
+    const initZero = () => {
       fetchingRef.current = true;
 
       console.log("[ZeroSetup] Initializing Zero...", {
@@ -70,35 +70,13 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
         cacheURL: clientEnv.VITE_PUBLIC_ZERO_SERVER,
       });
 
-      // Fetch JWT token for authenticated users
-      // This is needed for zero-cache to know the user identity (authData.sub)
-      let authToken: string | undefined;
-      if (session?.user?.id) {
-        // Fetch JWT token for authenticated users
-        // This token is sent to zero-cache to set authData.sub for permissions
-        try {
-          const response = await fetch("/api/zero-token", {
-            credentials: "include", // Include session cookies
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            authToken = data.token;
-          } else if (response.status === 401) {
-            console.log("[ZeroSetup] Not authenticated, skipping token fetch");
-          } else {
-            throw new Error(`Token fetch failed: ${response.status}`);
-          }
-        } catch (error) {
-          console.error("[ZeroSetup] Error fetching token:", error);
-        }
-        console.log("[ZeroSetup] Got auth token:", authToken ? "yes" : "no");
-      }
+      // Zero 0.25: Cookie-based auth - no token needed
+      // Cookies are automatically forwarded by zero-cache to query/mutate endpoints
+      // when ZERO_QUERY_FORWARD_COOKIES and ZERO_MUTATE_FORWARD_COOKIES are set
 
       setState({
         status: "ready",
         userID,
-        authToken,
       });
 
       fetchingRef.current = false;
@@ -109,7 +87,7 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
 
   const handleRetry = () => {
     console.log("[ZeroSetup] Retrying Zero connection...");
-    setState({ status: "loading", userID: "anon", authToken: undefined });
+    setState({ status: "loading", userID: "anon" });
     fetchingRef.current = false;
     // Force a re-initialization
     window.location.reload();
@@ -128,27 +106,24 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
   const context: ZeroContext =
     state.userID !== "anon" ? { userID: state.userID } : undefined;
 
-  // Zero props:
-  // - `auth` provides JWT token to zero-cache for authData.sub
-  // - `cacheURL` points to zero-cache
+  // Zero 0.25 Configuration (following zslack pattern):
+  // - `server` (or `cacheURL`) points to zero-cache
   // - `context` passes auth info to queries/mutators
-  // - Cookie forwarding handles session auth for query/mutate endpoints
+  // - Cookie forwarding is handled by zero-cache env vars:
+  //   ZERO_QUERY_FORWARD_COOKIES=true and ZERO_MUTATE_FORWARD_COOKIES=true
+  // - ZERO_QUERY_URL and ZERO_MUTATE_URL env vars tell zero-cache where to send requests
+  //
+  // NOTE: Do NOT pass queryURL/mutateURL to ZeroProvider - those are for client-side
+  // override only. Let zero-cache use its configured env vars.
   const zeroProps = {
     userID: state.userID,
-    // JWT token for zero-cache to authenticate websocket connection
-    // This sets authData.sub for row-level permissions
-    auth: state.authToken,
-    cacheURL: clientEnv.VITE_PUBLIC_ZERO_SERVER,
+    server: clientEnv.VITE_PUBLIC_ZERO_SERVER,
     schema,
     // Context for auth-aware queries and mutators
     context,
     // Named queries and mutators
     queries,
     mutators,
-    // Server endpoints for query resolution and mutation execution
-    // These receive forwarded cookies for authentication
-    queryURL: "/api/zero/query",
-    mutateURL: "/api/zero/mutate",
   };
 
   // Loading state

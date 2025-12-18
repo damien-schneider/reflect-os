@@ -30,31 +30,11 @@ export const env = createEnv({
         "Use strong credentials and a production database host in production."),
 
     /**
-     * Secret key for Zero JWT authentication (min 32 chars for security)
+     * Secret key for Zero JWT authentication - DEPRECATED in Zero 0.25
+     * Zero 0.25 uses cookie forwarding instead of JWT tokens
+     * Kept for backwards compatibility but no longer required
      */
-    ZERO_AUTH_SECRET: z
-      .string()
-      .min(1, "ZERO_AUTH_SECRET is required")
-      .refine(
-        (val) => process.env.NODE_ENV !== "production" || val.length >= 32,
-        "ZERO_AUTH_SECRET must be at least 32 characters in production"
-      )
-      .refine((val) => {
-        if (process.env.NODE_ENV !== "production") {
-          return true;
-        }
-        // Reject template/default values in production
-        const insecurePatterns = [
-          "your-zero-auth-secret",
-          "testsecretkey",
-          "test-secret",
-          "secret",
-        ];
-        return !insecurePatterns.some((pattern) =>
-          val.toLowerCase().includes(pattern)
-        );
-      }, "ZERO_AUTH_SECRET contains a default/template value. " +
-        "Generate a strong random secret for production (min 32 chars)."),
+    ZERO_AUTH_SECRET: z.string().optional(),
 
     /**
      * Path to Zero replica SQLite file (for local development)

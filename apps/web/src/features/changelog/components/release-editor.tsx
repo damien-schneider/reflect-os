@@ -7,9 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ChangelogItemSelector } from "@/features/changelog/components/changelog-item-selector";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Release, ReleaseItem } from "@/schema";
-import { zql } from "@/zero-schema";
 
 type ReleaseEditorProps = {
   organizationId: string;
@@ -37,7 +37,7 @@ export function ReleaseEditor({
 
   // Get current release items if editing
   const [releaseItemsData] = useQuery(
-    zql.releaseItem.where("releaseId", "=", release?.id ?? "")
+    queries.releaseItem.byReleaseId({ releaseId: release?.id ?? "" })
   );
 
   // Safely convert to array - only use items if actually editing

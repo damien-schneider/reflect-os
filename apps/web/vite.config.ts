@@ -27,6 +27,9 @@ export default defineConfig({
     esbuildOptions: {
       target: "es2022",
     },
+    // Force include @rocicorp/zero/react with its React dependencies
+    // This ensures proper React resolution during pre-bundling
+    include: ["react", "react-dom", "@rocicorp/zero/react"],
   },
   server: {
     allowedHosts: [".ngrok-free.app", ".ngrok-free.dev", ".ngrok.io"],
@@ -50,6 +53,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Force all React imports to use the same instance from web app's node_modules
+      react: path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
+    // Deduplicate React to fix "Invalid hook call" error
+    // This ensures all packages use the same React instance
+    dedupe: ["react", "react-dom"],
   },
 });

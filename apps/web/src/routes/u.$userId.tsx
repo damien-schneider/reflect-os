@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/features/feedback/components/status-badge";
 import type { FeedbackStatus } from "@/lib/constants";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/u/$userId")({
   component: UserProfile,
@@ -16,29 +16,23 @@ function UserProfile() {
   const { userId } = Route.useParams();
 
   // Get user info
-  const [users] = useQuery(zql.user.where("id", userId));
+  const [users] = useQuery(queries.user.byId({ id: userId }));
   const user = users?.[0];
 
   // Get user's public feedback (from public boards only)
   const [allFeedback] = useQuery(
-    zql.feedback
-      .where("authorId", userId)
-      .related("board")
-      .orderBy("createdAt", "desc")
+    queries.feedback.byAuthorId({ authorId: userId })
   );
 
   // Filter to only public boards
   const publicFeedback = allFeedback?.filter((f) => f.board?.isPublic) ?? [];
 
   // Get user's votes
-  const [votes] = useQuery(zql.vote.where("userId", userId));
+  const [votes] = useQuery(queries.vote.byUserId({ userId }));
 
   // Get user's comments on public feedback
   const [allComments] = useQuery(
-    zql.comment
-      .where("authorId", userId)
-      .related("feedback", (fb) => fb.one().related("board"))
-      .orderBy("createdAt", "desc")
+    queries.comment.byAuthorId({ authorId: userId })
   );
 
   // Filter to only comments on public feedback

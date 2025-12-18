@@ -8,7 +8,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/dashboard/$orgSlug")({
   component: DashboardOrgLayout,
@@ -34,12 +34,12 @@ function DashboardOrgLayout() {
   // Query Zero member table first - it has simpler permissions (allowIfLoggedIn)
   // This lets us detect sync status even for private organizations
   const [members, { type: memberQueryStatus }] = useQuery(
-    zql.member.where("organizationId", authOrgId).where("userId", userId)
+    queries.member.checkMembership({ userId, organizationId: authOrgId })
   );
   const isMemberInZero = members && members.length > 0;
 
   // Get organization from Zero for real-time updates (will only work after member syncs)
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug ?? ""));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug ?? "" }));
   const org = orgs?.[0];
 
   // User has access if they're a member according to Better Auth

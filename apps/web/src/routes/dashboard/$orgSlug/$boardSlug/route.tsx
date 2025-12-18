@@ -1,6 +1,6 @@
 import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/$boardSlug")({
   component: DashboardBoardLayout,
@@ -13,12 +13,15 @@ function DashboardBoardLayout() {
   };
 
   // Get organization
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
   // Get board
   const [boards] = useQuery(
-    zql.board.where("organizationId", org?.id ?? "").where("slug", boardSlug)
+    queries.board.byOrgAndSlug({
+      organizationId: org?.id ?? "",
+      slug: boardSlug,
+    })
   );
   const board = boards?.[0];
 

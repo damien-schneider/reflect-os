@@ -12,6 +12,7 @@ import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
 import { zql } from "@/zero-schema";
 
@@ -34,11 +35,14 @@ function NewFeedback() {
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
   // Get organization and board
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
   const [boards] = useQuery(
-    zql.board.where("organizationId", org?.id ?? "").where("slug", boardSlug)
+    queries.board.byOrgAndSlug({
+      organizationId: org?.id ?? "",
+      slug: boardSlug,
+    })
   );
   const board = boards?.[0];
 

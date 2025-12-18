@@ -42,7 +42,7 @@ import {
   useSubscriptionCheckout,
   useSubscriptionSync,
 } from "@/features/subscription";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/subscription")({
   component: DashboardSubscription,
@@ -53,7 +53,7 @@ function DashboardSubscription() {
 
   // Get organization with members and boards for usage stats
   const [orgs] = useQuery(
-    zql.organization.where("slug", orgSlug).related("members").related("boards")
+    queries.organization.bySlugWithRelations({ slug: orgSlug })
   );
   const org = orgs?.[0];
 

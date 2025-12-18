@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
 import { mutators } from "@/mutators";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/$orgSlug/changelog")({
   component: PublicChangelog,
@@ -26,30 +26,28 @@ function PublicChangelog() {
   const userId = session?.user?.id;
 
   // Get organization
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
-  // Get published releases for this organization
+  // Get published releases for this organization with full nested relations
   const [releasesData] = useQuery(
-    zql.release
-      .where("organizationId", org?.id ?? "")
-      .related("releaseItems", (q) =>
-        q.related("feedback", (fq) => fq.related("board"))
-      )
-      .orderBy("publishedAt", "desc")
+    queries.release.byOrganizationIdWithItemsAndFeedback({
+      organizationId: org?.id ?? "",
+    })
   );
 
   // Get user's changelog subscription for this org
-  const subscriptionsQuery =
+  const [subscriptions] = useQuery(
     userId && org?.id
-      ? zql.changelogSubscription
-          .where("userId", userId)
-          .where("organizationId", org.id)
-      : zql.changelogSubscription
-          .where("userId", "__none__")
-          .where("organizationId", "__none__");
-
-  const [subscriptions] = useQuery(subscriptionsQuery);
+      ? queries.changelogSubscription.byUserAndOrg({
+          userId,
+          organizationId: org.id,
+        })
+      : queries.changelogSubscription.empty({
+          userId: "",
+          organizationId: org?.id ?? "",
+        })
+  );
   const isSubscribed = subscriptions && subscriptions.length > 0;
 
   // Toggle subscription handler

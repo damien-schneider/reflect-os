@@ -11,7 +11,7 @@ import { TagSelector } from "@/features/feedback/components/tag-selector";
 import { VoteButton } from "@/features/feedback/components/vote-button";
 import { AddToRoadmap } from "@/features/roadmap/components/add-to-roadmap";
 import { authClient } from "@/lib/auth-client";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/$orgSlug/$boardSlug/$feedbackId")({
   component: FeedbackDetail,
@@ -26,40 +26,38 @@ function FeedbackDetail() {
   const { data: session } = authClient.useSession();
 
   // Get organization
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
   // Get board
   const [boards] = useQuery(
-    zql.board.where("organizationId", org?.id ?? "").where("slug", boardSlug)
+    queries.board.byOrgAndSlug({
+      organizationId: org?.id ?? "",
+      slug: boardSlug,
+    })
   );
   const board = boards?.[0];
 
   // Check if user is org member
   const [members] = useQuery(
-    zql.member
-      .where("organizationId", org?.id ?? "")
-      .where("userId", session?.user?.id ?? "")
+    queries.member.checkMembership({
+      userId: session?.user?.id ?? "",
+      organizationId: org?.id ?? "",
+    })
   );
   const isOrgMember = members && members.length > 0;
 
   // Get feedback with related data
   const [feedbacks] = useQuery(
-    zql.feedback
-      .where("id", feedbackId)
-      .related("author")
-      .related("feedbackTags", (q) => q.related("tag"))
+    queries.feedback.byIdWithAuthorAndTags({ id: feedbackId })
   );
   const feedback = feedbacks?.[0];
 
   // Get admin notes (only visible to org members)
   const [adminNotes] = useQuery(
     isOrgMember
-      ? zql.adminNote
-          .where("feedbackId", feedbackId)
-          .orderBy("createdAt", "desc")
-          .related("author")
-      : zql.adminNote.where("id", "") // Empty query if not member
+      ? queries.adminNote.byFeedbackId({ feedbackId })
+      : queries.adminNote.empty({ feedbackId })
   );
 
   // User is org member for admin note visibility

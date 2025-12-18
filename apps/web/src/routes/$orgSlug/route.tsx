@@ -10,7 +10,7 @@ import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/$orgSlug")({
   component: OrgLayout,
@@ -49,13 +49,13 @@ function OrgLayout() {
   // Query Zero member table first - it has simpler permissions (allowIfLoggedIn)
   // This lets us detect sync status even for private organizations
   const [members, { type: memberQueryStatus }] = useQuery(
-    zql.member.where("organizationId", authOrgId).where("userId", userId)
+    queries.member.checkMembership({ userId, organizationId: authOrgId })
   );
   const isMember = members && members.length > 0;
 
   // Get organization from Zero for real-time updates (will only work after member syncs)
   const [orgs, { type: queryStatus }] = useQuery(
-    zql.organization.where("slug", orgSlug ?? "")
+    queries.organization.bySlug({ slug: orgSlug ?? "" })
   );
   const org = orgs?.[0];
 

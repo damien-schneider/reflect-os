@@ -34,8 +34,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
-import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/changelog/")({
   component: DashboardChangelogIndex,
@@ -47,15 +47,12 @@ function DashboardChangelogIndex() {
   const zero = useZero();
 
   // Get organization
-  const [orgs] = useQuery(zql.organization.where("slug", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
   // Get releases for this organization
   const [releasesData] = useQuery(
-    zql.release
-      .where("organizationId", org?.id ?? "")
-      .related("releaseItems")
-      .orderBy("createdAt", "desc")
+    queries.release.byOrganizationIdWithItems({ organizationId: org?.id ?? "" })
   );
 
   const [deleteRelease, setDeleteRelease] = useState<{

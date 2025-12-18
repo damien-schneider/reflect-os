@@ -10,8 +10,8 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
-import { zql } from "@/zero-schema";
 
 type VoteButtonProps = {
   feedbackId: string;
@@ -33,7 +33,7 @@ export function VoteButton({
 
   // Check if user has voted
   const [votes] = useQuery(
-    zql.vote.where("feedbackId", feedbackId).where("userId", userId ?? "")
+    queries.vote.byUserAndFeedback({ userId: userId ?? "", feedbackId })
   );
 
   const hasVoted = votes && votes.length > 0;

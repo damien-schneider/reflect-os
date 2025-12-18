@@ -29,8 +29,8 @@ import {
 } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
-import { zql } from "@/zero-schema";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/")({
   component: DashboardOrgIndex,
@@ -44,22 +44,19 @@ function DashboardOrgIndex() {
 
   // Get organization
   const [orgs, { type: orgQueryStatus }] = useQuery(
-    zql.organization.where("slug", orgSlug)
+    queries.organization.bySlug({ slug: orgSlug })
   );
   const org = orgs?.[0];
 
   // Get all boards for this org
-  const [boards] = useQuery(zql.board.where("organizationId", org?.id ?? ""));
+  const [boards] = useQuery(
+    queries.board.byOrganizationId({ organizationId: org?.id ?? "" })
+  );
 
   // Get recent feedback across all boards
   const boardIds = boards?.map((b) => b.id) ?? [];
   const [recentFeedback] = useQuery(
-    zql.feedback
-      .where("boardId", "IN", boardIds.length > 0 ? boardIds : [""])
-      .orderBy("createdAt", "desc")
-      .limit(5)
-      .related("author")
-      .related("board")
+    queries.feedback.byBoardIds({ boardIds, limit: 5 })
   );
 
   // Stats

@@ -635,9 +635,10 @@ export const schema = createSchema({
     subscriptionRelationships,
     changelogSubscriptionRelationships,
   ],
-  // Zero 0.25: Enable legacy queries until full migration to named queries
-  // TODO: Migrate all inline zql.* queries to named queries, then set to false
-  enableLegacyQueries: true,
+  // Zero 0.25: Named queries are now the default - disable legacy queries
+  // All reactive useQuery() hooks should use queries from @/queries
+  // The zql builder is still exported for imperative queries (.run())
+  enableLegacyQueries: false,
 });
 
 // ============================================

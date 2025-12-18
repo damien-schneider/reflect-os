@@ -4,7 +4,7 @@ import { ArrowRight, Globe, Loader2, MessageSquare } from "lucide-react";
 import { AdminFloatingBar } from "@/components/admin-floating-bar";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 export const Route = createFileRoute("/$orgSlug/")({
   component: OrgDashboard,
@@ -16,20 +16,23 @@ function OrgDashboard() {
 
   // Get organization
   const [orgs, { type: orgQueryStatus }] = useQuery(
-    zql.organization.where("slug", orgSlug)
+    queries.organization.bySlug({ slug: orgSlug })
   );
   const org = orgs?.[0];
 
   // Check if user is a member
   const [members, { type: memberQueryStatus }] = useQuery(
-    zql.member
-      .where("organizationId", org?.id ?? "")
-      .where("userId", session?.user?.id ?? "")
+    queries.member.checkMembership({
+      userId: session?.user?.id ?? "",
+      organizationId: org?.id ?? "",
+    })
   );
   const isMember = members && members.length > 0;
 
   // Get boards for this org (public boards for non-members, all boards for members)
-  const [boards] = useQuery(zql.board.where("organizationId", org?.id ?? ""));
+  const [boards] = useQuery(
+    queries.board.byOrganizationId({ organizationId: org?.id ?? "" })
+  );
 
   // Filter boards based on membership - non-members only see public boards
   const visibleBoards = isMember ? boards : boards?.filter((b) => b.isPublic);

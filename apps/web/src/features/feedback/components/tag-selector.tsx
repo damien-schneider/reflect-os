@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
+import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Tag } from "@/schema";
+// Note: zql is kept for imperative queries (.run()) that aren't reactive
 import { zql } from "@/zero-schema";
 
 type TagSelectorProps = {
@@ -35,7 +37,7 @@ export function TagSelector({
   const [open, setOpen] = useState(false);
 
   // Get all tags for the organization
-  const [tags] = useQuery(zql.tag.where("organizationId", "=", organizationId));
+  const [tags] = useQuery(queries.tag.byOrganizationId({ organizationId }));
 
   // Get selected tags
   const selectedTags = tags?.filter((t) => selectedTagIds.includes(t.id)) ?? [];

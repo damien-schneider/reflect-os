@@ -1,9 +1,10 @@
-bun test
-bun run check-types
-
 #!/bin/sh
 # Exit on any error
 set -e
+
+# Run tests and type checking
+bun test
+bun run check-types
 
 # Check if there are any staged files
 if [ -z "$(git diff --cached --name-only)" ]; then

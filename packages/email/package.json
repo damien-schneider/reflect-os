@@ -22,16 +22,16 @@
     "email:dev": "email dev -p 3002"
   },
   "dependencies": {
-    "@react-email/components": "1.0.1",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
+    "@react-email/components": "1.0.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "resend": "^6.6.0"
   },
   "devDependencies": {
-    "@types/node": "^24.10.4",
+    "@types/node": "^25.0.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "react-email": "5.0.8",
+    "react-email": "5.1.0",
     "typescript": "^5.5.3"
   }
 }

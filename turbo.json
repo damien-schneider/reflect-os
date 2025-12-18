@@ -1,6 +1,15 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": [
+    "SKIP_ENV_VALIDATION",
+    "npm_lifecycle_event",
+    "DEV",
+    "BACKEND_PORT",
+    "DATABASE_URL",
+    "PLAYWRIGHT_BUILD_MODE",
+    "POLAR_SKIP_VALIDATION"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

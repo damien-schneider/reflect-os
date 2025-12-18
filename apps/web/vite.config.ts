@@ -53,12 +53,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // Force all React imports to use the same instance from web app's node_modules
-      react: path.resolve(__dirname, "./node_modules/react"),
-      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
-    // Deduplicate React to fix "Invalid hook call" error
-    // This ensures all packages use the same React instance
-    dedupe: ["react", "react-dom"],
   },
 });

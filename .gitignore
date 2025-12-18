@@ -41,6 +41,7 @@ zero-schema.json
 # Environment files (per-app and root)
 .env
 .env.local
+.env.prod
 .env.*.local
 apps/*/.env
 apps/*/.env.local

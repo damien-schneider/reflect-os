@@ -93,6 +93,13 @@ services:
       # Authentication
       ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
       ZERO_ADMIN_PASSWORD: ${ZERO_ADMIN_PASSWORD:-admin}
+      # Cookie-based auth (Zero 0.25+)
+      ZERO_QUERY_FORWARD_COOKIES: "true"
+      ZERO_MUTATE_FORWARD_COOKIES: "true"
+      # Custom endpoints for named queries and mutators
+      # Uses Docker network hostname to reach the web server
+      ZERO_QUERY_URL: http://web:3000/api/zero/query
+      ZERO_MUTATE_URL: http://web:3000/api/zero/mutate
       # Replica file for local caching
       ZERO_REPLICA_FILE: /data/zero_replica.db
       # Logging

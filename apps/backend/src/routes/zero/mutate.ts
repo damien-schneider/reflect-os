@@ -41,14 +41,28 @@ async function handleMutate(c: Context): Promise<any> {
       headers: c.req.raw.headers,
     });
 
+    // CRITICAL: Return 401 early if no session
+    // This triggers 'needs-auth' connection state on the client
+    // and ensures mutations are properly rejected before processing
+    if (!session?.user?.id) {
+      console.log(
+        "[API /zero/mutate] ❌ No session found - returning 401 to trigger needs-auth"
+      );
+      return c.json(
+        {
+          error: "Unauthorized",
+          message: "Authentication required: No valid session found",
+        },
+        401
+      );
+    }
+
     // Build context following official ztunes/zslack pattern
-    const ctx: ZeroContext = session?.user?.id
-      ? { userID: session.user.id }
-      : undefined;
+    const ctx: ZeroContext = { userID: session.user.id };
 
     console.log(
       "[API /zero/mutate] Processing mutation request for user:",
-      ctx?.userID ?? "anon"
+      ctx.userID
     );
 
     // Note: Using any casts to avoid TypeScript deep type instantiation error

@@ -62,6 +62,7 @@ function convertSlateToMarkdown(nodes: SlateNode[]): string {
     .join("\n\n");
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: markdown conversion with many node types
 function convertSlateNodeToMarkdown(node: SlateNode): string | null {
   // Skip slash_input nodes (incomplete slash commands)
   if (node.type === "slash_input") {

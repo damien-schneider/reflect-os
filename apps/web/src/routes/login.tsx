@@ -252,16 +252,20 @@ function Login() {
           </div>
 
           <Button className="w-full" disabled={isLoading} type="submit">
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {isSignUp ? "Creating..." : "Signing in..."}
-              </>
-            ) : isSignUp ? (
-              "Create Account"
-            ) : (
-              "Sign In"
-            )}
+            {(() => {
+              if (isLoading) {
+                return (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isSignUp ? "Creating..." : "Signing in..."}
+                  </>
+                );
+              }
+              if (isSignUp) {
+                return "Create Account";
+              }
+              return "Sign In";
+            })()}
           </Button>
         </form>
 

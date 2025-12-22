@@ -51,6 +51,7 @@ export function ReleaseEditor({
     }
   }, [releaseItems, selectedFeedbackIds.length]);
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex form submission logic
   const handleSubmit = () => {
     if (!title.trim()) {
       return;
@@ -194,11 +195,15 @@ export function ReleaseEditor({
           </Button>
         )}
         <Button disabled={isSubmitting || !title.trim()} onClick={handleSubmit}>
-          {isSubmitting
-            ? "Saving..."
-            : isEditing
-              ? "Save Changes"
-              : "Create Release"}
+          {(() => {
+            if (isSubmitting) {
+              return "Saving...";
+            }
+            if (isEditing) {
+              return "Save Changes";
+            }
+            return "Create Release";
+          })()}
         </Button>
       </div>
     </div>

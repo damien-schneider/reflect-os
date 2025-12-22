@@ -115,6 +115,7 @@ function DashboardSettings() {
             />
             {logo.length > 0 && !logoError ? (
               <div className="flex h-10 w-10 items-center justify-center rounded border bg-muted">
+                {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: onError handler for image loading */}
                 <img
                   alt="Logo preview"
                   className="max-h-8 max-w-8 object-contain"

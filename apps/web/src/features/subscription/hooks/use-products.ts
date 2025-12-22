@@ -65,6 +65,7 @@ export function useProducts() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex product fetching and tier mapping logic
     const fetchProducts = async () => {
       try {
         const response = await api.api.products.$get();

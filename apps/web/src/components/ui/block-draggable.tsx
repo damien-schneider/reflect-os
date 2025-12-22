@@ -29,6 +29,7 @@ const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
 export const BlockDraggable: RenderNodeWrapper = (blockProps) => {
   const { editor, element, path } = blockProps;
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: drag-and-drop requires many conditions
   const enabled = (() => {
     if (editor.dom.readOnly) {
       return false;
@@ -119,6 +120,8 @@ function Draggable(props: PlateElementProps) {
   const [dragButtonTop, setDragButtonTop] = React.useState(0);
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: drag-and-drop wrapper needs mouse events
+    // biome-ignore lint/a11y/noNoninteractiveElementInteractions: intentional wrapper for dnd
     <div
       className={cn(
         "relative",
@@ -179,6 +182,8 @@ function Draggable(props: PlateElementProps) {
         style={{ top: `${-previewTop}px` }}
       />
 
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: context menu handler for block selection */}
+      {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: context menu handler */}
       <div
         className="slate-blockWrapper flow-root"
         onContextMenu={(event) =>

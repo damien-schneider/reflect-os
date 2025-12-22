@@ -256,11 +256,15 @@ function AdminTags() {
               disabled={isSubmitting || !name.trim()}
               onClick={handleSubmit}
             >
-              {isSubmitting
-                ? "Saving..."
-                : editingTag
-                  ? "Save Changes"
-                  : "Create Tag"}
+              {(() => {
+                if (isSubmitting) {
+                  return "Saving...";
+                }
+                if (editingTag) {
+                  return "Save Changes";
+                }
+                return "Create Tag";
+              })()}
             </Button>
           </DialogFooter>
         </DialogContent>

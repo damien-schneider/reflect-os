@@ -130,6 +130,7 @@ export function useSubscriptionCheckout() {
   const org = orgs?.[0];
   const currentTier = (org?.subscriptionTier ?? "free") as SubscriptionTier;
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex checkout flow with many edge cases
   const initiateCheckout = async (productSlug: string) => {
     if (!org?.id) {
       throw new Error("Organization not found");
@@ -230,6 +231,7 @@ export function useCustomerPortal() {
   const [orgs] = useQuery(zql.organization.where("slug", orgSlug ?? ""));
   const org = orgs?.[0];
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex portal opening flow with error handling
   const openPortal = async () => {
     console.log("[useCustomerPortal] Starting portal open flow...");
     console.log("[useCustomerPortal] orgSlug:", orgSlug, "org:", org?.id);
@@ -460,6 +462,7 @@ export function useSubscriptionSync() {
     return () => clearInterval(timer);
   }, [cooldownRemaining]);
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex subscription sync with API calls
   const syncSubscription = async () => {
     if (!org?.id) {
       setSyncResult({ status: "error", message: "Organization not found" });

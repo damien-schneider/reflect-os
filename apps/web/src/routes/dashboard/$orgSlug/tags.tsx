@@ -108,12 +108,15 @@ function DashboardTags() {
             isDoneStatus,
             isRoadmapLane,
             // Set lane order if becoming a roadmap lane
-            laneOrder:
-              isRoadmapLane && !editingTag.isRoadmapLane
-                ? maxOrder + 1000
-                : isRoadmapLane
-                  ? (editingTag.laneOrder ?? undefined)
-                  : undefined,
+            laneOrder: (() => {
+              if (isRoadmapLane && !editingTag.isRoadmapLane) {
+                return maxOrder + 1000;
+              }
+              if (isRoadmapLane) {
+                return editingTag.laneOrder ?? undefined;
+              }
+              return;
+            })(),
           })
         );
       } else {
@@ -337,11 +340,15 @@ function DashboardTags() {
               disabled={isSubmitting || !name.trim()}
               onClick={handleSubmit}
             >
-              {isSubmitting
-                ? "Saving..."
-                : editingTag
-                  ? "Save Changes"
-                  : "Create Tag"}
+              {(() => {
+                if (isSubmitting) {
+                  return "Saving...";
+                }
+                if (editingTag) {
+                  return "Save Changes";
+                }
+                return "Create Tag";
+              })()}
             </Button>
           </DialogFooter>
         </DialogContent>

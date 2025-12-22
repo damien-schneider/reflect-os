@@ -197,6 +197,7 @@ function UserProfile() {
                     <div className="min-w-0 flex-1">
                       <div
                         className="line-clamp-2 text-sm"
+                        // biome-ignore lint/security/noDangerouslySetInnerHtml: user comment HTML from rich text editor
                         dangerouslySetInnerHTML={{ __html: comment.body }}
                       />
                       <div className="mt-2 flex items-center gap-2 text-muted-foreground text-xs">

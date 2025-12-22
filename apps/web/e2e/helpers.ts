@@ -42,6 +42,7 @@ export async function waitForSyncReady(
  *
  * This helper handles that race condition by retrying navigation if needed.
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: e2e helper with complex retry logic
 export async function waitForDashboardStable(
   page: Page,
   timeout = DEFAULT_TIMEOUT

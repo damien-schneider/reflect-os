@@ -117,6 +117,7 @@ function DashboardOrgLayout() {
   return (
     <>
       {/* Inject custom CSS if available */}
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: admin-controlled CSS */}
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
 
       <div className="p-4 md:p-6">

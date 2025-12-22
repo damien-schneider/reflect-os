@@ -17,6 +17,7 @@
  */
 
 import { Button } from "@repo/ui/components/button";
+import { dropAllDatabases } from "@rocicorp/zero";
 import { useConnectionState, ZeroProvider } from "@rocicorp/zero/react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -106,17 +107,16 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
   const context: ZeroContext =
     state.userID !== "anon" ? { userID: state.userID } : undefined;
 
-  // Zero 0.25 Configuration (following zbugs pattern):
-  // - `server` (or `cacheURL`) points to zero-cache for real-time sync
+  // Zero 0.25 Configuration:
+  // - `server` (or `cacheURL`) points to zero-cache for real-time sync and query/mutate
   // - `context` passes auth info to queries/mutators
-  // - `mutateURL` and `queryURL` point to our backend API endpoints
+  // - Cookie forwarding is handled by zero-cache env vars:
+  //   ZERO_QUERY_FORWARD_COOKIES=true and ZERO_MUTATE_FORWARD_COOKIES=true
+  // - ZERO_QUERY_URL and ZERO_MUTATE_URL env vars tell zero-cache where to send requests
   //
-  // IMPORTANT: By passing mutateURL/queryURL, the browser calls these endpoints
-  // directly (same-origin), which means cookies are sent automatically.
-  // Zero-cache is only used for real-time sync (WebSocket).
-  //
-  // This is how zbugs (official example) handles it:
-  // https://github.com/rocicorp/mono/blob/main/apps/zbugs/src/zero-init.tsx
+  // NOTE: Do NOT pass queryURL/mutateURL to ZeroProvider - zero-cache handles routing.
+  // The browser sends cookies to zero-cache (cross-origin), and zero-cache forwards
+  // them to the backend's query/mutate endpoints.
   const zeroProps = {
     userID: state.userID,
     server: clientEnv.VITE_PUBLIC_ZERO_SERVER,
@@ -126,9 +126,6 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
     // Named queries and mutators
     queries,
     mutators,
-    // Direct browser → backend API calls (same-origin, cookies included automatically)
-    mutateURL: `${window.location.origin}/api/zero/mutate`,
-    queryURL: `${window.location.origin}/api/zero/query`,
   };
 
   // Loading state
@@ -180,15 +177,50 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
 }
 
 /**
+ * Clear all Zero/Replicache data from IndexedDB.
+ * This should be called on auth errors to ensure a clean slate.
+ */
+async function clearZeroData(): Promise<void> {
+  try {
+    console.log("[ZeroSetup] Clearing Zero IndexedDB data...");
+    const result = await dropAllDatabases();
+    console.log("[ZeroSetup] Zero data cleared:", result);
+  } catch (error) {
+    console.error("[ZeroSetup] Failed to clear Zero data:", error);
+  }
+}
+
+/**
+ * Handle complete logout - clear Zero data, sign out, and redirect.
+ */
+async function handleAuthError(): Promise<void> {
+  console.log("[ZeroSetup] Handling auth error - clearing all data...");
+
+  // Clear Zero IndexedDB data
+  await clearZeroData();
+
+  // Sign out from better-auth (clears session cookies)
+  try {
+    await authClient.signOut();
+  } catch (error) {
+    console.error("[ZeroSetup] Sign out error (continuing anyway):", error);
+  }
+
+  // Redirect to login page
+  window.location.href = "/login";
+}
+
+/**
  * Internal component to handle connection state changes.
  * Zero: Use Connection Status API for auth failures and errors.
- * When 'needs-auth' occurs, the user should re-authenticate.
+ * When 'needs-auth' occurs, we clear all Zero data and redirect to login.
  */
 function ZeroConnectionHandler({ onNeedsAuth }: { onNeedsAuth: () => void }) {
   const connectionState = useConnectionState();
   const { data: session } = authClient.useSession();
   const hasTriggeredReauth = useRef(false);
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: auth error handling requires multiple state checks
   useEffect(() => {
     console.log("[ZeroSetup] Connection state:", connectionState.name);
 
@@ -202,17 +234,25 @@ function ZeroConnectionHandler({ onNeedsAuth }: { onNeedsAuth: () => void }) {
         return;
       }
 
-      // If user has a session, try reconnecting (token might be stale)
-      // If no session, they need to log in
+      hasTriggeredReauth.current = true;
+
+      // If user has a session but Zero says needs-auth, there's a mismatch
+      // This can happen with stale IndexedDB data - clear everything and re-auth
       if (session) {
         console.log(
-          "[ZeroSetup] User has session, triggering page reload to refresh token..."
+          "[ZeroSetup] User has session but Zero needs auth - clearing Zero data and retrying..."
         );
-        hasTriggeredReauth.current = true;
-        onNeedsAuth();
+        // Clear Zero data and reload to get a fresh state
+        clearZeroData().then(() => {
+          onNeedsAuth();
+        });
       } else {
-        console.log("[ZeroSetup] No session - user needs to log in");
-        // Don't auto-redirect - let the app handle showing login UI
+        console.log(
+          "[ZeroSetup] No session and Zero needs auth - redirecting to login..."
+        );
+        // No session - user needs to log in
+        // Clear any stale Zero data before redirecting
+        handleAuthError();
       }
     }
 
@@ -221,12 +261,27 @@ function ZeroConnectionHandler({ onNeedsAuth }: { onNeedsAuth: () => void }) {
       hasTriggeredReauth.current = false;
     }
 
-    // Log errors but don't block - these are recoverable
+    // Handle connection errors - may indicate auth issues
     if (connectionState.name === "error") {
-      console.error(
-        "[ZeroSetup] Connection error:",
-        "reason" in connectionState ? connectionState.reason : "unknown"
-      );
+      const reason =
+        "reason" in connectionState ? connectionState.reason : "unknown";
+      console.error("[ZeroSetup] Connection error:", reason);
+
+      // If the error mentions authentication, treat it as an auth error
+      if (
+        typeof reason === "string" &&
+        (reason.toLowerCase().includes("auth") ||
+          reason.toLowerCase().includes("unauthorized") ||
+          reason.toLowerCase().includes("401"))
+      ) {
+        console.log(
+          "[ZeroSetup] Auth-related error detected - clearing data..."
+        );
+        if (!hasTriggeredReauth.current) {
+          hasTriggeredReauth.current = true;
+          handleAuthError();
+        }
+      }
     }
   }, [connectionState, onNeedsAuth, session]);
 

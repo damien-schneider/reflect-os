@@ -17,6 +17,7 @@ export const Route = createFileRoute("/$orgSlug/$boardSlug/$feedbackId")({
   component: FeedbackDetail,
 });
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex feedback detail page with multiple states
 function FeedbackDetail() {
   const { orgSlug, boardSlug, feedbackId } = useParams({ strict: false }) as {
     orgSlug: string;

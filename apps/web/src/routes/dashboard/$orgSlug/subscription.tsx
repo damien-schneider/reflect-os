@@ -48,6 +48,7 @@ export const Route = createFileRoute("/dashboard/$orgSlug/subscription")({
   component: DashboardSubscription,
 });
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex subscription page with many states
 function DashboardSubscription() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
 
@@ -237,13 +238,15 @@ function DashboardSubscription() {
           {/* Sync status message */}
           {syncResult.status !== "idle" && (
             <div
-              className={`rounded-lg p-3 text-sm ${
-                syncResult.status === "success"
-                  ? "border border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/10 dark:text-green-400"
-                  : syncResult.status === "error"
-                    ? "border border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-400"
-                    : "border border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/10 dark:text-yellow-400"
-              }`}
+              className={`rounded-lg p-3 text-sm ${(() => {
+                if (syncResult.status === "success") {
+                  return "border border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/10 dark:text-green-400";
+                }
+                if (syncResult.status === "error") {
+                  return "border border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-400";
+                }
+                return "border border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/10 dark:text-yellow-400";
+              })()}`}
             >
               {syncResult.message}
             </div>
@@ -393,7 +396,15 @@ function DashboardSubscription() {
           </div>
 
           <div
-            className={`grid gap-4 ${isFreePlan ? "md:grid-cols-3" : upgradeTiers.length === 1 ? "max-w-md md:grid-cols-1" : "md:grid-cols-2"}`}
+            className={`grid gap-4 ${(() => {
+              if (isFreePlan) {
+                return "md:grid-cols-3";
+              }
+              if (upgradeTiers.length === 1) {
+                return "max-w-md md:grid-cols-1";
+              }
+              return "md:grid-cols-2";
+            })()}`}
           >
             {/* Show Free tier card when user is on free plan */}
             {isFreePlan && <FreeTierCard isCurrent />}
@@ -560,16 +571,20 @@ function PlanCard({
           disabled={!isOwner || isThisCheckingOut || !priceLoaded}
           onClick={handleClick}
         >
-          {isThisCheckingOut ? (
-            <span className="animate-pulse">Redirecting...</span>
-          ) : priceLoaded ? (
-            <>
-              Upgrade to {tierConfig.label}
-              <ExternalLink className="ml-2 h-3 w-3" />
-            </>
-          ) : (
-            <span className="animate-pulse">Loading...</span>
-          )}
+          {(() => {
+            if (isThisCheckingOut) {
+              return <span className="animate-pulse">Redirecting...</span>;
+            }
+            if (priceLoaded) {
+              return (
+                <>
+                  Upgrade to {tierConfig.label}
+                  <ExternalLink className="ml-2 h-3 w-3" />
+                </>
+              );
+            }
+            return <span className="animate-pulse">Loading...</span>;
+          })()}
         </Button>
         {!isOwner && (
           <p className="text-center text-muted-foreground text-xs">

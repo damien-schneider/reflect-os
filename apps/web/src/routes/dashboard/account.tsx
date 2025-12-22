@@ -19,6 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
+import { dropAllDatabases } from "@rocicorp/zero";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ChevronRight,
@@ -43,12 +44,20 @@ export const Route = createFileRoute("/dashboard/account")({
   component: MyAccount,
 });
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex account page with multiple sections
 function MyAccount() {
   const { data: session } = authClient.useSession();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
+    // Clear Zero IndexedDB data to prevent stale data on next login
+    try {
+      await dropAllDatabases();
+      console.log("[Account] Cleared Zero data on sign out");
+    } catch (error) {
+      console.error("[Account] Failed to clear Zero data:", error);
+    }
     await authClient.signOut();
     navigate({ to: "/login" });
   };

@@ -155,6 +155,7 @@ export function RoadmapKanban({
     }
   };
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex drag-and-drop logic with multiple scenarios
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveItem(null);

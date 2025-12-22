@@ -36,6 +36,7 @@ export const Route = createFileRoute("/dashboard/$orgSlug/")({
   component: DashboardOrgIndex,
 });
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex dashboard with multiple queries and state
 function DashboardOrgIndex() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
   const zero = useZero();

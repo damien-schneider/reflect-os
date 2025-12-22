@@ -345,8 +345,11 @@ export const auth = betterAuth({
   },
   advanced: {
     defaultCookieAttributes: {
-      sameSite: "lax",
-      secure: isProduction,
+      // Use SameSite=None for cross-subdomain cookie sharing with zero-cache
+      // This is required because browser at beta.reflet.app connects to beta-zero.reflet.app
+      // SameSite=Lax would block cookies on cross-origin WebSocket connections
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction, // SameSite=None requires Secure
     },
     useSecureCookies: isProduction,
     // Enable cross-subdomain cookies for zero-cache integration
@@ -369,6 +372,6 @@ export const auth = betterAuth({
 // Log the cross-subdomain cookie config in production
 if (isProduction && rootDomain) {
   console.log(
-    `[Auth] Cross-subdomain cookies enabled for domain: .${rootDomain}`
+    `[Auth] Cross-subdomain cookies enabled for domain: .${rootDomain} (SameSite=None, Secure=true)`
   );
 }

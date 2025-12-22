@@ -24,6 +24,13 @@ const app = new Hono();
 
 app.post("/", async (c) => {
   try {
+    // Debug: Log incoming cookies from zero-cache
+    const cookieHeader = c.req.header("Cookie");
+    console.log(
+      "[API /zero/query] Incoming cookies:",
+      cookieHeader ? `[${cookieHeader.substring(0, 100)}...]` : "NONE"
+    );
+
     // Get the current user's session from forwarded cookies
     // Zero 0.25: Cookies are forwarded when ZERO_QUERY_FORWARD_COOKIES=true
     const session = await auth.api.getSession({

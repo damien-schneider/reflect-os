@@ -28,6 +28,13 @@ const app = new Hono();
 // biome-ignore lint/suspicious/noExplicitAny: Required to avoid TypeScript deep type instantiation error with complex Zero types
 async function handleMutate(c: Context): Promise<any> {
   try {
+    // Debug: Log incoming cookies from zero-cache
+    const cookieHeader = c.req.header("Cookie");
+    console.log(
+      "[API /zero/mutate] Incoming cookies:",
+      cookieHeader ? `[${cookieHeader.substring(0, 100)}...]` : "NONE"
+    );
+
     // Get the current user's session from forwarded cookies
     // Zero 0.25: Cookies are forwarded when ZERO_MUTATE_FORWARD_COOKIES=true
     const session = await auth.api.getSession({

@@ -95,6 +95,31 @@ const polarPlugins = createPolarPlugins(
 // Regex for removing trailing slashes
 const trailingSlashRegex = /\/$/;
 
+// Extract the root domain from a URL for cross-subdomain cookies
+// e.g., "https://beta.reflet.app" → "reflet.app"
+const extractRootDomain = (url: string): string | undefined => {
+  try {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname;
+
+    // Handle localhost (no cross-subdomain needed)
+    if (hostname === "localhost" || hostname.startsWith("localhost:")) {
+      return;
+    }
+
+    // Split hostname and get the last two parts (domain.tld)
+    const parts = hostname.split(".");
+    if (parts.length >= 2) {
+      // Return domain.tld (e.g., "reflet.app" from "beta.reflet.app")
+      return parts.slice(-2).join(".");
+    }
+
+    return;
+  } catch {
+    return;
+  }
+};
+
 // Build trusted origins list (includes URL variations)
 const getTrustedOrigins = (): string[] => {
   const origins: string[] = [];
@@ -103,6 +128,19 @@ const getTrustedOrigins = (): string[] => {
     origins.push(authConfig.baseUrl);
     // Also allow without trailing slash
     origins.push(authConfig.baseUrl.replace(trailingSlashRegex, ""));
+
+    // Extract root domain to allow zero-cache subdomain
+    // e.g., if baseUrl is "https://beta.reflet.app", also trust "https://beta-zero.reflet.app"
+    const rootDomain = extractRootDomain(authConfig.baseUrl);
+    if (rootDomain && isProduction) {
+      // Add wildcard subdomain trust for zero-cache
+      // Note: Better Auth needs explicit origins, so we derive the zero subdomain
+      const parsedUrl = new URL(authConfig.baseUrl);
+      const subdomain = parsedUrl.hostname.split(".")[0]; // e.g., "beta"
+      const zeroOrigin = `${parsedUrl.protocol}//${subdomain}-zero.${rootDomain}`;
+      origins.push(zeroOrigin);
+      console.log(`[Auth] Added zero-cache trusted origin: ${zeroOrigin}`);
+    }
   }
 
   // In development, allow localhost
@@ -112,6 +150,11 @@ const getTrustedOrigins = (): string[] => {
 
   return [...new Set(origins)];
 };
+
+// Get the root domain for cross-subdomain cookies
+const rootDomain = authConfig.baseUrl
+  ? extractRootDomain(authConfig.baseUrl)
+  : undefined;
 
 // =============================================================================
 // ORGANIZATION PLUGIN
@@ -306,8 +349,26 @@ export const auth = betterAuth({
       secure: isProduction,
     },
     useSecureCookies: isProduction,
+    // Enable cross-subdomain cookies for zero-cache integration
+    // This allows cookies set on beta.reflet.app to be shared with beta-zero.reflet.app
+    // Required because zero-cache forwards cookies to query/mutate endpoints
+    ...(isProduction && rootDomain
+      ? {
+          crossSubDomainCookies: {
+            enabled: true,
+            domain: rootDomain, // e.g., "reflet.app"
+          },
+        }
+      : {}),
   },
   logger: {
     level: "debug", // Always debug to see errors in production logs
   },
 });
+
+// Log the cross-subdomain cookie config in production
+if (isProduction && rootDomain) {
+  console.log(
+    `[Auth] Cross-subdomain cookies enabled for domain: .${rootDomain}`
+  );
+}

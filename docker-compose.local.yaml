@@ -63,8 +63,9 @@ services:
       ZERO_QUERY_FORWARD_COOKIES: "true"
       ZERO_MUTATE_FORWARD_COOKIES: "true"
       # Custom endpoints for named queries and mutators
-      ZERO_QUERY_URL: http://web:3000/api/zero/query
-      ZERO_MUTATE_URL: http://web:3000/api/zero/mutate
+      # Note: Direct to backend (port 3001) to avoid web proxy issues with cookies
+      ZERO_QUERY_URL: http://backend:3001/api/zero/query
+      ZERO_MUTATE_URL: http://backend:3001/api/zero/mutate
       ZERO_NUM_SYNC_WORKERS: "2"
       ZERO_LOG_LEVEL: debug
       LOG_LEVEL: debug

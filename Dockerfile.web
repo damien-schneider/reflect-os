@@ -20,6 +20,7 @@ COPY packages/email/package.json ./packages/email/
 COPY packages/auth/package.json ./packages/auth/
 COPY packages/polar/package.json ./packages/polar/
 COPY packages/errors/package.json ./packages/errors/
+COPY packages/ui/package.json ./packages/ui/
 
 # Install dependencies
 RUN bun install

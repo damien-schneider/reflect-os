@@ -106,15 +106,17 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
   const context: ZeroContext =
     state.userID !== "anon" ? { userID: state.userID } : undefined;
 
-  // Zero 0.25 Configuration (following zslack pattern):
-  // - `server` (or `cacheURL`) points to zero-cache
+  // Zero 0.25 Configuration (following zbugs pattern):
+  // - `server` (or `cacheURL`) points to zero-cache for real-time sync
   // - `context` passes auth info to queries/mutators
-  // - Cookie forwarding is handled by zero-cache env vars:
-  //   ZERO_QUERY_FORWARD_COOKIES=true and ZERO_MUTATE_FORWARD_COOKIES=true
-  // - ZERO_QUERY_URL and ZERO_MUTATE_URL env vars tell zero-cache where to send requests
+  // - `mutateURL` and `queryURL` point to our backend API endpoints
   //
-  // NOTE: Do NOT pass queryURL/mutateURL to ZeroProvider - those are for client-side
-  // override only. Let zero-cache use its configured env vars.
+  // IMPORTANT: By passing mutateURL/queryURL, the browser calls these endpoints
+  // directly (same-origin), which means cookies are sent automatically.
+  // Zero-cache is only used for real-time sync (WebSocket).
+  //
+  // This is how zbugs (official example) handles it:
+  // https://github.com/rocicorp/mono/blob/main/apps/zbugs/src/zero-init.tsx
   const zeroProps = {
     userID: state.userID,
     server: clientEnv.VITE_PUBLIC_ZERO_SERVER,
@@ -124,6 +126,9 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
     // Named queries and mutators
     queries,
     mutators,
+    // Direct browser → backend API calls (same-origin, cookies included automatically)
+    mutateURL: `${window.location.origin}/api/zero/mutate`,
+    queryURL: `${window.location.origin}/api/zero/query`,
   };
 
   // Loading state

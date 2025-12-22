@@ -1,15 +1,15 @@
-import { useQuery } from "@rocicorp/zero/react";
-import { createFileRoute, Navigate, useSearch } from "@tanstack/react-router";
-import { CheckCircle, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@repo/ui/components/card";
+import { useQuery } from "@rocicorp/zero/react";
+import { createFileRoute, Navigate, useSearch } from "@tanstack/react-router";
+import { CheckCircle, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 import { requireAuthenticated } from "@/lib/route-guards";
@@ -186,10 +186,17 @@ function SubscriptionSuccess() {
             seconds...
           </div>
 
-          <Button asChild className="w-full">
-            <a href={`/dashboard/${firstOrg.slug}/subscription`}>
-              Go to Subscription Page
-            </a>
+          <Button
+            className="w-full"
+            render={
+              // biome-ignore lint/a11y/useAnchorContent: content is provided via render prop children, aria-label provides accessibility
+              <a
+                aria-label="Go to Subscription Page"
+                href={`/dashboard/${firstOrg.slug}/subscription`}
+              />
+            }
+          >
+            Go to Subscription Page
           </Button>
         </CardContent>
       </Card>

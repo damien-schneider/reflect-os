@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@/index.css";
+// import "@/index.css";
+import "@repo/ui/styles/shadcn.css";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
 // Import the generated route tree

@@ -1,11 +1,11 @@
-import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@repo/ui/components/tooltip";
+import { Monitor, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const themes = ["light", "dark", "system"] as const;
 const themeIcons = {
@@ -34,10 +34,10 @@ export function ThemeToggle() {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button onClick={cycleTheme} size="icon" variant="ghost">
-          <Icon className="h-4 w-4" />
-        </Button>
+      <TooltipTrigger
+        render={<Button onClick={cycleTheme} size="icon" variant="ghost" />}
+      >
+        <Icon className="h-4 w-4" />
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>

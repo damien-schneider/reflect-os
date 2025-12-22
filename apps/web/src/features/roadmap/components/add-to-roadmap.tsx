@@ -1,7 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
-import { Check, Plus, Unlink } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Dialog,
   DialogContent,
@@ -9,15 +6,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+} from "@repo/ui/components/dialog";
+import { Label } from "@repo/ui/components/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@repo/ui/components/select";
+import { useQuery, useZero } from "@rocicorp/zero/react";
+import { Check, Plus, Unlink } from "lucide-react";
+import { useState } from "react";
 import { LANE_OPTIONS, type RoadmapLane } from "@/lib/constants";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
@@ -111,20 +111,22 @@ export function AddToRoadmap({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant={isOnRoadmap ? "secondary" : "outline"}>
-          {isOnRoadmap ? (
-            <>
-              <Check className="mr-1 h-4 w-4" />
-              On Roadmap
-            </>
-          ) : (
-            <>
-              <Plus className="mr-1 h-4 w-4" />
-              Add to Roadmap
-            </>
-          )}
-        </Button>
+      <DialogTrigger
+        render={
+          <Button size="sm" variant={isOnRoadmap ? "secondary" : "outline"} />
+        }
+      >
+        {isOnRoadmap ? (
+          <>
+            <Check className="mr-1 h-4 w-4" />
+            On Roadmap
+          </>
+        ) : (
+          <>
+            <Plus className="mr-1 h-4 w-4" />
+            Add to Roadmap
+          </>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

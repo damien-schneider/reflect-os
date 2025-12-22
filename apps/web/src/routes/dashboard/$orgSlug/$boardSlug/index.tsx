@@ -1,3 +1,5 @@
+import { Button } from "@repo/ui/components/button";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { useZero } from "@rocicorp/zero/react";
 import {
   createFileRoute,
@@ -16,8 +18,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { EditableTitle } from "@/components/editable-title";
-import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { BoardActions } from "@/features/board/components/board-actions";
 import { SlugEditDialog } from "@/features/board/components/slug-edit-dialog";
 import { FeedbackFilters } from "@/features/feedback/components/feedback-filters";
@@ -249,13 +249,13 @@ function DashboardBoardHeader({
       <div className="flex items-center gap-2">
         <ToggleGroup
           className="rounded-md border"
-          onValueChange={(value) => {
+          onValueChange={(values) => {
+            const value = values[0];
             if (value) {
               setViewMode(value as "list" | "roadmap");
             }
           }}
-          type="single"
-          value={viewMode}
+          value={[viewMode]}
         >
           <ToggleGroupItem aria-label="List view" className="px-3" value="list">
             <List className="mr-1 h-4 w-4" />
@@ -272,14 +272,17 @@ function DashboardBoardHeader({
         </ToggleGroup>
 
         {board?.isPublic === true && org?.isPublic === true && (
-          <Button asChild variant="outline">
-            <Link
-              params={{ orgSlug, boardSlug: board.slug }}
-              to="/$orgSlug/$boardSlug"
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              View Public
-            </Link>
+          <Button
+            render={
+              <Link
+                params={{ orgSlug, boardSlug: board.slug }}
+                to="/$orgSlug/$boardSlug"
+              />
+            }
+            variant="outline"
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            View Public
           </Button>
         )}
 

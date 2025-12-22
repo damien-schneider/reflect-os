@@ -16,10 +16,10 @@
  * - https://github.com/rocicorp/zslack (reference implementation)
  */
 
+import { Button } from "@repo/ui/components/button";
 import { useConnectionState, ZeroProvider } from "@rocicorp/zero/react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
 import { mutators } from "@/mutators";

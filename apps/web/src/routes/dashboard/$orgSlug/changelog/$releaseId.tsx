@@ -1,3 +1,27 @@
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@repo/ui/components/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@repo/ui/components/dropdown-menu";
+import { Input } from "@repo/ui/components/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@repo/ui/components/popover";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import {
   createFileRoute,
@@ -19,30 +43,6 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import {
   useNextVersion,
@@ -273,11 +273,15 @@ function ReleaseDetailPage() {
     <div className="">
       {/* Header with back button and actions */}
       <div className="wrapper-content flex items-center justify-between">
-        <Button asChild className="gap-2" variant="ghost">
-          <Link params={{ orgSlug }} to="/dashboard/$orgSlug/changelog">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Changelog
-          </Link>
+        <Button
+          className="gap-2"
+          render={
+            <Link params={{ orgSlug }} to="/dashboard/$orgSlug/changelog" />
+          }
+          variant="ghost"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Changelog
         </Button>
 
         <div className="flex items-center gap-2">
@@ -302,23 +306,27 @@ function ReleaseDetailPage() {
 
           {/* More actions */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="outline">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+            <DropdownMenuTrigger
+              render={<Button size="icon" variant="outline" />}
+            >
+              <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {Boolean(org?.isPublic) && isPublished && (
                 <>
-                  <DropdownMenuItem asChild>
-                    <a
-                      href={`/${orgSlug}/changelog`}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      <Globe className="mr-2 h-4 w-4" />
-                      View Public Page
-                    </a>
+                  <DropdownMenuItem
+                    render={
+                      // biome-ignore lint/a11y/useAnchorContent: content is provided via render prop children, aria-label provides accessibility
+                      <a
+                        aria-label="View Public Page"
+                        href={`/${orgSlug}/changelog`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      />
+                    }
+                  >
+                    <Globe className="mr-2 h-4 w-4" />
+                    View Public Page
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
@@ -531,13 +539,13 @@ function VersionEditor({
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-sm">Version:</span>
           <ToggleGroup
-            onValueChange={(value) => {
+            onValueChange={(values) => {
+              const value = values[0];
               if (value) {
                 setSelectedIncrement(value as VersionIncrement);
               }
             }}
-            type="single"
-            value={selectedIncrement}
+            value={[selectedIncrement]}
           >
             <ToggleGroupItem size="sm" value="patch">
               Patch
@@ -644,11 +652,11 @@ function CompletedItemsSection({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Popover onOpenChange={setOpen} open={open}>
-            <PopoverTrigger asChild>
-              <Button className="gap-2" size="sm" variant="outline">
-                <Plus className="h-4 w-4" />
-                Add completed item
-              </Button>
+            <PopoverTrigger
+              render={<Button className="gap-2" size="sm" variant="outline" />}
+            >
+              <Plus className="h-4 w-4" />
+              Add completed item
             </PopoverTrigger>
             <PopoverContent align="start" className="w-80 p-0">
               <Command>

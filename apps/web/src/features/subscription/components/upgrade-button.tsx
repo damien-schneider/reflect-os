@@ -1,12 +1,12 @@
-import { Crown, ExternalLink } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@repo/ui/components/tooltip";
+import { Crown, ExternalLink } from "lucide-react";
+import { useState } from "react";
 import {
   useCanManageSubscription,
   useSubscription,
@@ -62,18 +62,16 @@ export function UpgradeButton({
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-block">
-              <Button
-                className={className}
-                disabled
-                size={size}
-                variant={variant}
-              >
-                <Crown className="mr-2 h-4 w-4" />
-                {children ?? "Upgrade"}
-              </Button>
-            </span>
+          <TooltipTrigger render={<span className="inline-block" />}>
+            <Button
+              className={className}
+              disabled
+              size={size}
+              variant={variant}
+            >
+              <Crown className="mr-2 h-4 w-4" />
+              {children ?? "Upgrade"}
+            </Button>
           </TooltipTrigger>
           <TooltipContent>
             <p>Only the organization owner can upgrade the plan</p>

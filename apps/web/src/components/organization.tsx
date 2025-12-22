@@ -1,3 +1,11 @@
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
 import {
   AlertCircle,
   Check,
@@ -9,14 +17,6 @@ import {
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { Organization } from "@/hooks/use-organization";
 import { authClient } from "@/lib/auth-client";
 
@@ -121,18 +121,20 @@ export function OrgDetailContent({
                 value={inviteLink}
               />
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={copyInviteLink}
-                    size="icon"
-                    variant="outline"
-                  >
-                    {copied ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      onClick={copyInviteLink}
+                      size="icon"
+                      variant="outline"
+                    />
+                  }
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                 </TooltipTrigger>
                 <TooltipContent>Copy link</TooltipContent>
               </Tooltip>

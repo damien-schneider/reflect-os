@@ -1,11 +1,8 @@
 "use client";
 
-import { useNavigate } from "@tanstack/react-router";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
@@ -13,7 +10,10 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
-} from "@/components/ui/responsive-dialog";
+} from "@repo/ui/components/responsive-dialog";
+import { useNavigate } from "@tanstack/react-router";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
 import { getSignUpErrorMessage } from "@/lib/auth-errors";

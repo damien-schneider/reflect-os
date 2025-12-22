@@ -1,12 +1,12 @@
-import { Building2 } from "lucide-react";
-import { OnboardingForm } from "@/components/onboarding-form";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@repo/ui/components/card";
+import { Building2 } from "lucide-react";
+import { OnboardingForm } from "@/components/onboarding-form";
 import { useOnboardingForm } from "@/hooks/use-onboarding-form";
 
 type OnboardingPageProps = {

@@ -1,9 +1,5 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
-import { createFileRoute, useParams } from "@tanstack/react-router";
-import { formatDistanceToNow } from "date-fns";
-import { Ban, Shield, User, UserCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
 import {
   Table,
   TableBody,
@@ -11,12 +7,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@repo/ui/components/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@repo/ui/components/tooltip";
+import { useQuery, useZero } from "@rocicorp/zero/react";
+import { createFileRoute, useParams } from "@tanstack/react-router";
+import { formatDistanceToNow } from "date-fns";
+import { Ban, Shield, User, UserCheck } from "lucide-react";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 
@@ -188,21 +188,23 @@ function AdminUsers() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          className={
-                            isBanned ? "text-green-600" : "text-destructive"
-                          }
-                          onClick={() => handleBanUser(user.id, isBanned)}
-                          size="icon"
-                          variant="ghost"
-                        >
-                          {isBanned ? (
-                            <UserCheck className="h-4 w-4" />
-                          ) : (
-                            <Ban className="h-4 w-4" />
-                          )}
-                        </Button>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            className={
+                              isBanned ? "text-green-600" : "text-destructive"
+                            }
+                            onClick={() => handleBanUser(user.id, isBanned)}
+                            size="icon"
+                            variant="ghost"
+                          />
+                        }
+                      >
+                        {isBanned ? (
+                          <UserCheck className="h-4 w-4" />
+                        ) : (
+                          <Ban className="h-4 w-4" />
+                        )}
                       </TooltipTrigger>
                       <TooltipContent>
                         {isBanned ? "Unban user" : "Ban user"}

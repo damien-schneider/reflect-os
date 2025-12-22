@@ -1,8 +1,4 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { Crown, Globe, Layers, Lock, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,9 +8,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@repo/ui/components/alert-dialog";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
 import {
   Dialog,
   DialogContent,
@@ -22,11 +18,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+} from "@repo/ui/components/dialog";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
+import { Switch } from "@repo/ui/components/switch";
+import { Textarea } from "@repo/ui/components/textarea";
+import { useQuery, useZero } from "@rocicorp/zero/react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { Crown, Globe, Layers, Lock, Pencil, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useLimitCheck } from "@/features/subscription";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";

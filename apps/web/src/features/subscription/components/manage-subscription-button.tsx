@@ -1,12 +1,12 @@
-import { AlertCircle, CreditCard } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@repo/ui/components/tooltip";
+import { AlertCircle, CreditCard } from "lucide-react";
+import { useState } from "react";
 import {
   useCanManageSubscription,
   useCustomerPortal,
@@ -76,18 +76,16 @@ export function ManageSubscriptionButton({
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-block">
-              <Button
-                className={className}
-                disabled
-                size={size}
-                variant={variant}
-              >
-                <CreditCard className="mr-2 h-4 w-4" />
-                {children ?? "Manage Subscription"}
-              </Button>
-            </span>
+          <TooltipTrigger render={<span className="inline-block" />}>
+            <Button
+              className={className}
+              disabled
+              size={size}
+              variant={variant}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              {children ?? "Manage Subscription"}
+            </Button>
           </TooltipTrigger>
           <TooltipContent>
             <p>Only the organization owner can manage the subscription</p>

@@ -1,3 +1,5 @@
+import { Button } from "@repo/ui/components/button";
+import { cn } from "@repo/ui/lib/utils";
 import { useQuery } from "@rocicorp/zero/react";
 import {
   createFileRoute,
@@ -13,9 +15,7 @@ import {
   Tags,
   Users,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
 import { queries } from "@/queries";
 
 export const Route = createFileRoute("/$orgSlug/admin")({
@@ -71,11 +71,12 @@ function AdminLayout() {
         <p className="text-muted-foreground">
           You don't have permission to access this area.
         </p>
-        <Button asChild variant="outline">
-          <Link params={{ orgSlug }} to="/$orgSlug">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Go Back
-          </Link>
+        <Button
+          render={<Link params={{ orgSlug }} to="/$orgSlug" />}
+          variant="outline"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Go Back
         </Button>
       </div>
     );

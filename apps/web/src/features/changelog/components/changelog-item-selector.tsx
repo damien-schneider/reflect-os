@@ -1,7 +1,7 @@
+import { cn } from "@repo/ui/lib/utils";
 import { useQuery } from "@rocicorp/zero/react";
 import { format } from "date-fns";
 import { Check, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { queries } from "@/queries";
 
 type ChangelogItemSelectorProps = {

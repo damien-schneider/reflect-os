@@ -1,3 +1,4 @@
+import { Button } from "@repo/ui/components/button";
 import { useQuery } from "@rocicorp/zero/react";
 import {
   createFileRoute,
@@ -8,7 +9,6 @@ import {
 } from "@tanstack/react-router";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { queries } from "@/queries";
 
@@ -274,8 +274,11 @@ function OrgLayout() {
               <RefreshCw className="h-4 w-4" />
               Retry
             </Button>
-            <Button asChild variant="secondary">
-              <Link to="/dashboard/account">Manage Account</Link>
+            <Button
+              render={<Link to="/dashboard/account" />}
+              variant="secondary"
+            >
+              Manage Account
             </Button>
           </div>
         </div>

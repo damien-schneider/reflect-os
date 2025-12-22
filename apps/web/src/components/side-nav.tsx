@@ -1,3 +1,27 @@
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@repo/ui/components/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@repo/ui/components/dropdown-menu";
+import { Separator } from "@repo/ui/components/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
+import { cn } from "@repo/ui/lib/utils";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import {
   Link,
@@ -28,33 +52,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useLimitCheck } from "@/features/subscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 import { randID } from "@/rand";
@@ -514,17 +514,19 @@ function OrgSelector({
   return (
     <div className="p-2">
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className="w-full justify-start gap-2 font-medium"
-            variant="ghost"
-          >
-            <Building2 className="h-4 w-4" />
-            <span className="flex-1 truncate text-left">
-              {currentOrg?.name ?? "Select Org"}
-            </span>
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </Button>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              className="w-full justify-start gap-2 font-medium"
+              variant="ghost"
+            />
+          }
+        >
+          <Building2 className="h-4 w-4" />
+          <span className="flex-1 truncate text-left">
+            {currentOrg?.name ?? "Select Org"}
+          </span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
           {organizations.map((org) => (
@@ -605,18 +607,18 @@ function UserSection({
 function NotificationButton({ unreadCount }: { unreadCount: number }) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button className="relative" size="icon" variant="ghost">
-          <Bell className="h-4 w-4" />
-          {unreadCount > 0 ? (
-            <Badge
-              className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center p-0 text-[10px]"
-              variant="destructive"
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </Badge>
-          ) : null}
-        </Button>
+      <TooltipTrigger
+        render={<Button className="relative" size="icon" variant="ghost" />}
+      >
+        <Bell className="h-4 w-4" />
+        {unreadCount > 0 ? (
+          <Badge
+            className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center p-0 text-[10px]"
+            variant="destructive"
+          >
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </Badge>
+        ) : null}
       </TooltipTrigger>
       <TooltipContent>Notifications</TooltipContent>
     </Tooltip>
@@ -726,22 +728,26 @@ function PublicViewSection({
   return (
     <div className="mt-2">
       <Tooltip>
-        <TooltipTrigger asChild>
-          <a
-            className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-              "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )}
-            href={`/${orgSlug}`}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <Globe className="h-4 w-4" />
-            View Public Page
-            <Badge className="ml-auto px-1.5 text-[10px]" variant="secondary">
-              {publicBoards.length}
-            </Badge>
-          </a>
+        <TooltipTrigger
+          render={
+            // biome-ignore lint/a11y/useAnchorContent: content is provided via render prop children, aria-label provides accessibility
+            <a
+              aria-label="View Public Page"
+              className={cn(
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              )}
+              href={`/${orgSlug}`}
+              rel="noopener noreferrer"
+              target="_blank"
+            />
+          }
+        >
+          <Globe className="h-4 w-4" />
+          View Public Page
+          <Badge className="ml-auto px-1.5 text-[10px]" variant="secondary">
+            {publicBoards.length}
+          </Badge>
         </TooltipTrigger>
         <TooltipContent side="right">
           <p>Open public page in new tab</p>

@@ -1,3 +1,12 @@
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import { Separator } from "@repo/ui/components/separator";
+import { Switch } from "@repo/ui/components/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import {
   createFileRoute,
@@ -18,15 +27,6 @@ import {
   Plus,
   TrendingUp,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
@@ -130,8 +130,8 @@ function DashboardOrgIndex() {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">Organization not found</p>
-        <Button asChild variant="outline">
-          <Link to="/dashboard">Go to Dashboard</Link>
+        <Button render={<Link to="/dashboard" />} variant="outline">
+          Go to Dashboard
         </Button>
       </div>
     );
@@ -149,18 +149,25 @@ function DashboardOrgIndex() {
         </div>
         {org.isPublic && publicBoards.length > 0 && (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button asChild variant="outline">
-                <a
-                  className="inline-flex items-center gap-2"
-                  href={`/${orgSlug}`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  View Live Page
-                </a>
-              </Button>
+            <TooltipTrigger
+              render={
+                <Button
+                  render={
+                    // biome-ignore lint/a11y/useAnchorContent: content is provided via render prop children, aria-label provides accessibility
+                    <a
+                      aria-label="View Live Page"
+                      className="inline-flex items-center gap-2"
+                      href={`/${orgSlug}`}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    />
+                  }
+                  variant="outline"
+                />
+              }
+            >
+              <ExternalLink className="h-4 w-4" />
+              View Live Page
             </TooltipTrigger>
             <TooltipContent>
               <p>Open public page in new tab</p>
@@ -289,15 +296,19 @@ function DashboardOrgIndex() {
             <Plus className="mr-2 h-4 w-4" />
             New Board
           </Button>
-          <Button asChild variant="outline">
-            <Link params={{ orgSlug }} to="/dashboard/$orgSlug/tags">
-              Manage Tags
-            </Link>
+          <Button
+            render={<Link params={{ orgSlug }} to="/dashboard/$orgSlug/tags" />}
+            variant="outline"
+          >
+            Manage Tags
           </Button>
-          <Button asChild variant="outline">
-            <Link params={{ orgSlug }} to="/dashboard/$orgSlug/users">
-              Manage Users
-            </Link>
+          <Button
+            render={
+              <Link params={{ orgSlug }} to="/dashboard/$orgSlug/users" />
+            }
+            variant="outline"
+          >
+            Manage Users
           </Button>
         </div>
       </div>

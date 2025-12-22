@@ -5,12 +5,11 @@ import {
   useTodoListElement,
   useTodoListElementState,
 } from "@platejs/list/react";
+import { Checkbox } from "@repo/ui/components/checkbox";
+import { cn } from "@repo/ui/lib/utils";
 import type { TListElement } from "platejs";
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 import { useReadOnly } from "platejs/react";
-
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 
 const config: Record<
   string,

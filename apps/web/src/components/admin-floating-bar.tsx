@@ -1,7 +1,7 @@
+import { Button } from "@repo/ui/components/button";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import { PencilLine, X } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
 type AdminFloatingBarProps = {
   /** The link to the dashboard edit page */
@@ -35,8 +35,8 @@ export function AdminFloatingBar({
           <span className="text-muted-foreground text-sm">{message}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild size="sm">
-            <Link {...dashboardLink}>Edit in Dashboard</Link>
+          <Button render={<Link {...dashboardLink} />} size="sm">
+            Edit in Dashboard
           </Button>
           <Button
             aria-label="Dismiss"

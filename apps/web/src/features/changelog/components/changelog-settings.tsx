@@ -1,16 +1,16 @@
-import { useZero } from "@rocicorp/zero/react";
-import { Hash } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+} from "@repo/ui/components/select";
+import { Switch } from "@repo/ui/components/switch";
+import { useZero } from "@rocicorp/zero/react";
+import { Hash } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { mutators } from "@/mutators";
 
 type ChangelogSettingsProps = {
@@ -122,7 +122,7 @@ export function ChangelogSettings({ org }: ChangelogSettingsProps) {
                 value={versionIncrement}
               >
                 <SelectTrigger className="w-48" id="version-increment">
-                  <SelectValue placeholder="Select increment" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="patch">

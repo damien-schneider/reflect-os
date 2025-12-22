@@ -1,7 +1,3 @@
-import { useZero } from "@rocicorp/zero/react";
-import { useNavigate } from "@tanstack/react-router";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,15 +7,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@repo/ui/components/alert-dialog";
+import { Button } from "@repo/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@repo/ui/components/dropdown-menu";
+import { useZero } from "@rocicorp/zero/react";
+import { useNavigate } from "@tanstack/react-router";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { BoardEditDialog } from "@/features/board/components/board-edit-dialog";
 import { mutators } from "@/mutators";
 import type { Board } from "@/schema";
@@ -59,10 +59,12 @@ export function BoardActions({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button aria-label="Board actions" size="icon" variant="ghost">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+        <DropdownMenuTrigger
+          render={
+            <Button aria-label="Board actions" size="icon" variant="ghost" />
+          }
+        >
+          <MoreVertical className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setShowEditDialog(true)}>

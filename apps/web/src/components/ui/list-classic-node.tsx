@@ -4,13 +4,12 @@ import {
   useTodoListElement,
   useTodoListElementState,
 } from "@platejs/list-classic/react";
+import { Checkbox } from "@repo/ui/components/checkbox";
+import { cn } from "@repo/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 import { Children } from "react";
-
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 
 const listVariants = cva("m-0 py-1 ps-6", {
   variants: {

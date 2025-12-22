@@ -1,14 +1,14 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
-import { ChevronUp } from "lucide-react";
-import { useAuthDialog } from "@/components/auth-dialog-provider";
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@repo/ui/components/tooltip";
+import { cn } from "@repo/ui/lib/utils";
+import { useQuery, useZero } from "@rocicorp/zero/react";
+import { ChevronUp } from "lucide-react";
+import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 import { randID } from "@/rand";
@@ -108,7 +108,7 @@ export function VoteButton({
   if (!userId) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipTrigger render={button}>{null}</TooltipTrigger>
         <TooltipContent>
           <p>Sign in to vote</p>
         </TooltipContent>

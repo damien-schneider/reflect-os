@@ -1,9 +1,9 @@
+import { Button } from "@repo/ui/components/button";
+import { Separator } from "@repo/ui/components/separator";
 import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Lock, Pin } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { CommentThread } from "@/features/feedback/components/comment-thread";
 import { StatusBadge } from "@/features/feedback/components/status-badge";
@@ -77,11 +77,15 @@ function FeedbackDetail() {
     <div className="space-y-6">
       {/* Back link */}
       <div className="wrapper-content">
-        <Button asChild className="gap-2" variant="ghost">
-          <Link params={{ orgSlug, boardSlug }} to="/$orgSlug/$boardSlug">
-            <ArrowLeft className="h-4 w-4" />
-            Back to {board?.name ?? "Board"}
-          </Link>
+        <Button
+          className="gap-2"
+          render={
+            <Link params={{ orgSlug, boardSlug }} to="/$orgSlug/$boardSlug" />
+          }
+          variant="ghost"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to {board?.name ?? "Board"}
         </Button>
       </div>
 

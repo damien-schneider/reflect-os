@@ -312,6 +312,19 @@ const tagQueries = {
 };
 
 // ============================================
+// FEEDBACK TAG QUERIES
+// ============================================
+
+const feedbackTagQueries = {
+  /** Find a feedback tag by feedback and tag IDs */
+  byFeedbackAndTag: defineQuery(
+    z.object({ feedbackId: z.string(), tagId: z.string() }),
+    ({ args: { feedbackId, tagId } }) =>
+      zql.feedbackTag.where("feedbackId", feedbackId).where("tagId", tagId)
+  ),
+};
+
+// ============================================
 // ADMIN NOTE QUERIES
 // ============================================
 
@@ -492,6 +505,7 @@ export const queries = defineQueries({
   vote: voteQueries,
   comment: commentQueries,
   tag: tagQueries,
+  feedbackTag: feedbackTagQueries,
   adminNote: adminNoteQueries,
   release: releaseQueries,
   releaseItem: releaseItemQueries,

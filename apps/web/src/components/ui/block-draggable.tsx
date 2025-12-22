@@ -3,6 +3,13 @@
 import { DndPlugin, useDraggable, useDropLine } from "@platejs/dnd";
 import { expandListItemsWithChildren } from "@platejs/list";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
+import { buttonVariants } from "@repo/ui/components/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
+import { cn } from "@repo/ui/lib/utils";
 import { GripVertical } from "lucide-react";
 import { getPluginByType, isType, KEYS, type TElement } from "platejs";
 import {
@@ -16,14 +23,6 @@ import {
   useSelected,
 } from "platejs/react";
 import React from "react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
 
@@ -151,12 +150,15 @@ function Draggable(props: PlateElementProps) {
                 isInColumn && "mr-1.5"
               )}
             >
-              <Button
-                className="absolute left-0 h-6 w-full p-0"
+              <button
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "absolute left-0 h-6 w-full p-0"
+                )}
                 data-plate-prevent-deselect
                 ref={handleRef}
                 style={{ top: `${dragButtonTop + 3}px` }}
-                variant="ghost"
+                type="button"
               >
                 <DragHandle
                   isDragging={isDragging}
@@ -164,7 +166,7 @@ function Draggable(props: PlateElementProps) {
                   resetPreview={resetPreview}
                   setPreviewTop={setPreviewTop}
                 />
-              </Button>
+              </button>
             </div>
           </div>
         </Gutter>
@@ -242,105 +244,107 @@ function DragHandle({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <div
-          className="flex size-full items-center justify-center"
-          data-plate-prevent-deselect
-          onClick={(e) => {
-            e.preventDefault();
-            editor.getApi(BlockSelectionPlugin).blockSelection.focus();
-          }}
-          onMouseDown={(e) => {
-            resetPreview();
+      <TooltipTrigger
+        onClick={(e) => {
+          e.preventDefault();
+          editor.getApi(BlockSelectionPlugin).blockSelection.focus();
+        }}
+        onMouseDown={(e) => {
+          resetPreview();
 
-            if ((e.button !== 0 && e.button !== 2) || e.shiftKey) {
-              return;
+          if ((e.button !== 0 && e.button !== 2) || e.shiftKey) {
+            return;
+          }
+
+          const blockSelection = editor
+            .getApi(BlockSelectionPlugin)
+            .blockSelection.getNodes({ sort: true });
+
+          let selectionNodes =
+            blockSelection.length > 0
+              ? blockSelection
+              : editor.api.blocks({ mode: "highest" });
+
+          // If current block is not in selection, use it as the starting point
+          if (!selectionNodes.some(([node]) => node.id === element.id)) {
+            const path = editor.api.findPath(element);
+            if (path) {
+              selectionNodes = [[element, path]];
             }
+          }
 
-            const blockSelection = editor
-              .getApi(BlockSelectionPlugin)
-              .blockSelection.getNodes({ sort: true });
+          // Process selection nodes to include list children
+          const blocks = expandListItemsWithChildren(
+            editor,
+            selectionNodes
+          ).map(([node]) => node);
 
-            let selectionNodes =
-              blockSelection.length > 0
-                ? blockSelection
-                : editor.api.blocks({ mode: "highest" });
+          if (blockSelection.length === 0) {
+            editor.tf.blur();
+            editor.tf.collapse();
+          }
 
-            // If current block is not in selection, use it as the starting point
-            if (!selectionNodes.some(([node]) => node.id === element.id)) {
-              const path = editor.api.findPath(element);
-              if (path) {
-                selectionNodes = [[element, path]];
-              }
+          const elements = createDragPreviewElements(editor, blocks);
+          previewRef.current?.append(...elements);
+          previewRef.current?.classList.remove("hidden");
+          previewRef.current?.classList.add("opacity-0");
+          editor.setOption(DndPlugin, "multiplePreviewRef", previewRef);
+
+          editor
+            .getApi(BlockSelectionPlugin)
+            .blockSelection.set(blocks.map((block) => block.id as string));
+        }}
+        onMouseEnter={() => {
+          if (isDragging) {
+            return;
+          }
+
+          const blockSelection = editor
+            .getApi(BlockSelectionPlugin)
+            .blockSelection.getNodes({ sort: true });
+
+          let selectedBlocks =
+            blockSelection.length > 0
+              ? blockSelection
+              : editor.api.blocks({ mode: "highest" });
+
+          // If current block is not in selection, use it as the starting point
+          if (!selectedBlocks.some(([node]) => node.id === element.id)) {
+            const path = editor.api.findPath(element);
+            if (path) {
+              selectedBlocks = [[element, path]];
             }
+          }
 
-            // Process selection nodes to include list children
-            const blocks = expandListItemsWithChildren(
-              editor,
-              selectionNodes
-            ).map(([node]) => node);
+          // Process selection to include list children
+          const processedBlocks = expandListItemsWithChildren(
+            editor,
+            selectedBlocks
+          );
 
-            if (blockSelection.length === 0) {
-              editor.tf.blur();
-              editor.tf.collapse();
-            }
+          const ids = processedBlocks.map((block) => block[0].id as string);
 
-            const elements = createDragPreviewElements(editor, blocks);
-            previewRef.current?.append(...elements);
-            previewRef.current?.classList.remove("hidden");
-            previewRef.current?.classList.add("opacity-0");
-            editor.setOption(DndPlugin, "multiplePreviewRef", previewRef);
-
-            editor
-              .getApi(BlockSelectionPlugin)
-              .blockSelection.set(blocks.map((block) => block.id as string));
-          }}
-          onMouseEnter={() => {
-            if (isDragging) {
-              return;
-            }
-
-            const blockSelection = editor
-              .getApi(BlockSelectionPlugin)
-              .blockSelection.getNodes({ sort: true });
-
-            let selectedBlocks =
-              blockSelection.length > 0
-                ? blockSelection
-                : editor.api.blocks({ mode: "highest" });
-
-            // If current block is not in selection, use it as the starting point
-            if (!selectedBlocks.some(([node]) => node.id === element.id)) {
-              const path = editor.api.findPath(element);
-              if (path) {
-                selectedBlocks = [[element, path]];
-              }
-            }
-
-            // Process selection to include list children
-            const processedBlocks = expandListItemsWithChildren(
-              editor,
-              selectedBlocks
-            );
-
-            const ids = processedBlocks.map((block) => block[0].id as string);
-
-            if (ids.length > 1 && ids.includes(element.id as string)) {
-              const previewTop = calculatePreviewTop(editor, {
-                blocks: processedBlocks.map((block) => block[0]),
-                element,
-              });
-              setPreviewTop(previewTop);
-            } else {
-              setPreviewTop(0);
-            }
-          }}
-          onMouseUp={() => {
-            resetPreview();
-          }}
-        >
-          <GripVertical className="text-muted-foreground" />
-        </div>
+          if (ids.length > 1 && ids.includes(element.id as string)) {
+            const previewTop = calculatePreviewTop(editor, {
+              blocks: processedBlocks.map((block) => block[0]),
+              element,
+            });
+            setPreviewTop(previewTop);
+          } else {
+            setPreviewTop(0);
+          }
+        }}
+        onMouseUp={() => {
+          resetPreview();
+        }}
+        render={
+          <div
+            className="flex size-full items-center justify-center"
+            data-plate-prevent-deselect
+          />
+        }
+      >
+        <GripVertical className="text-muted-foreground" />
       </TooltipTrigger>
       <TooltipContent>Drag to move</TooltipContent>
     </Tooltip>

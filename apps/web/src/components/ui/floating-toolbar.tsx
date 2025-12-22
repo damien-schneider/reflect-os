@@ -7,6 +7,7 @@ import {
   useFloatingToolbar,
   useFloatingToolbarState,
 } from "@platejs/floating";
+import { cn } from "@repo/ui/lib/utils";
 import { useComposedRef } from "@udecode/cn";
 import { KEYS } from "platejs";
 import {
@@ -15,8 +16,6 @@ import {
   usePluginOption,
 } from "platejs/react";
 import type * as React from "react";
-
-import { cn } from "@/lib/utils";
 
 import { Toolbar } from "./toolbar";
 

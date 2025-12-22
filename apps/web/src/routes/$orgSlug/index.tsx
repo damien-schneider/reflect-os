@@ -1,8 +1,8 @@
+import { Button } from "@repo/ui/components/button";
 import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowRight, Globe, Loader2, MessageSquare } from "lucide-react";
 import { AdminFloatingBar } from "@/components/admin-floating-bar";
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { queries } from "@/queries";
 
@@ -55,8 +55,8 @@ function OrgDashboard() {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">Organization not found</p>
-        <Button asChild variant="outline">
-          <Link to="/dashboard/account">Go to My Account</Link>
+        <Button render={<Link to="/dashboard/account" />} variant="outline">
+          Go to My Account
         </Button>
       </div>
     );

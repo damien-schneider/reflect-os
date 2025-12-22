@@ -1,7 +1,7 @@
+import { Badge } from "@repo/ui/components/badge";
 import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Calendar, CheckCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import type { Board, Feedback, Release } from "@/schema";
 
 type ReleaseCardProps = {

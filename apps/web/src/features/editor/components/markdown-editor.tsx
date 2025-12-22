@@ -1,6 +1,7 @@
 "use client";
 
 import { serializeMd } from "@platejs/markdown";
+import { cn } from "@repo/ui/lib/utils";
 import {
   BoldIcon,
   Code2Icon,
@@ -22,7 +23,6 @@ import { LinkToolbarButton } from "@/components/ui/link-toolbar-button";
 import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button";
 import { ToolbarGroup } from "@/components/ui/toolbar";
 import { useMarkdownEditor } from "@/features/editor/hooks/use-markdown-editor";
-import { cn } from "@/lib/utils";
 
 type MarkdownEditorProps = {
   value?: string;

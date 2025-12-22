@@ -1,10 +1,10 @@
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
+import { Switch } from "@repo/ui/components/switch";
+import { Textarea } from "@repo/ui/components/textarea";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { ChangelogItemSelector } from "@/features/changelog/components/changelog-item-selector";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";

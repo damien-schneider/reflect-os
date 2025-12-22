@@ -1,21 +1,22 @@
-import { Link, useParams } from "@tanstack/react-router";
-import { Filter, Plus, Search, SortAsc, SortDesc, X } from "lucide-react";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@repo/ui/components/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@repo/ui/components/select";
+import { cn } from "@repo/ui/lib/utils";
+import { Link, useParams } from "@tanstack/react-router";
+import { Filter, Plus, Search, SortAsc, SortDesc, X } from "lucide-react";
+import { useState } from "react";
 import {
   useBoardData,
   useFeedbackFilters,
@@ -23,7 +24,6 @@ import {
 } from "@/features/feedback/hooks/use-feedback-filters";
 import type { SortOption } from "@/features/feedback/store/atoms";
 import { STATUS_OPTIONS } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 
 type FeedbackFiltersProps = {
   className?: string;
@@ -80,19 +80,19 @@ export function FeedbackFilters({
 
           {/* Filter button */}
           <Popover onOpenChange={setFilterOpen} open={filterOpen}>
-            <PopoverTrigger asChild>
-              <Button className="gap-2" variant="outline">
-                <Filter className="h-4 w-4" />
-                Filter
-                {filterCount > 0 && (
-                  <Badge
-                    className="ml-1 flex h-5 w-5 items-center justify-center p-0"
-                    variant="secondary"
-                  >
-                    {filterCount}
-                  </Badge>
-                )}
-              </Button>
+            <PopoverTrigger
+              render={<Button className="gap-2" variant="outline" />}
+            >
+              <Filter className="h-4 w-4" />
+              Filter
+              {filterCount > 0 && (
+                <Badge
+                  className="ml-1 flex h-5 w-5 items-center justify-center p-0"
+                  variant="secondary"
+                >
+                  {filterCount}
+                </Badge>
+              )}
             </PopoverTrigger>
             <PopoverContent align="end" className="w-72">
               <div className="space-y-4">
@@ -189,11 +189,16 @@ export function FeedbackFilters({
         </div>
 
         {showSubmitButton && session !== null && orgSlug && boardSlug ? (
-          <Button asChild>
-            <Link params={{ orgSlug, boardSlug }} to="/$orgSlug/$boardSlug/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Submit Feedback
-            </Link>
+          <Button
+            render={
+              <Link
+                params={{ orgSlug, boardSlug }}
+                to="/$orgSlug/$boardSlug/new"
+              />
+            }
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Submit Feedback
           </Button>
         ) : null}
       </div>

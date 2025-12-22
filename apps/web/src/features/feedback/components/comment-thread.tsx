@@ -1,3 +1,12 @@
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@repo/ui/components/dropdown-menu";
+import { cn } from "@repo/ui/lib/utils";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -9,17 +18,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 import { randID } from "@/rand";
@@ -315,10 +315,16 @@ function CommentItem({
 
               {canEdit && (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="h-7 w-7 p-0" size="sm" variant="ghost">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        className="h-7 w-7 p-0"
+                        size="sm"
+                        variant="ghost"
+                      />
+                    }
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
                     <DropdownMenuItem onClick={() => setIsEditing(true)}>

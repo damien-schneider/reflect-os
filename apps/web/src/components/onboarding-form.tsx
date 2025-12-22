@@ -1,9 +1,9 @@
+import { Alert, AlertDescription } from "@repo/ui/components/alert";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
 import { AlertCircle, Loader2 } from "lucide-react";
 import type { FocusEvent, FormEvent } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { UseOnboardingFormReturn } from "@/hooks/use-onboarding-form";
 
 type OnboardingFormProps = {

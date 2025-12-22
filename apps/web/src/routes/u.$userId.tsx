@@ -1,9 +1,9 @@
+import { Badge } from "@repo/ui/components/badge";
+import { Card, CardContent } from "@repo/ui/components/card";
+import { Separator } from "@repo/ui/components/separator";
 import { useQuery } from "@rocicorp/zero/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, ChevronUp, MessageSquare, User } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/features/feedback/components/status-badge";
 import type { FeedbackStatus } from "@/lib/constants";
 import { queries } from "@/queries";

@@ -1,20 +1,18 @@
-import { useQuery, useZero } from "@rocicorp/zero/react";
-import { Check, Plus, X } from "lucide-react";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+} from "@repo/ui/components/popover";
+import { cn } from "@repo/ui/lib/utils";
+import { useQuery, useZero } from "@rocicorp/zero/react";
+import { Check, Plus, X } from "lucide-react";
+import { useState } from "react";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Tag } from "@/schema";
-// Note: zql is kept for imperative queries (.run()) that aren't reactive
-import { zql } from "@/zero-schema";
 
 type TagSelectorProps = {
   feedbackId: string;
@@ -47,13 +45,12 @@ export function TagSelector({
 
     if (isSelected) {
       // Remove tag
-      const [feedbackTags] = await zql.feedbackTag
-        .where("feedbackId", "=", feedbackId)
-        .where("tagId", "=", tag.id)
-        .run();
+      const [feedbackTag] = await zero.run(
+        queries.feedbackTag.byFeedbackAndTag({ feedbackId, tagId: tag.id })
+      );
 
-      if (feedbackTags) {
-        await zero.mutate(mutators.feedbackTag.delete({ id: feedbackTags.id }));
+      if (feedbackTag) {
+        await zero.mutate(mutators.feedbackTag.delete({ id: feedbackTag.id }));
       }
 
       onChange?.(selectedTagIds.filter((id) => id !== tag.id));
@@ -72,13 +69,12 @@ export function TagSelector({
   };
 
   const removeTag = async (tagId: string) => {
-    const [feedbackTags] = await zql.feedbackTag
-      .where("feedbackId", "=", feedbackId)
-      .where("tagId", "=", tagId)
-      .run();
+    const [feedbackTag] = await zero.run(
+      queries.feedbackTag.byFeedbackAndTag({ feedbackId, tagId })
+    );
 
-    if (feedbackTags) {
-      await zero.mutate(mutators.feedbackTag.delete({ id: feedbackTags.id }));
+    if (feedbackTag) {
+      await zero.mutate(mutators.feedbackTag.delete({ id: feedbackTag.id }));
     }
 
     onChange?.(selectedTagIds.filter((id) => id !== tagId));
@@ -108,11 +104,13 @@ export function TagSelector({
 
       {editable && (
         <Popover onOpenChange={setOpen} open={open}>
-          <PopoverTrigger asChild>
-            <Button className="h-6 gap-1 px-2" size="sm" variant="ghost">
-              <Plus className="h-3 w-3" />
-              <span className="text-xs">Add tag</span>
-            </Button>
+          <PopoverTrigger
+            render={
+              <Button className="h-6 gap-1 px-2" size="sm" variant="ghost" />
+            }
+          >
+            <Plus className="h-3 w-3" />
+            <span className="text-xs">Add tag</span>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-48 p-2">
             <div className="space-y-1">

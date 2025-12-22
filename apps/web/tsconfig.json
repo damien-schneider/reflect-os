@@ -22,7 +22,8 @@
       "@repo/db": ["../../packages/db/src/index.ts"],
       "@repo/db/*": ["../../packages/db/src/*"],
       "@repo/email": ["../../packages/email/src/index.ts"],
-      "@repo/email/*": ["../../packages/email/src/*"]
+      "@repo/email/*": ["../../packages/email/src/*"],
+      "@repo/ui/*": ["../../packages/ui/src/*"]
     }
   },
   "include": ["src", "vite.config.ts", "../../packages/db/src"]

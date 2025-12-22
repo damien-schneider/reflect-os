@@ -1,3 +1,24 @@
+import { Button } from "@repo/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@repo/ui/components/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@repo/ui/components/drawer";
+import { Input } from "@repo/ui/components/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ChevronRight,
@@ -9,29 +30,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { OrgDetailContent } from "@/components/organization";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   type Organization,
@@ -187,10 +185,15 @@ function MyAccount() {
         {/* Left column: User info */}
         <section className="space-y-4 sm:w-1/3">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <h1 className="cursor-default font-semibold text-2xl">
-                {session?.user.name}
-              </h1>
+            <TooltipTrigger
+              render={
+                <h1
+                  aria-label={session?.user.name ?? "User name"}
+                  className="cursor-default font-semibold text-2xl"
+                />
+              }
+            >
+              {session?.user.name}
             </TooltipTrigger>
             <TooltipContent>{session?.user.email}</TooltipContent>
           </Tooltip>
@@ -341,9 +344,9 @@ function MyAccount() {
             </div>
             <DrawerFooter>
               {footerContent}
-              <DrawerClose asChild>
-                <Button variant="outline">Done</Button>
-              </DrawerClose>
+              <Button onClick={closeOrgDetail} variant="outline">
+                Done
+              </Button>
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
@@ -362,9 +365,9 @@ function MyAccount() {
             <OrgDetailContent {...contentProps} />
             <DialogFooter className="flex-row justify-between sm:justify-between">
               {footerContent}
-              <DialogClose asChild>
-                <Button variant="outline">Done</Button>
-              </DialogClose>
+              <Button onClick={closeOrgDetail} variant="outline">
+                Done
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

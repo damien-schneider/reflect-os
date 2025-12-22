@@ -3,6 +3,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { cn } from "@repo/ui/lib/utils";
 import { CheckCircle } from "lucide-react";
 import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
 import type {
@@ -10,7 +11,6 @@ import type {
   RoadmapFeedbackItem,
 } from "@/features/roadmap/components/roadmap-kanban";
 import { LANE_CONFIG, type RoadmapLaneWithBacklog } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 
 type RoadmapLaneColumnProps = {
   lane: RoadmapLaneWithBacklog | string;

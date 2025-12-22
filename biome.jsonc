@@ -21,11 +21,14 @@
       },
       "performance": {
         // Barrel files are intentionally used for re-exporting schema types
-        "noBarrelFile": "off"
+        "noBarrelFile": "off",
+        "noNamespaceImport": {
+          "level": "info"
+        }
       },
       "complexity": {
         // Allow higher complexity for route components that handle many states
-        "noExcessiveCognitiveComplexity": "off"
+        "noExcessiveCognitiveComplexity": "warn"
       },
       "suspicious": {
         // confirm() is used for simple confirmation dialogs
@@ -33,23 +36,23 @@
       },
       "style": {
         // Nested ternaries are readable for simple conditions like button text
-        "noNestedTernary": "off",
+        "noNestedTernary": "warn",
         // TanStack Router generates files with specific naming convention
         "useFilenamingConvention": "off"
       },
       "security": {
         // dangerouslySetInnerHTML is used intentionally for user-provided CSS
-        "noDangerouslySetInnerHtml": "off"
+        "noDangerouslySetInnerHtml": "warn"
       },
       "a11y": {
         // These are too strict for interactive UI components
-        "noNoninteractiveElementInteractions": "off",
-        "useKeyWithClickEvents": "off",
-        "noStaticElementInteractions": "off"
+        "noNoninteractiveElementInteractions": "info",
+        "useKeyWithClickEvents": "info",
+        "noStaticElementInteractions": "info"
       },
       "correctness": {
         // Image sizing is handled by CSS classes
-        "useImageSize": "off"
+        "useImageSize": "info"
       }
     }
   }

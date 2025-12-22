@@ -1,3 +1,11 @@
+import { Button } from "@repo/ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
@@ -7,14 +15,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -158,8 +158,8 @@ function CheckEmail() {
           )}
 
           <div className="flex flex-wrap gap-3">
-            <Button asChild variant="default">
-              <Link to="/">Back to home</Link>
+            <Button render={<Link to="/" />} variant="default">
+              Back to home
             </Button>
             {email && (
               <Button

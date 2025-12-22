@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@repo/ui/components/badge";
 import type { SubscriptionStatus } from "../status.config";
 import { STATUS_CONFIG } from "../status.config";
 import { PLAN_TIERS, type SubscriptionTier } from "../tiers.config";

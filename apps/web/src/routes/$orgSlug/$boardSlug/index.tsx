@@ -1,9 +1,9 @@
+import { Button } from "@repo/ui/components/button";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { List, Map as MapIcon, Plus } from "lucide-react";
 import { AdminFloatingBar } from "@/components/admin-floating-bar";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
-import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FeedbackFilters } from "@/features/feedback/components/feedback-filters";
 import { FeedbackListItem } from "@/features/feedback/components/feedback-list-item";
 import {
@@ -137,13 +137,13 @@ function BoardHeader({
       <div className="flex items-center gap-2">
         <ToggleGroup
           className="rounded-md border"
-          onValueChange={(value) => {
+          onValueChange={(values) => {
+            const value = values[0];
             if (value) {
               setViewMode(value as "list" | "roadmap");
             }
           }}
-          type="single"
-          value={viewMode}
+          value={[viewMode]}
         >
           <ToggleGroupItem aria-label="List view" className="px-3" value="list">
             <List className="mr-1 h-4 w-4" />
@@ -255,11 +255,16 @@ function EmptyState({
   const renderButton = () => {
     if (session !== null) {
       return (
-        <Button asChild>
-          <Link params={{ orgSlug, boardSlug }} to="/$orgSlug/$boardSlug/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Submit Feedback
-          </Link>
+        <Button
+          render={
+            <Link
+              params={{ orgSlug, boardSlug }}
+              to="/$orgSlug/$boardSlug/new"
+            />
+          }
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Submit Feedback
         </Button>
       );
     }

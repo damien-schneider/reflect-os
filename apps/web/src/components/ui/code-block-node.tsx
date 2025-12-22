@@ -1,6 +1,21 @@
 "use client";
 
 import { formatCodeBlock, isLangSupported } from "@platejs/code-block";
+import { Button } from "@repo/ui/components/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@repo/ui/components/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@repo/ui/components/popover";
+import { cn } from "@repo/ui/lib/utils";
 import { BracesIcon, Check, CheckIcon, CopyIcon } from "lucide-react";
 import { NodeApi, type TCodeBlockElement, type TCodeSyntaxLeaf } from "platejs";
 import {
@@ -13,22 +28,6 @@ import {
   useReadOnly,
 } from "platejs/react";
 import React from "react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 
 export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
   const { editor, element } = props;
@@ -92,23 +91,31 @@ function CodeBlockCombobox() {
   }
 
   return (
-    <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger asChild>
-        <Button
-          aria-expanded={open}
-          className="h-6 select-none justify-between gap-1 px-2 text-muted-foreground text-xs"
-          role="combobox"
-          size="sm"
-          variant="ghost"
-        >
-          {languages.find((language) => language.value === value)?.label ??
-            "Plain Text"}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-[200px] p-0"
-        onCloseAutoFocus={() => setSearchValue("")}
+    <Popover
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        // Clear search when closing
+        if (!isOpen) {
+          setSearchValue("");
+        }
+      }}
+      open={open}
+    >
+      <PopoverTrigger
+        render={
+          <Button
+            aria-expanded={open}
+            className="h-6 select-none justify-between gap-1 px-2 text-muted-foreground text-xs"
+            role="combobox"
+            size="sm"
+            variant="ghost"
+          />
+        }
       >
+        {languages.find((language) => language.value === value)?.label ??
+          "Plain Text"}
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0">
         <Command shouldFilter={false}>
           <CommandInput
             className="h-9"

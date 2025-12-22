@@ -1,3 +1,21 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@repo/ui/components/alert-dialog";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import {
   createFileRoute,
@@ -15,24 +33,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 import { randID } from "@/rand";
@@ -122,28 +122,36 @@ function DashboardChangelogIndex() {
         </div>
         <div className="flex gap-2">
           {org?.isPublic && (
-            <Button asChild variant="outline">
-              <Link
-                params={{ orgSlug }}
-                target="_blank"
-                to="/$orgSlug/changelog"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View Public
-              </Link>
+            <Button
+              render={
+                <Link
+                  params={{ orgSlug }}
+                  target="_blank"
+                  to="/$orgSlug/changelog"
+                />
+              }
+              variant="outline"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              View Public
             </Button>
           )}
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button asChild variant="outline">
-                  <Link
-                    params={{ orgSlug }}
-                    to="/dashboard/$orgSlug/changelog/settings"
-                  >
-                    <Settings className="h-4 w-4" />
-                  </Link>
-                </Button>
+              <TooltipTrigger
+                render={
+                  <Button
+                    render={
+                      <Link
+                        params={{ orgSlug }}
+                        to="/dashboard/$orgSlug/changelog/settings"
+                      />
+                    }
+                    variant="outline"
+                  />
+                }
+              >
+                <Settings className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Settings</p>
@@ -200,14 +208,18 @@ function DashboardChangelogIndex() {
                 </p>
               </div>
               <div className="flex shrink-0 gap-1">
-                <Button asChild size="icon" variant="ghost">
-                  <Link
-                    onClick={(e) => e.stopPropagation()}
-                    params={{ orgSlug, releaseId: release.id as string }}
-                    to="/dashboard/$orgSlug/changelog/$releaseId"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Link>
+                <Button
+                  render={
+                    <Link
+                      onClick={(e) => e.stopPropagation()}
+                      params={{ orgSlug, releaseId: release.id as string }}
+                      to="/dashboard/$orgSlug/changelog/$releaseId"
+                    />
+                  }
+                  size="icon"
+                  variant="ghost"
+                >
+                  <Pencil className="h-4 w-4" />
                 </Button>
                 <Button
                   className="text-destructive hover:text-destructive"

@@ -1,6 +1,6 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@repo/ui/components/badge";
+import { cn } from "@repo/ui/lib/utils";
 import { type FeedbackStatus, STATUS_CONFIG } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 
 type StatusBadgeProps = {
   status: FeedbackStatus | string;

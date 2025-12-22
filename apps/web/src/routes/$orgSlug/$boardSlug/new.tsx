@@ -1,3 +1,5 @@
+import { Button } from "@repo/ui/components/button";
+import { cn } from "@repo/ui/lib/utils";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import {
   createFileRoute,
@@ -7,14 +9,11 @@ import {
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
-import { Button } from "@/components/ui/button";
 import { MarkdownEditor } from "@/features/editor/components/markdown-editor";
 import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 import { randID } from "@/rand";
-import { zql } from "@/zero-schema";
 
 const MAX_VERIFY_ATTEMPTS = 10;
 const VERIFY_DELAY_MS = 300;
@@ -127,7 +126,9 @@ function NewFeedback() {
       // Verify the feedback was actually created before navigating
       let verified = false;
       for (let i = 0; i < MAX_VERIFY_ATTEMPTS; i++) {
-        const result = await zql.feedback.where("id", feedbackId).one().run();
+        const [result] = await zero.run(
+          queries.feedback.byId({ id: feedbackId })
+        );
 
         if (result) {
           console.log("[NewFeedback] ✅ Feedback verified:", result.id);

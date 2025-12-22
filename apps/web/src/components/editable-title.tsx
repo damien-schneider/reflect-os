@@ -1,6 +1,6 @@
+import { Input } from "@repo/ui/components/input";
+import { cn } from "@repo/ui/lib/utils";
 import { useEffect, useRef, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 
 type EditableTitleProps = {
   value: string;

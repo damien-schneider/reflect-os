@@ -26,6 +26,7 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on failure */
+  // biome-ignore lint/style/noNestedTernary: simple conditional for retry count based on environment
   retries: isBuildMode ? 1 : process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */

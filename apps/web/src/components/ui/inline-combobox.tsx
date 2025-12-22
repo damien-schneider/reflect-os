@@ -19,12 +19,11 @@ import {
   useComboboxInput,
   useHTMLInputCursorState,
 } from "@platejs/combobox/react";
+import { cn } from "@repo/ui/lib/utils";
 import { cva } from "class-variance-authority";
 import type { Point, TElement } from "platejs";
 import { useComposedRef, useEditorRef } from "platejs/react";
 import React from "react";
-
-import { cn } from "@/lib/utils";
 
 type FilterFn = (
   item: { value: string; group?: string; keywords?: string[]; label?: string },

@@ -21,22 +21,14 @@
       },
       "performance": {
         // Barrel files are intentionally used for re-exporting schema types
-        "noBarrelFile": "off",
+        "noBarrelFile": {
+          "level": "info"
+        },
         "noNamespaceImport": {
           "level": "info"
         }
       },
-      "complexity": {
-        // Allow higher complexity for route components that handle many states
-        "noExcessiveCognitiveComplexity": "warn"
-      },
-      "suspicious": {
-        // confirm() is used for simple confirmation dialogs
-        "noAlert": "off"
-      },
       "style": {
-        // Nested ternaries are readable for simple conditions like button text
-        "noNestedTernary": "warn",
         // TanStack Router generates files with specific naming convention
         "useFilenamingConvention": "off"
       },

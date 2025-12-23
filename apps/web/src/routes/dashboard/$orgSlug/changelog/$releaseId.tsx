@@ -1,3 +1,13 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@repo/ui/components/alert-dialog";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -81,6 +91,7 @@ function ReleaseDetailPage() {
   const [version, setVersion] = useState("");
   const [description, setDescription] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Get selected feedback IDs from release items
   const releaseItems: ReleaseItem[] = Array.isArray(release?.releaseItems)
@@ -163,9 +174,6 @@ function ReleaseDetailPage() {
 
   const handleDelete = () => {
     if (!release) {
-      return;
-    }
-    if (!confirm(`Delete "${release.title}"? This cannot be undone.`)) {
       return;
     }
 
@@ -333,7 +341,7 @@ function ReleaseDetailPage() {
               )}
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
-                onClick={handleDelete}
+                onClick={() => setShowDeleteDialog(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Release
@@ -429,6 +437,27 @@ function ReleaseDetailPage() {
         showToolbar={true}
         value={description}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog onOpenChange={setShowDeleteDialog} open={showDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Release</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete "{release?.title}"? This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

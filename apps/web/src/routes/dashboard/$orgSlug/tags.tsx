@@ -1,3 +1,13 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@repo/ui/components/alert-dialog";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -142,13 +152,12 @@ function DashboardTags() {
   };
 
   const handleDelete = async (tag: Tag) => {
-    if (
-      !confirm(`Delete "${tag.name}"? This will remove it from all feedback.`)
-    ) {
-      return;
-    }
     await zero.mutate(mutators.tag.delete({ id: tag.id }));
+    setTagToDelete(null);
   };
+
+  // Delete confirmation state
+  const [tagToDelete, setTagToDelete] = useState<Tag | null>(null);
 
   return (
     <div className="wrapper-content space-y-6">
@@ -209,7 +218,7 @@ function DashboardTags() {
               </Button>
               <Button
                 className="text-destructive hover:text-destructive"
-                onClick={() => handleDelete(tag)}
+                onClick={() => setTagToDelete(tag)}
                 size="icon"
                 variant="ghost"
               >
@@ -353,6 +362,31 @@ function DashboardTags() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog
+        onOpenChange={(open) => !open && setTagToDelete(null)}
+        open={!!tagToDelete}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete tag?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete &quot;{tagToDelete?.name}&quot; and remove it
+              from all feedback. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => tagToDelete && handleDelete(tagToDelete)}
+              variant="destructive"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

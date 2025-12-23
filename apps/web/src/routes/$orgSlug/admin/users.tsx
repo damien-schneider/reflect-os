@@ -1,3 +1,13 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@repo/ui/components/alert-dialog";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -17,6 +27,7 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { Ban, Shield, User, UserCheck } from "lucide-react";
+import { useState } from "react";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 
@@ -53,18 +64,20 @@ function AdminUsers() {
     queries.user.byIds({ ids: feedbackUserIds })
   );
 
-  const handleBanUser = async (userId: string, isBanned: boolean) => {
-    const action = isBanned ? "unban" : "ban";
-    if (!confirm(`Are you sure you want to ${action} this user?`)) {
-      return;
-    }
+  // Ban confirmation state
+  const [userToBan, setUserToBan] = useState<{
+    id: string;
+    isBanned: boolean;
+  } | null>(null);
 
+  const handleBanUser = async (userId: string, isBanned: boolean) => {
     await zero.mutate(
       mutators.user.update({
         id: userId,
         bannedAt: isBanned ? undefined : Date.now(),
       })
     );
+    setUserToBan(null);
   };
 
   return (
@@ -194,7 +207,9 @@ function AdminUsers() {
                             className={
                               isBanned ? "text-green-600" : "text-destructive"
                             }
-                            onClick={() => handleBanUser(user.id, isBanned)}
+                            onClick={() =>
+                              setUserToBan({ id: user.id, isBanned })
+                            }
                             size="icon"
                             variant="ghost"
                           />
@@ -227,6 +242,36 @@ function AdminUsers() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Ban/Unban Confirmation */}
+      <AlertDialog
+        onOpenChange={(open) => !open && setUserToBan(null)}
+        open={!!userToBan}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {userToBan?.isBanned ? "Unban user?" : "Ban user?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {userToBan?.isBanned
+                ? "This will restore the user's access to submit feedback and comments."
+                : "This will prevent the user from submitting new feedback or comments."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                userToBan && handleBanUser(userToBan.id, userToBan.isBanned)
+              }
+              variant={userToBan?.isBanned ? "default" : "destructive"}
+            >
+              {userToBan?.isBanned ? "Unban" : "Ban"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

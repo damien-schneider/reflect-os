@@ -125,7 +125,7 @@ type TierLimits = {
  */
 export const PLAN_LIMITS: Record<SubscriptionTier, TierLimits> = {
   free: {
-    boards: 1,
+    boards: 3,
     membersPerOrg: 3,
     feedbackPerBoard: 100,
     customBranding: false,

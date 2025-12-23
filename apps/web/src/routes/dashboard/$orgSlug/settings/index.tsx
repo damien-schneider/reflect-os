@@ -3,7 +3,6 @@ import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
 import { Separator } from "@repo/ui/components/separator";
 import { Switch } from "@repo/ui/components/switch";
-import { Textarea } from "@repo/ui/components/textarea";
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ExternalLink, Globe, Lock } from "lucide-react";
@@ -11,11 +10,11 @@ import { useEffect, useRef, useState } from "react";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 
-export const Route = createFileRoute("/dashboard/$orgSlug/settings")({
-  component: DashboardSettings,
+export const Route = createFileRoute("/dashboard/$orgSlug/settings/")({
+  component: OrganizationSettings,
 });
 
-function DashboardSettings() {
+function OrganizationSettings() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string };
   const zero = useZero();
 
@@ -26,8 +25,6 @@ function DashboardSettings() {
   // Form state
   const [name, setName] = useState("");
   const [logo, setLogo] = useState("");
-  const [primaryColor, setPrimaryColor] = useState("#3b82f6");
-  const [customCss, setCustomCss] = useState("");
   const [logoError, setLogoError] = useState(false);
 
   // Track which org we've initialized the form for
@@ -39,8 +36,6 @@ function DashboardSettings() {
       initializedOrgId.current = org.id;
       setName(org.name);
       setLogo(org.logo ?? "");
-      setPrimaryColor(org.primaryColor ?? "#3b82f6");
-      setCustomCss(org.customCss ?? "");
     }
   }, [org]);
 
@@ -66,12 +61,12 @@ function DashboardSettings() {
   }
 
   return (
-    <div className="wrapper-content space-y-8">
+    <div className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="font-bold text-2xl">Organization Settings</h1>
         <p className="mt-1 text-muted-foreground">
-          Customize your organization's branding and appearance
+          Manage your organization's general settings and visibility
         </p>
       </div>
 
@@ -216,70 +211,6 @@ function DashboardSettings() {
           </Link>{" "}
           or directly in each board&apos;s settings.
         </p>
-      </div>
-
-      <Separator />
-
-      {/* Branding */}
-      <div className="space-y-6">
-        <h2 className="font-semibold text-lg">Branding</h2>
-
-        <div className="space-y-2">
-          <Label htmlFor="primaryColor">Primary Color</Label>
-          <div className="flex gap-3">
-            <Input
-              className="h-10 w-16 cursor-pointer p-1"
-              id="primaryColor"
-              onBlur={() => {
-                if (primaryColor !== (org.primaryColor ?? "#3b82f6")) {
-                  saveField("primaryColor", primaryColor || undefined);
-                }
-              }}
-              onChange={(e) => setPrimaryColor(e.target.value)}
-              type="color"
-              value={primaryColor}
-            />
-            <Input
-              className="flex-1"
-              onBlur={() => {
-                if (primaryColor !== (org.primaryColor ?? "#3b82f6")) {
-                  saveField("primaryColor", primaryColor || undefined);
-                }
-              }}
-              onChange={(e) => setPrimaryColor(e.target.value)}
-              placeholder="#3b82f6"
-              value={primaryColor}
-            />
-          </div>
-          <p className="text-muted-foreground text-xs">
-            Used for buttons, links, and accents
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="customCss">Custom CSS</Label>
-          <Textarea
-            className="font-mono text-sm"
-            id="customCss"
-            onBlur={() => {
-              const newCss = customCss.trim() || undefined;
-              if (newCss !== (org.customCss ?? undefined)) {
-                saveField("customCss", newCss);
-              }
-            }}
-            onChange={(e) => setCustomCss(e.target.value)}
-            placeholder={`/* Custom styles */
-.your-class {
-  /* your styles */
-}`}
-            rows={8}
-            value={customCss}
-          />
-          <p className="text-muted-foreground text-xs">
-            Add custom CSS to further customize the appearance. Be careful with
-            this feature.
-          </p>
-        </div>
       </div>
     </div>
   );

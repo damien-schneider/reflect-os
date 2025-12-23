@@ -159,7 +159,7 @@ function Sidebar({
   className,
   children,
   ...props
-}: React.ComponentProps<"div"> & {
+}: React.ComponentProps<"aside"> & {
   side?: "left" | "right";
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offExamples" | "icon" | "none";
@@ -168,7 +168,7 @@ function Sidebar({
 
   if (collapsible === "none") {
     return (
-      <div
+      <aside
         className={cn(
           "flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground",
           className
@@ -177,7 +177,7 @@ function Sidebar({
         {...props}
       >
         {children}
-      </div>
+      </aside>
     );
   }
 
@@ -189,6 +189,13 @@ function Sidebar({
           data-mobile="true"
           data-sidebar="sidebar"
           data-slot="sidebar"
+          onClick={(e) => {
+            // Close sidebar when clicking on a link (navigation)
+            const target = e.target as HTMLElement;
+            if (target.closest("a[href]")) {
+              setOpenMobile(false);
+            }
+          }}
           side={side}
           style={
             {
@@ -200,20 +207,21 @@ function Sidebar({
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
+          <aside className="flex h-full w-full flex-col">{children}</aside>
         </SheetContent>
       </Sheet>
     );
   }
 
   return (
-    <div
+    <aside
       className="group peer hidden text-sidebar-foreground md:block"
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-side={side}
       data-slot="sidebar"
       data-state={state}
       data-variant={variant}
+      {...props}
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
@@ -240,7 +248,6 @@ function Sidebar({
           className
         )}
         data-slot="sidebar-container"
-        {...props}
       >
         <div
           className="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
@@ -250,7 +257,7 @@ function Sidebar({
           {children}
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
 
@@ -527,7 +534,7 @@ function SidebarMenuButton({
       },
       props
     ),
-    render: tooltip ? TooltipTrigger : render,
+    render,
     state: {
       slot: "sidebar-menu-button",
       sidebar: "menu-button",
@@ -548,7 +555,7 @@ function SidebarMenuButton({
 
   return (
     <Tooltip>
-      {comp}
+      <TooltipTrigger className="w-full" render={comp} />
       <TooltipContent
         align="center"
         hidden={state !== "collapsed" || isMobile}

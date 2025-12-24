@@ -1,4 +1,5 @@
 import { Button } from "@repo/ui/components/button";
+import { DropdownMenuItem } from "@repo/ui/components/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -41,5 +42,30 @@ export function ThemeToggle() {
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
+  );
+}
+
+export function ThemeToggleMenuItem() {
+  const { theme, setTheme } = useTheme();
+
+  const currentTheme = (theme ?? "system") as keyof typeof themeIcons;
+  const Icon = themeIcons[currentTheme] ?? Monitor;
+  const label = themeLabels[currentTheme] ?? "System";
+
+  const cycleTheme = () => {
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  };
+
+  return (
+    <DropdownMenuItem
+      className="gap-2 p-2"
+      closeOnClick={false}
+      onClick={cycleTheme}
+    >
+      <Icon className="size-4" />
+      <span>Theme: {label}</span>
+    </DropdownMenuItem>
   );
 }

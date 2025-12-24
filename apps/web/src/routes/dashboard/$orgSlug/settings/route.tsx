@@ -16,7 +16,7 @@ import {
   useParams,
   useRouterState,
 } from "@tanstack/react-router";
-import { ArrowLeft, Building2, Palette } from "lucide-react";
+import { ArrowLeft, Building2, Palette, Users } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/$orgSlug/settings")({
   component: SettingsLayout,
@@ -28,6 +28,11 @@ const settingsNavItems = [
     label: "Organization",
     icon: Building2,
     exact: true,
+  },
+  {
+    href: "/dashboard/$orgSlug/settings/members",
+    label: "Members",
+    icon: Users,
   },
   {
     href: "/dashboard/$orgSlug/settings/branding",

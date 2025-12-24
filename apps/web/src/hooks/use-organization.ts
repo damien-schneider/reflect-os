@@ -180,7 +180,7 @@ export function useOrgInvite(selectedOrg: Organization | null) {
   };
 
   const inviteLink = generatedInviteId
-    ? `${window.location.origin}/accept-invite/${generatedInviteId}`
+    ? `${window.location.origin}/invite/${generatedInviteId}`
     : null;
 
   const copyInviteLink = () => {

@@ -51,7 +51,7 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggleMenuItem } from "@/components/theme-toggle";
 import { authClient } from "@/lib/auth-client";
 import { queries } from "@/queries";
 import type { Board, Organization } from "@/schema";
@@ -584,6 +584,7 @@ function UserSection({
                   </Badge>
                 ) : null}
               </DropdownMenuItem>
+              <ThemeToggleMenuItem />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2" onClick={handleSignOut}>
@@ -592,11 +593,6 @@ function UserSection({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </SidebarMenuItem>
-      <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-        <div className="flex items-center justify-end px-2">
-          <ThemeToggle />
-        </div>
       </SidebarMenuItem>
     </SidebarMenu>
   );

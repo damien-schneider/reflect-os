@@ -1,27 +1,21 @@
 "use client";
 
-import { serializeMd } from "@platejs/markdown";
 import { cn } from "@repo/ui/lib/utils";
+import { DragHandle } from "@tiptap/extension-drag-handle-react";
+import { EditorContent } from "@tiptap/react";
 import {
   BoldIcon,
   Code2Icon,
+  GripVerticalIcon,
   ItalicIcon,
+  Link2Icon,
+  ListIcon,
+  ListOrderedIcon,
+  QuoteIcon,
+  Redo2Icon,
   StrikethroughIcon,
+  Undo2Icon,
 } from "lucide-react";
-import { KEYS } from "platejs";
-import { Plate } from "platejs/react";
-import { useRef, useSyncExternalStore } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { Editor, EditorContainer } from "@/components/ui/editor";
-import { FloatingToolbar } from "@/components/ui/floating-toolbar";
-import {
-  RedoToolbarButton,
-  UndoToolbarButton,
-} from "@/components/ui/history-toolbar-button";
-import { LinkToolbarButton } from "@/components/ui/link-toolbar-button";
-import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button";
-import { ToolbarGroup } from "@/components/ui/toolbar";
 import { useMarkdownEditor } from "@/features/editor/hooks/use-markdown-editor";
 
 type MarkdownEditorProps = {
@@ -32,10 +26,8 @@ type MarkdownEditorProps = {
   autoFocus?: boolean;
   editable?: boolean;
   showToolbar?: boolean;
-  enableDnd?: boolean;
+  placeholder?: string;
 };
-
-const EDITOR_PLACEHOLDER = "Start typing or press '/' for commands...";
 
 export function MarkdownEditor({
   value = "",
@@ -45,36 +37,14 @@ export function MarkdownEditor({
   autoFocus = false,
   editable = true,
   showToolbar = true,
-  enableDnd = false,
+  placeholder,
 }: MarkdownEditorProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isMountedRef = useRef(true);
-
-  // Track mounted state to prevent updates after unmount
-  useSyncExternalStore(
-    () => {
-      isMountedRef.current = true;
-      return () => {
-        isMountedRef.current = false;
-      };
-    },
-    () => true,
-    () => true
-  );
-
-  const handleUpdate = (markdown: string) => {
-    // Only call onChange if still mounted
-    if (isMountedRef.current) {
-      onChange?.(markdown);
-    }
-  };
-
   const { editor } = useMarkdownEditor({
     content: value,
-    onUpdate: handleUpdate,
+    onUpdate: onChange,
     autoFocus,
     editable,
-    enableDnd,
+    placeholder,
   });
 
   if (!editor) {
@@ -85,64 +55,148 @@ export function MarkdownEditor({
     );
   }
 
-  const editorContent = (
-    <div className={cn("relative flex flex-col", className)} ref={containerRef}>
-      <Plate
-        editor={editor}
-        onChange={({ editor: ed }) => {
-          const markdown = serializeMd(ed);
-          handleUpdate(markdown);
-        }}
-      >
-        <EditorContainer>
-          <Editor
-            className={cn(
-              "w-full",
-              "min-h-150! *:mx-auto *:max-w-3xl focus:outline-none",
-              editorClassName
-            )}
-            placeholder={EDITOR_PLACEHOLDER}
-            variant="default"
-          />
+  return (
+    <div className={cn("relative flex flex-col", className)}>
+      {/* Toolbar */}
+      {showToolbar && editable && (
+        <div className="flex flex-wrap items-center gap-1 border-b p-2">
+          <ToolbarButton
+            isActive={false}
+            onClick={() => editor.chain().focus().undo().run()}
+            title="Undo"
+          >
+            <Undo2Icon className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            isActive={false}
+            onClick={() => editor.chain().focus().redo().run()}
+            title="Redo"
+          >
+            <Redo2Icon className="size-4" />
+          </ToolbarButton>
 
-          {/* Floating toolbar appears when text is selected */}
-          {showToolbar && editable && (
-            <FloatingToolbar>
-              <ToolbarGroup>
-                <UndoToolbarButton />
-                <RedoToolbarButton />
-              </ToolbarGroup>
-              <ToolbarGroup>
-                <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘B)">
-                  <BoldIcon />
-                </MarkToolbarButton>
-                <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘I)">
-                  <ItalicIcon />
-                </MarkToolbarButton>
-                <MarkToolbarButton
-                  nodeType={KEYS.strikethrough}
-                  tooltip="Strikethrough"
-                >
-                  <StrikethroughIcon />
-                </MarkToolbarButton>
-                <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘E)">
-                  <Code2Icon />
-                </MarkToolbarButton>
-              </ToolbarGroup>
-              <ToolbarGroup>
-                <LinkToolbarButton />
-              </ToolbarGroup>
-            </FloatingToolbar>
+          <ToolbarDivider />
+
+          <ToolbarButton
+            isActive={editor.isActive("bold")}
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            title="Bold (⌘B)"
+          >
+            <BoldIcon className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            isActive={editor.isActive("italic")}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            title="Italic (⌘I)"
+          >
+            <ItalicIcon className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            isActive={editor.isActive("strike")}
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            title="Strikethrough"
+          >
+            <StrikethroughIcon className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            isActive={editor.isActive("code")}
+            onClick={() => editor.chain().focus().toggleCode().run()}
+            title="Code (⌘E)"
+          >
+            <Code2Icon className="size-4" />
+          </ToolbarButton>
+
+          <ToolbarDivider />
+
+          <ToolbarButton
+            isActive={editor.isActive("bulletList")}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            title="Bullet List"
+          >
+            <ListIcon className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            isActive={editor.isActive("orderedList")}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            title="Numbered List"
+          >
+            <ListOrderedIcon className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            isActive={editor.isActive("blockquote")}
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            title="Quote"
+          >
+            <QuoteIcon className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            isActive={editor.isActive("link")}
+            onClick={() => {
+              if (editor.isActive("link")) {
+                editor.chain().focus().unsetLink().run();
+              } else {
+                // biome-ignore lint/suspicious/noAlert: Simple prompt for URL input in editor toolbar
+                const url = window.prompt("Enter URL");
+                if (url) {
+                  editor.chain().focus().setLink({ href: url }).run();
+                }
+              }
+            }}
+            title="Link"
+          >
+            <Link2Icon className="size-4" />
+          </ToolbarButton>
+        </div>
+      )}
+
+      {/* Editor content with Drag Handle */}
+      <div className="relative">
+        <DragHandle editor={editor}>
+          <div className="flex cursor-grab items-center justify-center rounded p-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:cursor-grabbing">
+            <GripVerticalIcon className="size-4" />
+          </div>
+        </DragHandle>
+        <EditorContent
+          className={cn(
+            "editor-content",
+            "focus-within:outline-none",
+            editorClassName
           )}
-        </EditorContainer>
-      </Plate>
+          editor={editor}
+        />
+      </div>
     </div>
   );
+}
 
-  // Wrap with DndProvider when drag and drop is enabled
-  if (enableDnd) {
-    return <DndProvider backend={HTML5Backend}>{editorContent}</DndProvider>;
-  }
+function ToolbarButton({
+  children,
+  onClick,
+  isActive,
+  title,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  isActive: boolean;
+  title: string;
+}) {
+  return (
+    <button
+      className={cn(
+        "rounded p-1.5 transition-colors",
+        isActive
+          ? "bg-accent text-accent-foreground"
+          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+      )}
+      onClick={onClick}
+      title={title}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
 
-  return editorContent;
+function ToolbarDivider() {
+  return <div className="mx-1 h-6 w-px bg-border" />;
 }

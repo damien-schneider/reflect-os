@@ -1,0 +1,387 @@
+/* TipTap Editor Styles */
+
+/* Base editor container */
+.editor-content {
+  width: 100%;
+  min-height: 9.25rem;
+  padding: 1rem;
+}
+
+/* ProseMirror editor */
+.editor-content .ProseMirror {
+  outline: none;
+}
+
+/* Placeholder styling */
+.editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  content: attr(data-placeholder);
+}
+
+/* Typography */
+.editor-content .ProseMirror {
+  color: var(--foreground);
+  line-height: 1.625;
+}
+
+/* Headings */
+.editor-content .ProseMirror h1 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--foreground);
+}
+
+.editor-content .ProseMirror h2 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+}
+
+.editor-content .ProseMirror h3 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.editor-content .ProseMirror h4 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.editor-content .ProseMirror h5 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.editor-content .ProseMirror h6 {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--muted-foreground);
+}
+
+/* Paragraphs */
+.editor-content .ProseMirror p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Links */
+.editor-content .ProseMirror a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 150ms;
+  cursor: pointer;
+}
+
+.editor-content .ProseMirror a:hover {
+  opacity: 0.8;
+}
+
+/* Bold */
+.editor-content .ProseMirror strong {
+  font-weight: 600;
+}
+
+/* Italic */
+.editor-content .ProseMirror em {
+  font-style: italic;
+}
+
+/* Strikethrough */
+.editor-content .ProseMirror s {
+  text-decoration: line-through;
+}
+
+/* Inline code */
+.editor-content .ProseMirror code {
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background-color: var(--muted);
+  font-size: 0.875rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+/* Code blocks */
+.editor-content .ProseMirror pre {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--muted);
+  overflow-x: auto;
+}
+
+.editor-content .ProseMirror pre code {
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+/* Blockquote */
+.editor-content .ProseMirror blockquote {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 4px solid color-mix(in oklch, var(--primary) 30%, transparent);
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+/* Horizontal rule */
+.editor-content .ProseMirror hr {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+/* Unordered list */
+.editor-content .ProseMirror ul {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
+  list-style-type: disc;
+}
+
+.editor-content .ProseMirror ul li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Ordered list */
+.editor-content .ProseMirror ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
+  list-style-type: decimal;
+}
+
+.editor-content .ProseMirror ol li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Nested lists */
+.editor-content .ProseMirror ul ul,
+.editor-content .ProseMirror ol ul {
+  list-style-type: circle;
+}
+
+.editor-content .ProseMirror ul ul ul,
+.editor-content .ProseMirror ol ul ul,
+.editor-content .ProseMirror ul ol ul,
+.editor-content .ProseMirror ol ol ul {
+  list-style-type: square;
+}
+
+/* Task lists */
+.editor-content .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.editor-content .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.editor-content .ProseMirror ul[data-type="taskList"] li > label {
+  display: flex;
+  align-items: center;
+}
+
+.editor-content
+  .ProseMirror
+  ul[data-type="taskList"]
+  li
+  > label
+  > input[type="checkbox"] {
+  height: 1rem;
+  width: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--input);
+  background-color: var(--background);
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.editor-content
+  .ProseMirror
+  ul[data-type="taskList"]
+  li[data-checked="true"]
+  > div {
+  text-decoration: line-through;
+  color: var(--muted-foreground);
+}
+
+/* Images */
+.editor-content .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Tables */
+.editor-content .ProseMirror table {
+  width: 100%;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-collapse: collapse;
+}
+
+.editor-content .ProseMirror th {
+  border: 1px solid var(--border);
+  background-color: var(--muted);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.editor-content .ProseMirror td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+}
+
+/* Selection */
+.editor-content .ProseMirror ::selection {
+  background-color: color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+/* Code block syntax highlighting (lowlight) */
+.editor-content .ProseMirror pre .hljs-comment,
+.editor-content .ProseMirror pre .hljs-quote {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.editor-content .ProseMirror pre .hljs-keyword,
+.editor-content .ProseMirror pre .hljs-selector-tag,
+.editor-content .ProseMirror pre .hljs-addition {
+  color: oklch(0.55 0.2 300);
+}
+
+.dark .editor-content .ProseMirror pre .hljs-keyword,
+.dark .editor-content .ProseMirror pre .hljs-selector-tag,
+.dark .editor-content .ProseMirror pre .hljs-addition {
+  color: oklch(0.75 0.18 300);
+}
+
+.editor-content .ProseMirror pre .hljs-number,
+.editor-content .ProseMirror pre .hljs-string,
+.editor-content .ProseMirror pre .hljs-meta .hljs-meta-string,
+.editor-content .ProseMirror pre .hljs-literal,
+.editor-content .ProseMirror pre .hljs-doctag,
+.editor-content .ProseMirror pre .hljs-regexp {
+  color: oklch(0.55 0.18 145);
+}
+
+.dark .editor-content .ProseMirror pre .hljs-number,
+.dark .editor-content .ProseMirror pre .hljs-string,
+.dark .editor-content .ProseMirror pre .hljs-meta .hljs-meta-string,
+.dark .editor-content .ProseMirror pre .hljs-literal,
+.dark .editor-content .ProseMirror pre .hljs-doctag,
+.dark .editor-content .ProseMirror pre .hljs-regexp {
+  color: oklch(0.75 0.16 145);
+}
+
+.editor-content .ProseMirror pre .hljs-title,
+.editor-content .ProseMirror pre .hljs-section,
+.editor-content .ProseMirror pre .hljs-name,
+.editor-content .ProseMirror pre .hljs-selector-id,
+.editor-content .ProseMirror pre .hljs-selector-class {
+  color: oklch(0.55 0.18 240);
+}
+
+.dark .editor-content .ProseMirror pre .hljs-title,
+.dark .editor-content .ProseMirror pre .hljs-section,
+.dark .editor-content .ProseMirror pre .hljs-name,
+.dark .editor-content .ProseMirror pre .hljs-selector-id,
+.dark .editor-content .ProseMirror pre .hljs-selector-class {
+  color: oklch(0.75 0.16 240);
+}
+
+.editor-content .ProseMirror pre .hljs-attribute,
+.editor-content .ProseMirror pre .hljs-attr,
+.editor-content .ProseMirror pre .hljs-variable,
+.editor-content .ProseMirror pre .hljs-template-variable,
+.editor-content .ProseMirror pre .hljs-class .hljs-title,
+.editor-content .ProseMirror pre .hljs-type {
+  color: oklch(0.55 0.18 50);
+}
+
+.dark .editor-content .ProseMirror pre .hljs-attribute,
+.dark .editor-content .ProseMirror pre .hljs-attr,
+.dark .editor-content .ProseMirror pre .hljs-variable,
+.dark .editor-content .ProseMirror pre .hljs-template-variable,
+.dark .editor-content .ProseMirror pre .hljs-class .hljs-title,
+.dark .editor-content .ProseMirror pre .hljs-type {
+  color: oklch(0.75 0.16 50);
+}
+
+.editor-content .ProseMirror pre .hljs-symbol,
+.editor-content .ProseMirror pre .hljs-bullet,
+.editor-content .ProseMirror pre .hljs-subst,
+.editor-content .ProseMirror pre .hljs-meta,
+.editor-content .ProseMirror pre .hljs-meta .hljs-keyword,
+.editor-content .ProseMirror pre .hljs-selector-attr,
+.editor-content .ProseMirror pre .hljs-selector-pseudo,
+.editor-content .ProseMirror pre .hljs-link {
+  color: oklch(0.55 0.18 195);
+}
+
+.dark .editor-content .ProseMirror pre .hljs-symbol,
+.dark .editor-content .ProseMirror pre .hljs-bullet,
+.dark .editor-content .ProseMirror pre .hljs-subst,
+.dark .editor-content .ProseMirror pre .hljs-meta,
+.dark .editor-content .ProseMirror pre .hljs-meta .hljs-keyword,
+.dark .editor-content .ProseMirror pre .hljs-selector-attr,
+.dark .editor-content .ProseMirror pre .hljs-selector-pseudo,
+.dark .editor-content .ProseMirror pre .hljs-link {
+  color: oklch(0.75 0.16 195);
+}
+
+.editor-content .ProseMirror pre .hljs-built_in,
+.editor-content .ProseMirror pre .hljs-deletion {
+  color: oklch(0.55 0.2 25);
+}
+
+.dark .editor-content .ProseMirror pre .hljs-built_in,
+.dark .editor-content .ProseMirror pre .hljs-deletion {
+  color: oklch(0.75 0.18 25);
+}
+
+.editor-content .ProseMirror pre .hljs-emphasis {
+  font-style: italic;
+}
+
+.editor-content .ProseMirror pre .hljs-strong {
+  font-weight: 700;
+}

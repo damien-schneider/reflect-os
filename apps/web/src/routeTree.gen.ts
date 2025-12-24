@@ -18,6 +18,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as OrgSlugIndexRouteImport } from './routes/$orgSlug/index'
 import { Route as UUserIdRouteImport } from './routes/u.$userId'
 import { Route as SubscriptionSuccessRouteImport } from './routes/subscription/success'
+import { Route as InviteInvitationIdRouteImport } from './routes/invite.$invitationId'
 import { Route as DashboardAccountRouteImport } from './routes/dashboard/account'
 import { Route as OrgSlugChangelogRouteImport } from './routes/$orgSlug/changelog'
 import { Route as DashboardOrgSlugRouteRouteImport } from './routes/dashboard/$orgSlug/route'
@@ -41,6 +42,7 @@ import { Route as DashboardOrgSlugBoardSlugRouteRouteImport } from './routes/das
 import { Route as DashboardOrgSlugSettingsIndexRouteImport } from './routes/dashboard/$orgSlug/settings/index'
 import { Route as DashboardOrgSlugChangelogIndexRouteImport } from './routes/dashboard/$orgSlug/changelog/index'
 import { Route as DashboardOrgSlugBoardSlugIndexRouteImport } from './routes/dashboard/$orgSlug/$boardSlug/index'
+import { Route as DashboardOrgSlugSettingsMembersRouteImport } from './routes/dashboard/$orgSlug/settings/members'
 import { Route as DashboardOrgSlugSettingsBrandingRouteImport } from './routes/dashboard/$orgSlug/settings/branding'
 import { Route as DashboardOrgSlugChangelogSettingsRouteImport } from './routes/dashboard/$orgSlug/changelog/settings'
 import { Route as DashboardOrgSlugChangelogReleaseIdRouteImport } from './routes/dashboard/$orgSlug/changelog/$releaseId'
@@ -88,6 +90,11 @@ const UUserIdRoute = UUserIdRouteImport.update({
 const SubscriptionSuccessRoute = SubscriptionSuccessRouteImport.update({
   id: '/subscription/success',
   path: '/subscription/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteInvitationIdRoute = InviteInvitationIdRouteImport.update({
+  id: '/invite/$invitationId',
+  path: '/invite/$invitationId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardAccountRoute = DashboardAccountRouteImport.update({
@@ -213,6 +220,12 @@ const DashboardOrgSlugBoardSlugIndexRoute =
     path: '/',
     getParentRoute: () => DashboardOrgSlugBoardSlugRouteRoute,
   } as any)
+const DashboardOrgSlugSettingsMembersRoute =
+  DashboardOrgSlugSettingsMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => DashboardOrgSlugSettingsRouteRoute,
+  } as any)
 const DashboardOrgSlugSettingsBrandingRoute =
   DashboardOrgSlugSettingsBrandingRouteImport.update({
     id: '/branding',
@@ -243,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/$orgSlug': typeof DashboardOrgSlugRouteRouteWithChildren
   '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
   '/dashboard/account': typeof DashboardAccountRoute
+  '/invite/$invitationId': typeof InviteInvitationIdRoute
   '/subscription/success': typeof SubscriptionSuccessRoute
   '/u/$userId': typeof UUserIdRoute
   '/$orgSlug/': typeof OrgSlugIndexRoute
@@ -265,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
   '/dashboard/$orgSlug/changelog/settings': typeof DashboardOrgSlugChangelogSettingsRoute
   '/dashboard/$orgSlug/settings/branding': typeof DashboardOrgSlugSettingsBrandingRoute
+  '/dashboard/$orgSlug/settings/members': typeof DashboardOrgSlugSettingsMembersRoute
   '/dashboard/$orgSlug/$boardSlug/': typeof DashboardOrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/changelog/': typeof DashboardOrgSlugChangelogIndexRoute
   '/dashboard/$orgSlug/settings/': typeof DashboardOrgSlugSettingsIndexRoute
@@ -276,6 +291,7 @@ export interface FileRoutesByTo {
   '/$orgSlug/admin': typeof OrgSlugAdminRouteRouteWithChildren
   '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
   '/dashboard/account': typeof DashboardAccountRoute
+  '/invite/$invitationId': typeof InviteInvitationIdRoute
   '/subscription/success': typeof SubscriptionSuccessRoute
   '/u/$userId': typeof UUserIdRoute
   '/$orgSlug': typeof OrgSlugIndexRoute
@@ -295,6 +311,7 @@ export interface FileRoutesByTo {
   '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
   '/dashboard/$orgSlug/changelog/settings': typeof DashboardOrgSlugChangelogSettingsRoute
   '/dashboard/$orgSlug/settings/branding': typeof DashboardOrgSlugSettingsBrandingRoute
+  '/dashboard/$orgSlug/settings/members': typeof DashboardOrgSlugSettingsMembersRoute
   '/dashboard/$orgSlug/$boardSlug': typeof DashboardOrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/changelog': typeof DashboardOrgSlugChangelogIndexRoute
   '/dashboard/$orgSlug/settings': typeof DashboardOrgSlugSettingsIndexRoute
@@ -311,6 +328,7 @@ export interface FileRoutesById {
   '/dashboard/$orgSlug': typeof DashboardOrgSlugRouteRouteWithChildren
   '/$orgSlug/changelog': typeof OrgSlugChangelogRoute
   '/dashboard/account': typeof DashboardAccountRoute
+  '/invite/$invitationId': typeof InviteInvitationIdRoute
   '/subscription/success': typeof SubscriptionSuccessRoute
   '/u/$userId': typeof UUserIdRoute
   '/$orgSlug/': typeof OrgSlugIndexRoute
@@ -333,6 +351,7 @@ export interface FileRoutesById {
   '/dashboard/$orgSlug/changelog/$releaseId': typeof DashboardOrgSlugChangelogReleaseIdRoute
   '/dashboard/$orgSlug/changelog/settings': typeof DashboardOrgSlugChangelogSettingsRoute
   '/dashboard/$orgSlug/settings/branding': typeof DashboardOrgSlugSettingsBrandingRoute
+  '/dashboard/$orgSlug/settings/members': typeof DashboardOrgSlugSettingsMembersRoute
   '/dashboard/$orgSlug/$boardSlug/': typeof DashboardOrgSlugBoardSlugIndexRoute
   '/dashboard/$orgSlug/changelog/': typeof DashboardOrgSlugChangelogIndexRoute
   '/dashboard/$orgSlug/settings/': typeof DashboardOrgSlugSettingsIndexRoute
@@ -350,6 +369,7 @@ export interface FileRouteTypes {
     | '/dashboard/$orgSlug'
     | '/$orgSlug/changelog'
     | '/dashboard/account'
+    | '/invite/$invitationId'
     | '/subscription/success'
     | '/u/$userId'
     | '/$orgSlug/'
@@ -372,6 +392,7 @@ export interface FileRouteTypes {
     | '/dashboard/$orgSlug/changelog/$releaseId'
     | '/dashboard/$orgSlug/changelog/settings'
     | '/dashboard/$orgSlug/settings/branding'
+    | '/dashboard/$orgSlug/settings/members'
     | '/dashboard/$orgSlug/$boardSlug/'
     | '/dashboard/$orgSlug/changelog/'
     | '/dashboard/$orgSlug/settings/'
@@ -383,6 +404,7 @@ export interface FileRouteTypes {
     | '/$orgSlug/admin'
     | '/$orgSlug/changelog'
     | '/dashboard/account'
+    | '/invite/$invitationId'
     | '/subscription/success'
     | '/u/$userId'
     | '/$orgSlug'
@@ -402,6 +424,7 @@ export interface FileRouteTypes {
     | '/dashboard/$orgSlug/changelog/$releaseId'
     | '/dashboard/$orgSlug/changelog/settings'
     | '/dashboard/$orgSlug/settings/branding'
+    | '/dashboard/$orgSlug/settings/members'
     | '/dashboard/$orgSlug/$boardSlug'
     | '/dashboard/$orgSlug/changelog'
     | '/dashboard/$orgSlug/settings'
@@ -417,6 +440,7 @@ export interface FileRouteTypes {
     | '/dashboard/$orgSlug'
     | '/$orgSlug/changelog'
     | '/dashboard/account'
+    | '/invite/$invitationId'
     | '/subscription/success'
     | '/u/$userId'
     | '/$orgSlug/'
@@ -439,6 +463,7 @@ export interface FileRouteTypes {
     | '/dashboard/$orgSlug/changelog/$releaseId'
     | '/dashboard/$orgSlug/changelog/settings'
     | '/dashboard/$orgSlug/settings/branding'
+    | '/dashboard/$orgSlug/settings/members'
     | '/dashboard/$orgSlug/$boardSlug/'
     | '/dashboard/$orgSlug/changelog/'
     | '/dashboard/$orgSlug/settings/'
@@ -450,6 +475,7 @@ export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   CheckEmailRoute: typeof CheckEmailRoute
   LoginRoute: typeof LoginRoute
+  InviteInvitationIdRoute: typeof InviteInvitationIdRoute
   SubscriptionSuccessRoute: typeof SubscriptionSuccessRoute
   UUserIdRoute: typeof UUserIdRoute
 }
@@ -517,6 +543,13 @@ declare module '@tanstack/react-router' {
       path: '/subscription/success'
       fullPath: '/subscription/success'
       preLoaderRoute: typeof SubscriptionSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$invitationId': {
+      id: '/invite/$invitationId'
+      path: '/invite/$invitationId'
+      fullPath: '/invite/$invitationId'
+      preLoaderRoute: typeof InviteInvitationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/account': {
@@ -680,6 +713,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOrgSlugBoardSlugIndexRouteImport
       parentRoute: typeof DashboardOrgSlugBoardSlugRouteRoute
     }
+    '/dashboard/$orgSlug/settings/members': {
+      id: '/dashboard/$orgSlug/settings/members'
+      path: '/members'
+      fullPath: '/dashboard/$orgSlug/settings/members'
+      preLoaderRoute: typeof DashboardOrgSlugSettingsMembersRouteImport
+      parentRoute: typeof DashboardOrgSlugSettingsRouteRoute
+    }
     '/dashboard/$orgSlug/settings/branding': {
       id: '/dashboard/$orgSlug/settings/branding'
       path: '/branding'
@@ -772,6 +812,7 @@ const DashboardOrgSlugBoardSlugRouteRouteWithChildren =
 
 interface DashboardOrgSlugSettingsRouteRouteChildren {
   DashboardOrgSlugSettingsBrandingRoute: typeof DashboardOrgSlugSettingsBrandingRoute
+  DashboardOrgSlugSettingsMembersRoute: typeof DashboardOrgSlugSettingsMembersRoute
   DashboardOrgSlugSettingsIndexRoute: typeof DashboardOrgSlugSettingsIndexRoute
 }
 
@@ -779,6 +820,7 @@ const DashboardOrgSlugSettingsRouteRouteChildren: DashboardOrgSlugSettingsRouteR
   {
     DashboardOrgSlugSettingsBrandingRoute:
       DashboardOrgSlugSettingsBrandingRoute,
+    DashboardOrgSlugSettingsMembersRoute: DashboardOrgSlugSettingsMembersRoute,
     DashboardOrgSlugSettingsIndexRoute: DashboardOrgSlugSettingsIndexRoute,
   }
 
@@ -858,6 +900,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   CheckEmailRoute: CheckEmailRoute,
   LoginRoute: LoginRoute,
+  InviteInvitationIdRoute: InviteInvitationIdRoute,
   SubscriptionSuccessRoute: SubscriptionSuccessRoute,
   UUserIdRoute: UUserIdRoute,
 }

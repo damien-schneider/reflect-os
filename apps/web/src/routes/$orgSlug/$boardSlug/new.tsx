@@ -237,7 +237,7 @@ function NewFeedback() {
         {/* Notion-style description editor */}
 
         {isSubmitting ? (
-          <div className="wrapper-content min-h-[200px] rounded-lg bg-muted/30 p-4">
+          <div className="wrapper-content min-h-50 rounded-lg bg-muted/30 p-4">
             <p className="text-muted-foreground text-sm">
               {description || "No description provided"}
             </p>
@@ -246,7 +246,6 @@ function NewFeedback() {
           <MarkdownEditor
             editable
             editorClassName="border-none shadow-none px-0 py-0 bg-transparent"
-            enableDnd
             onChange={setDescription}
             value={description}
           />

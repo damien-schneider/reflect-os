@@ -19,8 +19,5 @@
     "ui": "@repo/ui/components"
   },
   "menuColor": "default",
-  "menuAccent": "subtle",
-  "registries": {
-    "@plate": "https://platejs.org/r/{name}.json"
-  }
+  "menuAccent": "subtle"
 }

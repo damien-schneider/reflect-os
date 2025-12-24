@@ -18,7 +18,6 @@ import {
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  ArrowRight,
   Crown,
   Eye,
   EyeOff,
@@ -49,64 +48,67 @@ function BoardCard({
   onVisibilityToggle: (boardId: string, checked: boolean) => void;
 }) {
   return (
-    <Card className="group transition-shadow hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-base">{board.name}</CardTitle>
+    <Link
+      params={{ orgSlug, boardSlug: board.slug }}
+      to="/dashboard/$orgSlug/$boardSlug"
+    >
+      <Card className="group h-full cursor-pointer transition-shadow hover:shadow-md">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-base">{board.name}</CardTitle>
+            </div>
+            <Badge variant={board.isPublic ? "default" : "secondary"}>
+              {board.isPublic ? (
+                <Eye className="mr-1 h-3 w-3" />
+              ) : (
+                <Lock className="mr-1 h-3 w-3" />
+              )}
+              {board.isPublic ? "Public" : "Private"}
+            </Badge>
           </div>
-          <Badge variant={board.isPublic ? "default" : "secondary"}>
-            {board.isPublic ? (
-              <Eye className="mr-1 h-3 w-3" />
-            ) : (
-              <Lock className="mr-1 h-3 w-3" />
-            )}
-            {board.isPublic ? "Public" : "Private"}
-          </Badge>
-        </div>
-        {board.description ? (
-          <CardDescription className="line-clamp-2">
-            {board.description}
-          </CardDescription>
-        ) : null}
-      </CardHeader>
-      <CardFooter className="flex items-center justify-between pt-0">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <div className="flex items-center gap-1">
-                <Switch
-                  checked={board.isPublic ?? false}
-                  onCheckedChange={(checked) =>
-                    onVisibilityToggle(board.id, checked)
-                  }
-                  size="sm"
-                />
-                <span className="text-muted-foreground text-xs">
-                  {board.isPublic ? (
-                    <Eye className="h-3 w-3" />
-                  ) : (
-                    <EyeOff className="h-3 w-3" />
-                  )}
-                </span>
-              </div>
-            }
-          />
-          <TooltipContent>
-            {board.isPublic ? "Click to make private" : "Click to make public"}
-          </TooltipContent>
-        </Tooltip>
-        <Link
-          className="flex items-center gap-1 text-primary text-sm hover:underline"
-          params={{ orgSlug, boardSlug: board.slug }}
-          to="/dashboard/$orgSlug/$boardSlug"
-        >
-          View Board
-          <ArrowRight className="h-3 w-3" />
-        </Link>
-      </CardFooter>
-    </Card>
+          {board.description ? (
+            <CardDescription className="line-clamp-2">
+              {board.description}
+            </CardDescription>
+          ) : null}
+        </CardHeader>
+        <CardFooter className="flex items-center justify-between pt-0">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <div
+                  className="flex items-center gap-1"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.key === "Enter" && e.stopPropagation()}
+                >
+                  <Switch
+                    checked={board.isPublic ?? false}
+                    onCheckedChange={(checked) =>
+                      onVisibilityToggle(board.id, checked)
+                    }
+                    size="sm"
+                  />
+                  <span className="text-muted-foreground text-xs">
+                    {board.isPublic ? (
+                      <Eye className="h-3 w-3" />
+                    ) : (
+                      <EyeOff className="h-3 w-3" />
+                    )}
+                  </span>
+                </div>
+              }
+            />
+            <TooltipContent>
+              {board.isPublic
+                ? "Click to make private"
+                : "Click to make public"}
+            </TooltipContent>
+          </Tooltip>
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }
 

@@ -1,10 +1,11 @@
 import path from "node:path";
-// import { startServer } from "@react-grab/opencode/server";
+// import { startServer } from "@react-grab/claude-code/server";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-vite-plugin";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+// TODO: Enable when vite.config integration works
 // if (process.env.NODE_ENV === "development") {
 //   startServer();
 // }

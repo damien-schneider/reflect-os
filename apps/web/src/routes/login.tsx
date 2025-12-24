@@ -1,16 +1,34 @@
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  createFileRoute,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
+import { AlertCircle, CheckCircle2, Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
 import { getSignUpErrorMessage } from "@/lib/auth-errors";
+import { isValidInviteId } from "@/lib/invitation-utils";
 import { redirectIfAuthenticated } from "@/lib/route-guards";
 
+type LoginSearchParams = {
+  inviteId?: string;
+  orgName?: string;
+};
+
 export const Route = createFileRoute("/login")({
-  beforeLoad: async () => {
+  validateSearch: (search: Record<string, unknown>): LoginSearchParams => ({
+    inviteId: typeof search.inviteId === "string" ? search.inviteId : undefined,
+    orgName: typeof search.orgName === "string" ? search.orgName : undefined,
+  }),
+  beforeLoad: async ({ search }) => {
+    // Don't redirect if user has an invitation to process
+    if (search.inviteId && isValidInviteId(search.inviteId)) {
+      return;
+    }
     await redirectIfAuthenticated({
       to: "/dashboard",
     });
@@ -23,7 +41,18 @@ export const Route = createFileRoute("/login")({
   component: Login,
 });
 
+function getAuthSubtitle(isSignUp: boolean): string {
+  return isSignUp
+    ? "Enter your details to get started"
+    : "Enter your credentials to continue";
+}
+
 function Login() {
+  const search = useSearch({ from: "/login" });
+  const inviteId = search.inviteId;
+  const orgName = search.orgName;
+  const hasInvite = inviteId && isValidInviteId(inviteId);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -34,6 +63,50 @@ function Login() {
   const navigate = useNavigate();
   const requiresEmailVerification =
     clientEnv.VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION;
+
+  /**
+   * Accept invitation after successful auth.
+   * Returns true if successful or already a member, false on error.
+   */
+  const acceptInvitationAfterAuth = async (): Promise<boolean> => {
+    if (!inviteId) {
+      return false;
+    }
+
+    try {
+      // Accept the invitation
+      const acceptResult = await authClient.organization.acceptInvitation({
+        invitationId: inviteId,
+      });
+
+      if (acceptResult.error) {
+        const errorMsg = acceptResult.error.message?.toLowerCase() ?? "";
+        // If already a member, that's fine - continue to dashboard
+        if (errorMsg.includes("already a member")) {
+          return true;
+        }
+        console.error("Could not accept invitation:", acceptResult.error);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Error accepting invitation:", err);
+      return false;
+    }
+  };
+
+  /**
+   * Navigate after successful auth.
+   * If there's an invitation, try to accept it first.
+   */
+  const navigateAfterAuth = async () => {
+    if (hasInvite) {
+      await acceptInvitationAfterAuth();
+    }
+    // Always go to dashboard, it will redirect to the right org
+    navigate({ to: "/dashboard" });
+  };
 
   const validateForm = () => {
     if (!email.trim()) {
@@ -92,8 +165,8 @@ function Login() {
                   password,
                 },
                 {
-                  onSuccess: () => {
-                    navigate({ to: "/dashboard" });
+                  onSuccess: async () => {
+                    await navigateAfterAuth();
                   },
                   onError: (ctx) => {
                     setError(
@@ -121,11 +194,9 @@ function Login() {
           password,
         },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
             setSuccess("Signed in! Redirecting...");
-            setTimeout(() => {
-              navigate({ to: "/dashboard" });
-            }, 1000);
+            await navigateAfterAuth();
           },
           onError: (ctx) => {
             const errorMsg = ctx.error.message?.toLowerCase() ?? "";
@@ -167,14 +238,31 @@ function Login() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-6">
+        {/* Invitation banner */}
+        {hasInvite && (
+          <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
+            <UserPlus className="h-5 w-5 shrink-0 text-primary" />
+            <p className="text-sm">
+              {orgName ? (
+                <>
+                  You've been invited to join{" "}
+                  <span className="font-semibold">{orgName}</span>
+                </>
+              ) : (
+                "You've been invited to join an organization"
+              )}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-2 text-center">
           <h1 className="font-semibold text-2xl">
             {isSignUp ? "Create Account" : "Sign In"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isSignUp
-              ? "Enter your details to get started"
-              : "Enter your credentials to continue"}
+            {hasInvite
+              ? "Sign in or create an account to accept your invitation"
+              : getAuthSubtitle(isSignUp)}
           </p>
         </div>
 

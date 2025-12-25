@@ -1,5 +1,114 @@
 /* TipTap Editor Styles */
 
+/* =============================================================================
+   INLINE EDITOR - Minimalist single-line TipTap editor
+   ============================================================================= */
+
+/* Base inline editor container - easy to override with className */
+.inline-editor {
+  width: 100%;
+}
+
+/* Loading state */
+.inline-editor--loading {
+  min-height: 1.5em;
+}
+
+/* Disabled state */
+.inline-editor--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Readonly state */
+.inline-editor--readonly {
+  cursor: default;
+}
+
+/* Inner editor content wrapper */
+.inline-editor-content {
+  width: 100%;
+}
+
+/* ProseMirror editor - minimal styling, easy to customize */
+.inline-editor-content .ProseMirror {
+  outline: none;
+  min-height: 1em;
+  /* Ensure single line with text overflow */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Remove paragraph margins for inline use */
+.inline-editor-content .ProseMirror p {
+  margin: 0;
+  padding: 0;
+  /* Inherit all typography from parent */
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+/* Placeholder styling */
+.inline-editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  content: attr(data-placeholder);
+  opacity: 0.6;
+}
+
+/* Selection styling */
+.inline-editor-content .ProseMirror ::selection {
+  background-color: color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+/* Semantic variant styles - apply typography via parent className or these defaults */
+.inline-editor--h1 .inline-editor-content .ProseMirror {
+  font-size: 2rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+}
+
+.inline-editor--h2 .inline-editor-content .ProseMirror {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+}
+
+.inline-editor--h3 .inline-editor-content .ProseMirror {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+.inline-editor--h4 .inline-editor-content .ProseMirror {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+}
+
+.inline-editor--h5 .inline-editor-content .ProseMirror {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+.inline-editor--h6 .inline-editor-content .ProseMirror {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+/* =============================================================================
+   MARKDOWN EDITOR - Full-featured multi-line editor
+   ============================================================================= */
+
 /* Base editor container */
 .editor-content {
   width: 100%;

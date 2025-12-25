@@ -42,7 +42,6 @@ import {
   EyeOff,
   FileText,
   Globe,
-  LayoutDashboard,
   LayoutGrid,
   LogOut,
   Plus,
@@ -103,7 +102,6 @@ export function AppSidebar() {
           <MainNavigation
             boardSlug={boardSlug}
             effectiveOrgSlug={effectiveOrgSlug}
-            isAccountPage={isAccountPage}
             pathname={pathname}
           />
         </div>
@@ -257,12 +255,10 @@ function MainNavigation({
   effectiveOrgSlug,
   boardSlug,
   pathname,
-  isAccountPage,
 }: {
   effectiveOrgSlug: string;
   boardSlug: string | undefined;
   pathname: string;
-  isAccountPage: boolean;
 }) {
   // Check if we're viewing a board (for highlighting)
   const isViewingBoards = boardSlug !== undefined;
@@ -287,15 +283,6 @@ function MainNavigation({
 
   // Main navigation items that are always visible
   const mainNavItems = [
-    {
-      href: "/dashboard/$orgSlug",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      isActive:
-        !(boardSlug || isAccountPage) &&
-        pathname === `/dashboard/${effectiveOrgSlug}`,
-      exact: true,
-    },
     {
       href: "/dashboard/$orgSlug/boards",
       label: "Boards",

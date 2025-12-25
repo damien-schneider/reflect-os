@@ -78,10 +78,12 @@ function BoardCard({
           <Tooltip>
             <TooltipTrigger
               render={
+                // biome-ignore lint/a11y/noStaticElementInteractions: Wrapper for interactive Switch component
                 <div
                   className="flex items-center gap-1"
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.key === "Enter" && e.stopPropagation()}
+                  role="presentation"
                 >
                   <Switch
                     checked={board.isPublic ?? false}

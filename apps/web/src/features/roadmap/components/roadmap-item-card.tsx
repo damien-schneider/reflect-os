@@ -1,5 +1,3 @@
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@repo/ui/lib/utils";
 import { ChevronUp, ExternalLink, GripVertical } from "lucide-react";
 import type { RoadmapFeedbackItem } from "@/features/roadmap/components/roadmap-kanban";
@@ -8,51 +6,55 @@ type RoadmapItemCardProps = {
   item: RoadmapFeedbackItem;
   isAdmin?: boolean;
   isDragging?: boolean;
+  onDragStart?: (
+    e: React.DragEvent<HTMLDivElement>,
+    item: RoadmapFeedbackItem
+  ) => void;
+  onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
 };
 
 export function RoadmapItemCard({
   item,
   isAdmin = false,
   isDragging = false,
+  onDragStart,
+  onDragEnd,
 }: RoadmapItemCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging: isSortableDragging,
-  } = useSortable({
-    id: item.id,
-    disabled: !isAdmin,
-  });
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    if (!isAdmin) {
+      e.preventDefault();
+      return;
+    }
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", item.id);
+    onDragStart?.(e, item);
+  };
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    onDragEnd?.(e);
   };
 
   return (
+    // biome-ignore lint/a11y/noNoninteractiveElementInteractions: This is a draggable card for drag-and-drop functionality
+    // biome-ignore lint/a11y/noStaticElementInteractions: This is a draggable card for drag-and-drop functionality
     <div
       className={cn(
-        "rounded-lg border bg-card p-3 shadow-sm",
-        (isDragging || isSortableDragging) &&
-          "opacity-50 shadow-lg ring-2 ring-primary",
+        "rounded-lg border bg-card p-3 shadow-sm transition-opacity",
+        isDragging && "opacity-50 shadow-lg ring-2 ring-primary",
+        isAdmin && "cursor-grab active:cursor-grabbing",
         !isAdmin && "cursor-default"
       )}
-      ref={setNodeRef}
-      style={style}
+      draggable={isAdmin}
+      onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart}
+      role={isAdmin ? "button" : undefined}
     >
       <div className="flex items-start gap-2">
         {/* Drag Handle (admin only) */}
         {isAdmin && (
-          <button
-            className="mt-0.5 cursor-grab touch-none active:cursor-grabbing"
-            {...attributes}
-            {...listeners}
-          >
+          <div className="mt-0.5 touch-none">
             <GripVertical className="h-4 w-4 text-muted-foreground" />
-          </button>
+          </div>
         )}
 
         <div className="min-w-0 flex-1">

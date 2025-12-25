@@ -1,10 +1,6 @@
-import { useDroppable } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { cn } from "@repo/ui/lib/utils";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Plus } from "lucide-react";
+import { useState } from "react";
 import { RoadmapItemCard } from "@/features/roadmap/components/roadmap-item-card";
 import type {
   LaneConfig,
@@ -18,6 +14,15 @@ type RoadmapLaneColumnProps = {
   isAdmin?: boolean;
   /** Custom lane configuration - if not provided, uses default LANE_CONFIG */
   laneConfig?: LaneConfig;
+  draggingItemId?: string | null;
+  onDragStart?: (
+    e: React.DragEvent<HTMLDivElement>,
+    item: RoadmapFeedbackItem
+  ) => void;
+  onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onAddItem?: (laneId: string) => void;
 };
 
 export function RoadmapLaneColumn({
@@ -25,10 +30,14 @@ export function RoadmapLaneColumn({
   items,
   isAdmin = false,
   laneConfig,
+  draggingItemId,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
+  onAddItem,
 }: RoadmapLaneColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: lane,
-  });
+  const [isHovered, setIsHovered] = useState(false);
 
   // Use custom config if provided, otherwise fall back to default
   const config = laneConfig ?? LANE_CONFIG[lane as RoadmapLaneWithBacklog];
@@ -38,13 +47,34 @@ export function RoadmapLaneColumn({
     return null;
   }
 
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    onDragOver?.(e);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    onDrop?.(e);
+  };
+
+  const handleAddItem = () => {
+    onAddItem?.(lane);
+  };
+
   return (
-    <div
+    // biome-ignore lint/a11y/noNoninteractiveElementInteractions: This is a drop zone for drag-and-drop functionality
+    <section
+      aria-label={`${config.label} lane`}
       className={cn(
-        "flex min-h-[400px] flex-col rounded-lg border bg-muted/30",
-        isOver && "ring-2 ring-primary/50"
+        "group/lane flex min-h-[400px] flex-col rounded-lg border bg-muted/30 transition-all",
+        draggingItemId && "ring-2 ring-dashed ring-primary/20"
       )}
-      ref={setNodeRef}
+      data-lane={lane}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Lane Header */}
       <div className="flex items-center gap-2 rounded-t-lg border-b bg-muted/50 p-4">
@@ -59,25 +89,49 @@ export function RoadmapLaneColumn({
         <span className="ml-auto text-muted-foreground text-sm">
           {items.length}
         </span>
+        {/* Add button in header (visible on hover) */}
+        {isAdmin && onAddItem && (
+          <button
+            className={cn(
+              "rounded p-1 text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
+              isHovered ? "opacity-100" : "opacity-0"
+            )}
+            onClick={handleAddItem}
+            type="button"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Lane Content */}
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
-        <SortableContext
-          items={items.map((i) => i.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {items.length === 0 ? (
-            <div className="flex h-32 items-center justify-center text-muted-foreground text-sm">
-              {isAdmin ? "Drag items here" : "No items"}
-            </div>
-          ) : (
-            items.map((item) => (
-              <RoadmapItemCard isAdmin={isAdmin} item={item} key={item.id} />
-            ))
-          )}
-        </SortableContext>
+        {items.map((item) => (
+          <RoadmapItemCard
+            isAdmin={isAdmin}
+            isDragging={draggingItemId === item.id}
+            item={item}
+            key={item.id}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+          />
+        ))}
+
+        {/* Bottom add button (visible on hover) */}
+        {isAdmin && onAddItem && (
+          <button
+            className={cn(
+              "flex w-full items-center gap-2 rounded-lg border border-muted-foreground/30 border-dashed p-3 text-muted-foreground text-sm transition-all hover:border-primary/50 hover:bg-muted/50 hover:text-foreground",
+              isHovered ? "opacity-100" : "opacity-0"
+            )}
+            onClick={handleAddItem}
+            type="button"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New</span>
+          </button>
+        )}
       </div>
-    </div>
+    </section>
   );
 }

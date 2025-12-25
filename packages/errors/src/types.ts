@@ -9,11 +9,11 @@ import type { AppErrorCodeType } from "./codes";
 /**
  * Structured error object with code and message
  */
-export type AppError = {
+export interface AppError {
   code: AppErrorCodeType | string;
   message: string;
   originalMessage?: string;
-};
+}
 
 /**
  * Result type for operations that can fail

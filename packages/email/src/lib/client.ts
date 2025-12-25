@@ -14,7 +14,7 @@ function renderEmailTemplate(template: ReactElement): string {
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">${html}`;
 }
 
-export type SendEmailOptions = {
+export interface SendEmailOptions {
   to: string | string[];
   subject: string;
   template: ReactElement;
@@ -22,7 +22,7 @@ export type SendEmailOptions = {
   /** Optional tags for categorization and analytics */
   tags?: Array<{ name: string; value: string }>;
   config?: Partial<EmailConfig>;
-};
+}
 
 /**
  * Resend API error codes from:
@@ -61,11 +61,11 @@ function getResendClient(apiKey: string): Resend {
   return resendClient;
 }
 
-type ResendErrorPayload = {
+interface ResendErrorPayload {
   message?: string;
   name?: ResendErrorCode | string;
   statusCode?: number;
-};
+}
 
 const testModeAddressPattern =
   /only send testing emails to your own email address\s*\(([^)]+)\)/i;

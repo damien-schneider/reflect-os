@@ -12,9 +12,9 @@ export async function requireAuthenticated(): Promise<void> {
   }
 }
 
-type RedirectIfAuthenticatedOptions = {
+interface RedirectIfAuthenticatedOptions {
   to: string;
-};
+}
 
 export async function redirectIfAuthenticated({
   to,

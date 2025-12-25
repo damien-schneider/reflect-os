@@ -27,14 +27,14 @@
   "dependencies": {
     "@repo/email": "workspace:*",
     "@repo/polar": "workspace:*",
-    "better-auth": "^1.4.7"
+    "better-auth": "^1.4.9"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
     "@types/pg": "^8.16.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "pg": "^8.0.0"
+    "pg": "^8.16.3"
   }
 }

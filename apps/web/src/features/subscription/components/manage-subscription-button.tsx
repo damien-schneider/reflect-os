@@ -13,12 +13,12 @@ import {
   useSubscription,
 } from "../hooks/use-subscription";
 
-type ManageSubscriptionButtonProps = {
+interface ManageSubscriptionButtonProps {
   variant?: "default" | "outline" | "ghost" | "secondary";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   children?: React.ReactNode;
-};
+}
 
 /**
  * Button to open Polar customer portal for managing subscription.

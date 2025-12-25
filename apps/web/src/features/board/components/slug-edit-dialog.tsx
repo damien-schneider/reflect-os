@@ -13,13 +13,13 @@ import { Label } from "@repo/ui/components/label";
 import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
 
-type SlugEditDialogProps = {
+interface SlugEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentSlug: string;
   orgSlug: string;
   onSave: (newSlug: string) => void;
-};
+}
 
 export function SlugEditDialog({
   open,

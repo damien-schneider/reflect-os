@@ -13,16 +13,16 @@ import type { AuthConfig } from "./config";
 // TYPES
 // =============================================================================
 
-export type OrganizationHooksConfig = {
+export interface OrganizationHooksConfig {
   pool: Pool;
   authConfig: AuthConfig;
-};
+}
 
-export type OrgMemberLimitInfo = {
+export interface OrgMemberLimitInfo {
   tier: SubscriptionTier;
   memberCount: number;
   maxMembers: number;
-};
+}
 
 // =============================================================================
 // MEMBER LIMIT HELPERS

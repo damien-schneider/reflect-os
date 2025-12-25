@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useMarkdownEditor } from "@/features/editor/hooks/use-markdown-editor";
 
-type MarkdownEditorProps = {
+interface MarkdownEditorProps {
   value?: string;
   onChange?: (markdown: string) => void;
   className?: string;
@@ -27,7 +27,7 @@ type MarkdownEditorProps = {
   editable?: boolean;
   showToolbar?: boolean;
   placeholder?: string;
-};
+}
 
 export function MarkdownEditor({
   value = "",

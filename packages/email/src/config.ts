@@ -4,12 +4,12 @@
  * In development, allows running without credentials (emails will be logged).
  */
 
-export type EmailConfig = {
+export interface EmailConfig {
   apiKey: string | undefined;
   fromAddress: string;
   fromName: string;
   isDevelopment: boolean;
-};
+}
 
 const DEFAULT_FROM_NAME = "Reflet";
 const DEFAULT_DEV_FROM_ADDRESS = "onboarding@resend.dev";

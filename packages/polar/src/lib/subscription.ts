@@ -11,7 +11,7 @@ import { mapProductToTier } from "../tiers";
 // TYPES
 // =============================================================================
 
-export type SubscriptionData = {
+export interface SubscriptionData {
   id: string;
   organizationId: string;
   polarCustomerId: string;
@@ -21,13 +21,13 @@ export type SubscriptionData = {
   currentPeriodStart?: number;
   currentPeriodEnd?: number;
   cancelAtPeriodEnd?: boolean;
-};
+}
 
-export type OrgSubscriptionUpdate = {
+export interface OrgSubscriptionUpdate {
   subscriptionId: string;
   tier: string;
   status: string;
-};
+}
 
 // =============================================================================
 // HELPERS

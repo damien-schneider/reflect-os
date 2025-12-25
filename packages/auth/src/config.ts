@@ -4,7 +4,7 @@
  * Configuration for Better Auth with feature flags.
  */
 
-export type AuthConfig = {
+export interface AuthConfig {
   /**
    * Base URL for authentication callbacks and redirects.
    * Usually your app's public URL.
@@ -52,7 +52,7 @@ export type AuthConfig = {
     fromAddress?: string;
     fromName?: string;
   };
-};
+}
 
 /**
  * Creates auth configuration from environment variables.

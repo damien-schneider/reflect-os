@@ -30,11 +30,11 @@ import type { ZeroContext } from "@/zero-context";
 // Import to register DefaultTypes
 import "@/zero-context";
 
-type ZeroState = {
+interface ZeroState {
   status: "loading" | "ready" | "error";
   userID: string;
   error?: string;
-};
+}
 
 export function ZeroSetup({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<ZeroState>({

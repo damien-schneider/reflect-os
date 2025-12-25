@@ -60,7 +60,7 @@ const createSingleLineExtension = ({
     },
   });
 
-type UseInlineEditorOptions = {
+interface UseInlineEditorOptions {
   /**
    * Initial content for the editor (plain text)
    */
@@ -89,7 +89,7 @@ type UseInlineEditorOptions = {
    * Placeholder text when empty
    */
   placeholder?: string;
-};
+}
 
 export function useInlineEditor({
   content = "",

@@ -22,11 +22,11 @@ import { LANE_OPTIONS, type RoadmapLane } from "@/lib/constants";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 
-type AddToRoadmapProps = {
+interface AddToRoadmapProps {
   feedbackId: string;
   currentLane?: string | null;
   onSuccess?: () => void;
-};
+}
 
 export function AddToRoadmap({
   feedbackId,

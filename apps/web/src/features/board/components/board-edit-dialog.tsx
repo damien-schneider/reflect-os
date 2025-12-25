@@ -17,14 +17,14 @@ import { mutators } from "@/mutators";
 import { randID } from "@/rand";
 import type { Board } from "@/schema";
 
-type BoardEditDialogProps = {
+interface BoardEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   board?: Board | null;
   organizationId: string;
   orgSlug: string;
   onSuccess?: () => void;
-};
+}
 
 export function BoardEditDialog({
   open,

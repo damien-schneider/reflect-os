@@ -6,9 +6,9 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import type { FocusEvent, FormEvent } from "react";
 import type { UseOnboardingFormReturn } from "@/hooks/use-onboarding-form";
 
-type OnboardingFormProps = {
+interface OnboardingFormProps {
   form: UseOnboardingFormReturn;
-};
+}
 
 export function OnboardingForm({ form }: OnboardingFormProps) {
   const {

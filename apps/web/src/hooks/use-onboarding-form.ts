@@ -49,7 +49,7 @@ function validateSlug(slug: string): string | null {
   return null;
 }
 
-export type UseOnboardingFormReturn = {
+export interface UseOnboardingFormReturn {
   // Form values
   name: string;
   slug: string;
@@ -65,7 +65,7 @@ export type UseOnboardingFormReturn = {
   slugError: string | null;
   apiError: string | null;
   slugManuallyEdited: boolean;
-};
+}
 
 export function useOnboardingForm(
   defaultName: string,

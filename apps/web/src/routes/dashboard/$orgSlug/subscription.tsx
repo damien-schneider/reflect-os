@@ -446,10 +446,10 @@ function DashboardSubscription() {
   );
 }
 
-type FeatureItemProps = {
+interface FeatureItemProps {
   label: string;
   enabled: boolean;
-};
+}
 
 function FeatureItem({ label, enabled }: FeatureItemProps) {
   return (
@@ -464,7 +464,7 @@ function FeatureItem({ label, enabled }: FeatureItemProps) {
   );
 }
 
-type PlanCardProps = {
+interface PlanCardProps {
   tierKey: Exclude<SubscriptionTier, "free">;
   product: PolarProduct | undefined;
   billingInterval: "month" | "year";
@@ -472,7 +472,7 @@ type PlanCardProps = {
   isOwner: boolean;
   isCheckingOut: string | null;
   savings: number | null;
-};
+}
 
 function PlanCard({
   tierKey,
@@ -600,9 +600,9 @@ function PlanCard({
 // FREE TIER CARD
 // =============================================================================
 
-type FreeTierCardProps = {
+interface FreeTierCardProps {
   isCurrent: boolean;
-};
+}
 
 function FreeTierCard({ isCurrent }: FreeTierCardProps) {
   const tierConfig = PLAN_TIERS.free;

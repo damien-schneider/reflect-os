@@ -4,11 +4,11 @@ import { createContext, type ReactNode, useContext, useState } from "react";
 import { AuthDialog } from "@/components/auth-dialog";
 
 // Context for managing auth dialog state globally
-type AuthDialogContextType = {
+interface AuthDialogContextType {
   isOpen: boolean;
   openAuthDialog: () => void;
   closeAuthDialog: () => void;
-};
+}
 
 const AuthDialogContext = createContext<AuthDialogContextType | null>(null);
 
@@ -20,9 +20,9 @@ export function useAuthDialog() {
   return context;
 }
 
-type AuthDialogProviderProps = {
+interface AuthDialogProviderProps {
   children: ReactNode;
-};
+}
 
 export function AuthDialogProvider({ children }: AuthDialogProviderProps) {
   const [isOpen, setIsOpen] = useState(false);

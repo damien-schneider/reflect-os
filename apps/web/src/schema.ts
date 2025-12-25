@@ -43,6 +43,6 @@ export {
 } from "./zero-schema";
 
 // Auth context type - used in queries/mutators for permissions
-export type AuthData = {
+export interface AuthData {
   sub: string | null;
-};
+}

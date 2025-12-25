@@ -9,17 +9,17 @@ import {
   slashCommandItems,
 } from "../extensions/slash-command";
 
-export type SlashMenuRef = {
+export interface SlashMenuRef {
   onKeyDown: (props: { event: KeyboardEvent }) => boolean;
-};
+}
 
-type SlashMenuProps = {
+interface SlashMenuProps {
   editor: Editor;
   range: Range;
   query: string;
   command: (item: SlashCommandItem) => void;
   ref?: Ref<SlashMenuRef>;
-};
+}
 
 export function SlashMenu({ query, command, ref }: SlashMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);

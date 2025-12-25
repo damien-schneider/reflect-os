@@ -8,22 +8,22 @@
 // Template Props Interfaces
 // ============================================
 
-export type VerifyEmailProps = {
+export interface VerifyEmailProps {
   userName: string;
   verificationUrl: string;
-};
+}
 
-export type ResetPasswordProps = {
+export interface ResetPasswordProps {
   userName: string;
   resetUrl: string;
-};
+}
 
-export type WelcomeProps = {
+export interface WelcomeProps {
   userName: string;
   loginUrl: string;
-};
+}
 
-export type ChangelogUpdateProps = {
+export interface ChangelogUpdateProps {
   orgName: string;
   orgSlug: string;
   releaseTitle: string;
@@ -35,18 +35,18 @@ export type ChangelogUpdateProps = {
   }>;
   viewUrl: string;
   unsubscribeUrl: string;
-};
+}
 
 // ============================================
 // Template Name to Props Mapping
 // ============================================
 
-export type EmailTemplateMap = {
+export interface EmailTemplateMap {
   "verify-email": VerifyEmailProps;
   "reset-password": ResetPasswordProps;
   welcome: WelcomeProps;
   "changelog-update": ChangelogUpdateProps;
-};
+}
 
 export type EmailTemplateName = keyof EmailTemplateMap;
 

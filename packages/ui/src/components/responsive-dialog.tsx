@@ -24,9 +24,9 @@ import {
   DrawerTrigger,
 } from "./drawer";
 
-type BaseProps = {
+interface BaseProps {
   children: ReactNode;
-};
+}
 
 interface RootResponsiveDialogProps extends BaseProps {
   open?: boolean;

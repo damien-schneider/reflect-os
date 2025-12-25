@@ -24,21 +24,29 @@ import { hc } from "hono/client";
 // They're manually defined to avoid cross-package type resolution issues.
 
 /** Response types for API endpoints */
-type ZeroTokenSuccessResponse = { token: string };
-type ZeroTokenErrorResponse = { error: string; details?: string };
+interface ZeroTokenSuccessResponse {
+  token: string;
+}
+interface ZeroTokenErrorResponse {
+  error: string;
+  details?: string;
+}
 type ZeroTokenResponse = ZeroTokenSuccessResponse | ZeroTokenErrorResponse;
 
-type EnsureCustomerSuccessResponse = {
+interface EnsureCustomerSuccessResponse {
   success: true;
   customerId: string;
   created: boolean;
-};
-type EnsureCustomerErrorResponse = { error: string; details?: string };
+}
+interface EnsureCustomerErrorResponse {
+  error: string;
+  details?: string;
+}
 type EnsureCustomerResponse =
   | EnsureCustomerSuccessResponse
   | EnsureCustomerErrorResponse;
 
-type SyncSubscriptionSuccessResponse = {
+interface SyncSubscriptionSuccessResponse {
   synced: true;
   subscription: {
     id: string | null;
@@ -48,24 +56,30 @@ type SyncSubscriptionSuccessResponse = {
   };
   downgraded?: boolean;
   message?: string;
-};
-type SyncSubscriptionNoSubResponse = { synced: false; message: string };
-type SyncSubscriptionErrorResponse = { error: string; details?: string };
+}
+interface SyncSubscriptionNoSubResponse {
+  synced: false;
+  message: string;
+}
+interface SyncSubscriptionErrorResponse {
+  error: string;
+  details?: string;
+}
 type SyncSubscriptionResponse =
   | SyncSubscriptionSuccessResponse
   | SyncSubscriptionNoSubResponse
   | SyncSubscriptionErrorResponse;
 
-type CheckSubscriptionResponse = {
+interface CheckSubscriptionResponse {
   hasActiveSubscription: boolean;
   canCheckout: boolean;
   currentTier?: string;
   productName?: string | null;
   message?: string;
   error?: string;
-};
+}
 
-type ProductsResponse = {
+interface ProductsResponse {
   products: Array<{
     id: string;
     name: string;
@@ -86,7 +100,7 @@ type ProductsResponse = {
     }>;
   }>;
   error?: string;
-};
+}
 
 /**
  * Typed API Response - wraps the Response with proper json() typing
@@ -96,7 +110,7 @@ type TypedResponse<T> = Omit<Response, "json"> & {
 };
 
 /** API client type - manually typed for cross-package compatibility */
-type ApiClientType = {
+interface ApiClientType {
   api: {
     "zero-token": {
       $get: () => Promise<TypedResponse<ZeroTokenResponse>>;
@@ -118,7 +132,7 @@ type ApiClientType = {
       $get: () => Promise<TypedResponse<ProductsResponse>>;
     };
   };
-};
+}
 
 // =============================================================================
 // API Client Implementation

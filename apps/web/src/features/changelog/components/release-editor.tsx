@@ -11,12 +11,12 @@ import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Release, ReleaseItem } from "@/schema";
 
-type ReleaseEditorProps = {
+interface ReleaseEditorProps {
   organizationId: string;
   release?: Release | null;
   onClose?: () => void;
   onSave?: () => void;
-};
+}
 
 export function ReleaseEditor({
   organizationId,

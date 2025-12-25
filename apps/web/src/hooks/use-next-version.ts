@@ -3,18 +3,18 @@ import { zql } from "@/zero-schema";
 
 type VersionIncrement = "patch" | "minor" | "major";
 
-type ChangelogSettings = {
+interface ChangelogSettings {
   autoVersioning?: boolean;
   versionIncrement?: VersionIncrement;
   versionPrefix?: string;
-};
+}
 
-type ParsedVersion = {
+interface ParsedVersion {
   major: number;
   minor: number;
   patch: number;
   prefix: string;
-};
+}
 
 // Regex to match semver versions with optional prefix
 const VERSION_REGEX = /^([^\d]*)(\d+)\.(\d+)\.(\d+)/u;

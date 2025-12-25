@@ -19,9 +19,9 @@ export type ChartConfig = {
   );
 };
 
-type ChartContextProps = {
+interface ChartContextProps {
   config: ChartConfig;
-};
+}
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
 
@@ -106,6 +106,19 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
+// biome-ignore lint/suspicious/noExplicitAny: Recharts types are dynamic and not well-typed
+type RechartsValue = any;
+// biome-ignore lint/suspicious/noExplicitAny: Recharts types are dynamic and not well-typed
+type RechartsName = any;
+// biome-ignore lint/suspicious/noExplicitAny: Recharts types are dynamic and not well-typed
+type RechartsPayload = any;
+// biome-ignore lint/suspicious/noExplicitAny: Recharts types are dynamic and not well-typed
+type RechartsItem = any;
+// biome-ignore lint/suspicious/noExplicitAny: Recharts types are dynamic and not well-typed
+type RechartsLabel = any;
+// biome-ignore lint/suspicious/noExplicitAny: Recharts types are dynamic and not well-typed
+type RechartsTooltipPayload = any[];
+
 function ChartTooltipContent({
   active,
   payload,
@@ -120,14 +133,30 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-  React.ComponentProps<"div"> & {
-    hideLabel?: boolean;
-    hideIndicator?: boolean;
-    indicator?: "line" | "dot" | "dashed";
-    nameKey?: string;
-    labelKey?: string;
-  }) {
+}: {
+  active?: boolean;
+  payload?: RechartsTooltipPayload;
+  className?: string;
+  indicator?: "line" | "dot" | "dashed";
+  hideLabel?: boolean;
+  hideIndicator?: boolean;
+  label?: RechartsLabel;
+  labelFormatter?: (
+    label: RechartsLabel,
+    payload: RechartsTooltipPayload
+  ) => React.ReactNode;
+  labelClassName?: string;
+  formatter?: (
+    value: RechartsValue,
+    name: RechartsName,
+    item: RechartsItem,
+    index: number,
+    payload: RechartsPayload
+  ) => React.ReactNode;
+  color?: string;
+  nameKey?: string;
+  labelKey?: string;
+}) {
   const { config } = useChart();
 
   const tooltipLabel = React.useMemo(() => {
@@ -261,11 +290,14 @@ function ChartLegendContent({
   payload,
   verticalAlign = "bottom",
   nameKey,
-}: React.ComponentProps<"div"> &
-  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-    hideIcon?: boolean;
-    nameKey?: string;
-  }) {
+}: {
+  className?: string;
+  hideIcon?: boolean;
+  // biome-ignore lint/suspicious/noExplicitAny: Recharts payload is dynamic
+  payload?: any[];
+  verticalAlign?: "top" | "bottom";
+  nameKey?: string;
+}) {
   const { config } = useChart();
 
   if (!payload?.length) {

@@ -5,7 +5,7 @@ import {
   type InlineEditorRef,
 } from "@/features/editor/components/inline-editor";
 
-type EditableTitleProps = {
+interface EditableTitleProps {
   value: string;
   onSave: (value: string) => void;
   placeholder?: string;
@@ -21,7 +21,7 @@ type EditableTitleProps = {
    * @default true
    */
   alwaysEditable?: boolean;
-};
+}
 
 export function EditableTitle({
   value,

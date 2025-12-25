@@ -18,10 +18,10 @@ import { clientEnv } from "@/env/client";
 import { authClient } from "@/lib/auth-client";
 import { getSignUpErrorMessage } from "@/lib/auth-errors";
 
-type AuthDialogProps = {
+interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-};
+}
 
 export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   const navigate = useNavigate();

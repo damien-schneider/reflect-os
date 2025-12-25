@@ -10,27 +10,27 @@ import {
 /**
  * Price information from Polar
  */
-export type PolarPrice = {
+export interface PolarPrice {
   id: string;
   amount: number | null;
   currency: string;
   type: string;
-};
+}
 
 /**
  * Benefit/feature from Polar's Automated Benefits
  */
-export type PolarBenefit = {
+export interface PolarBenefit {
   id: string;
   type: string;
   description: string | null;
-};
+}
 
 /**
  * Product from Polar with tier derived from product name.
  * Products should be named: "{Tier} Monthly" or "{Tier} Yearly"
  */
-export type PolarProduct = {
+export interface PolarProduct {
   id: string;
   name: string;
   description: string | null;
@@ -40,7 +40,7 @@ export type PolarProduct = {
   prices: PolarPrice[];
   benefits: PolarBenefit[];
   tier: Exclude<SubscriptionTier, "free">;
-};
+}
 
 /**
  * Products grouped by tier and billing interval.

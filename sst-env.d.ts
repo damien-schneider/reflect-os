@@ -3,7 +3,7 @@
 /* deno-fmt-ignore-file */
 
 declare module "sst" {
-  export type Resource = {
+  export interface Resource {
     PostgresConnectionString: {
       type: "sst.sst.Secret";
       value: string;
@@ -28,7 +28,7 @@ declare module "sst" {
     vpc: {
       type: "sst.aws.Vpc";
     };
-  };
+  }
 }
 /// <reference path="sst-env.d.ts" />
 

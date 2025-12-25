@@ -5,7 +5,7 @@
  * Set `enabled: false` to disable subscriptions/paywalls entirely.
  */
 
-export type PolarConfig = {
+export interface PolarConfig {
   /**
    * Enable or disable subscription features.
    * When disabled, all paywall/subscription features are skipped.
@@ -35,7 +35,7 @@ export type PolarConfig = {
    * Usually your app's public URL.
    */
   baseUrl?: string;
-};
+}
 
 /**
  * Default Polar configuration.

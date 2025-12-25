@@ -15,10 +15,10 @@ import { authClient } from "@/lib/auth-client";
 import { requireAuthenticated } from "@/lib/route-guards";
 import { queries } from "@/queries";
 
-type SubscriptionSuccessSearch = {
+interface SubscriptionSuccessSearch {
   checkout_id?: string;
   customer_session_token?: string;
-};
+}
 
 function SubscriptionSuccessPending() {
   return (

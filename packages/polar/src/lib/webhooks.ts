@@ -9,10 +9,10 @@ import type { Pool } from "pg";
 import { mapProductToTier } from "../tiers";
 import { updateOrgSubscription, upsertSubscription } from "./subscription";
 
-type WebhookConfig = {
+interface WebhookConfig {
   secret: string;
   pool: Pool;
-};
+}
 
 /**
  * Creates Polar webhook handlers for Better Auth.

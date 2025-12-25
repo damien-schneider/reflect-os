@@ -117,7 +117,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
 }
 
 // Extracted MemberRow component to reduce cognitive complexity
-type MemberRowProps = {
+interface MemberRowProps {
   member: {
     id: string;
     userId: string;
@@ -135,7 +135,7 @@ type MemberRowProps = {
     name: string;
   }) => void;
   onRemove: (member: { id: string; userId: string; name: string }) => void;
-};
+}
 
 function MemberRow({
   member,

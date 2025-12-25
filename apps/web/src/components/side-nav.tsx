@@ -60,10 +60,10 @@ import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Board, Organization } from "@/schema";
 
-type SideNavProps = {
+interface SideNavProps {
   isOpen: boolean;
   onToggle: () => void;
-};
+}
 
 export function SideNav({ isOpen, onToggle }: SideNavProps) {
   const isMobile = useIsMobile();
@@ -494,11 +494,11 @@ function AdminSection({ effectiveOrgSlug }: { effectiveOrgSlug: string }) {
   );
 }
 
-type AuthOrganization = {
+interface AuthOrganization {
   id: string;
   name: string;
   slug: string;
-};
+}
 
 function OrgSelector({
   currentOrg,
@@ -558,12 +558,12 @@ function OrgSelector({
   );
 }
 
-type SessionData = {
+interface SessionData {
   user?: {
     id: string;
     name?: string | null;
   } | null;
-};
+}
 
 function UserSection({
   session,

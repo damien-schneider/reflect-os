@@ -2,7 +2,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { ChevronUp, ExternalLink, GripVertical } from "lucide-react";
 import type { RoadmapFeedbackItem } from "@/features/roadmap/components/roadmap-kanban";
 
-type RoadmapItemCardProps = {
+interface RoadmapItemCardProps {
   item: RoadmapFeedbackItem;
   isAdmin?: boolean;
   isDragging?: boolean;
@@ -11,7 +11,7 @@ type RoadmapItemCardProps = {
     item: RoadmapFeedbackItem
   ) => void;
   onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
-};
+}
 
 export function RoadmapItemCard({
   item,

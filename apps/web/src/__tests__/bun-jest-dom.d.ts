@@ -1,5 +1,4 @@
 declare module "bun:test" {
-  // biome-ignore lint/style/useConsistentTypeDefinitions: interface merging is required for module augmentation.
   interface Matchers<T = unknown> {
     toBeInTheDocument(): any;
     toHaveValue(value: unknown): any;

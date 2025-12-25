@@ -9,10 +9,10 @@ import { Building2 } from "lucide-react";
 import { OnboardingForm } from "@/components/onboarding-form";
 import { useOnboardingForm } from "@/hooks/use-onboarding-form";
 
-type OnboardingPageProps = {
+interface OnboardingPageProps {
   userName: string | null;
   onOrganizationCreated: (slug: string) => void;
-};
+}
 
 /**
  * Generates a default organization name from the user's name

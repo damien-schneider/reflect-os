@@ -54,7 +54,7 @@ export const PAID_TIERS: Exclude<SubscriptionTier, "free">[] = ["pro"];
 // TIER DISPLAY CONFIGURATION
 // =============================================================================
 
-type TierDisplayConfig = {
+interface TierDisplayConfig {
   /** Display name shown in UI */
   label: string;
   /** Short description of the tier */
@@ -65,7 +65,7 @@ type TierDisplayConfig = {
   badgeVariant: "default" | "secondary" | "outline";
   /** Sort order (0 = lowest/free, higher = premium) */
   order: number;
-};
+}
 
 /**
  * Display configuration for each tier.
@@ -100,7 +100,7 @@ export const PLAN_TIERS: Record<SubscriptionTier, TierDisplayConfig> = {
 // TIER FEATURE LIMITS
 // =============================================================================
 
-type TierLimits = {
+interface TierLimits {
   /** Maximum boards per organization */
   boards: number;
   /** Maximum members per organization */
@@ -117,7 +117,7 @@ type TierLimits = {
   sso: boolean;
   /** Has advanced analytics */
   advancedAnalytics: boolean;
-};
+}
 
 /**
  * Feature limits for each tier.

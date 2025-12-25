@@ -463,12 +463,12 @@ function ReleaseDetailPage() {
 }
 
 // Version Editor Component with auto-versioning support
-type VersionEditorProps = {
+interface VersionEditorProps {
   organizationId: string;
   version: string;
   setVersion: (version: string) => void;
   onSave: () => void;
-};
+}
 
 function VersionEditor({
   organizationId,
@@ -627,13 +627,13 @@ function VersionEditor({
 }
 
 // Completed Items Section with Combobox
-type CompletedItemsSectionProps = {
+interface CompletedItemsSectionProps {
   organizationId: string;
   selectedFeedbackIds: string[];
   onAddItem: (feedbackId: string) => void;
   onAddAllItems: (feedbackIds: string[]) => void;
   onRemoveItem: (feedbackId: string) => void;
-};
+}
 
 function CompletedItemsSection({
   organizationId,

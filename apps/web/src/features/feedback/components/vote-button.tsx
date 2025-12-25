@@ -13,12 +13,12 @@ import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 import { randID } from "@/rand";
 
-type VoteButtonProps = {
+interface VoteButtonProps {
   feedbackId: string;
   voteCount: number;
   size?: "sm" | "md" | "lg";
   className?: string;
-};
+}
 
 export function VoteButton({
   feedbackId,

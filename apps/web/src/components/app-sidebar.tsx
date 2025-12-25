@@ -129,11 +129,11 @@ export function AppSidebar() {
   );
 }
 
-type AuthOrganization = {
+interface AuthOrganization {
   id: string;
   name: string;
   slug: string;
-};
+}
 
 function OrgSelector({
   currentOrg,
@@ -479,13 +479,13 @@ function PublicViewSection({
   );
 }
 
-type SessionData = {
+interface SessionData {
   user?: {
     id: string;
     name?: string | null;
     email?: string | null;
   } | null;
-};
+}
 
 function UserSection({
   session,

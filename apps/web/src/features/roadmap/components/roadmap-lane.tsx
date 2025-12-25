@@ -8,7 +8,7 @@ import type {
 } from "@/features/roadmap/components/roadmap-kanban";
 import { LANE_CONFIG, type RoadmapLaneWithBacklog } from "@/lib/constants";
 
-type RoadmapLaneColumnProps = {
+interface RoadmapLaneColumnProps {
   lane: RoadmapLaneWithBacklog | string;
   items: RoadmapFeedbackItem[];
   isAdmin?: boolean;
@@ -23,7 +23,7 @@ type RoadmapLaneColumnProps = {
   onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop?: (e: React.DragEvent<HTMLDivElement>) => void;
   onAddItem?: (laneId: string) => void;
-};
+}
 
 export function RoadmapLaneColumn({
   lane,

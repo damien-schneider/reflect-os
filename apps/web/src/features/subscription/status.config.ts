@@ -13,14 +13,14 @@ export type SubscriptionStatus =
   | "canceled"
   | "none";
 
-type StatusDisplayConfig = {
+interface StatusDisplayConfig {
   /** Display label for the status */
   label: string;
   /** Badge variant */
   variant: "default" | "secondary" | "destructive" | "outline";
   /** Additional CSS class for styling */
   className: string;
-};
+}
 
 /**
  * Display configuration for subscription status badges.

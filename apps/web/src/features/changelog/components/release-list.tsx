@@ -3,11 +3,11 @@ import { ReleaseCard } from "@/features/changelog/components/release-card";
 import { queries } from "@/queries";
 import type { Board, Feedback, Release } from "@/schema";
 
-type ReleaseListProps = {
+interface ReleaseListProps {
   organizationId: string;
   orgSlug: string;
   showDrafts?: boolean;
-};
+}
 
 type ReleaseWithFeedbacks = Release & {
   feedbacks: (Feedback & { board?: Board | null })[];

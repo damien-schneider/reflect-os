@@ -17,12 +17,12 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
-export type SlashCommandItem = {
+export interface SlashCommandItem {
   title: string;
   description: string;
   icon: ReactNode;
   command: (props: { editor: Editor; range: Range }) => void;
-};
+}
 
 export const slashCommandItems: SlashCommandItem[] = [
   {
@@ -107,9 +107,9 @@ export const slashCommandItems: SlashCommandItem[] = [
   },
 ];
 
-export type SlashCommandOptions = {
+export interface SlashCommandOptions {
   suggestion: Omit<SuggestionOptions<SlashCommandItem>, "editor">;
-};
+}
 
 export const SlashCommand = Extension.create<SlashCommandOptions>({
   name: "slashCommand",

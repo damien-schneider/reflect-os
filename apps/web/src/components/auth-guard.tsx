@@ -3,9 +3,9 @@ import { Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { authClient } from "@/lib/auth-client";
 
-type AuthGuardProps = {
+interface AuthGuardProps {
   children: ReactNode;
-};
+}
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { data: session, isPending } = authClient.useSession();

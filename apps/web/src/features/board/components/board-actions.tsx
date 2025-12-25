@@ -24,11 +24,11 @@ import { BoardEditDialog } from "@/features/board/components/board-edit-dialog";
 import { mutators } from "@/mutators";
 import type { Board } from "@/schema";
 
-type BoardActionsProps = {
+interface BoardActionsProps {
   board: Board;
   organizationId: string;
   orgSlug: string;
-};
+}
 
 export function BoardActions({
   board,

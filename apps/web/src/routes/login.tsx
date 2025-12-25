@@ -14,10 +14,10 @@ import { getSignUpErrorMessage } from "@/lib/auth-errors";
 import { isValidInviteId } from "@/lib/invitation-utils";
 import { redirectIfAuthenticated } from "@/lib/route-guards";
 
-type LoginSearchParams = {
+interface LoginSearchParams {
   inviteId?: string;
   orgName?: string;
-};
+}
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>): LoginSearchParams => ({

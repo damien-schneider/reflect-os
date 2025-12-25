@@ -17,13 +17,13 @@ import { createSlashCommandSuggestion } from "../extensions/slash-command-sugges
 
 const lowlight = createLowlight(common);
 
-type UseMarkdownEditorOptions = {
+interface UseMarkdownEditorOptions {
   content?: string;
   onUpdate?: (markdown: string) => void;
   autoFocus?: boolean;
   editable?: boolean;
   placeholder?: string;
-};
+}
 
 export function useMarkdownEditor({
   content = "",

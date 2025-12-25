@@ -3,12 +3,12 @@ import { Link, type LinkProps } from "@tanstack/react-router";
 import { PencilLine, X } from "lucide-react";
 import { useState } from "react";
 
-type AdminFloatingBarProps = {
+interface AdminFloatingBarProps {
   /** The link to the dashboard edit page */
   dashboardLink: Pick<LinkProps, "to" | "params">;
   /** Optional message to display */
   message?: string;
-};
+}
 
 /**
  * A floating admin bar that appears at the bottom of public pages

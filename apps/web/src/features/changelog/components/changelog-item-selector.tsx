@@ -4,13 +4,13 @@ import { format } from "date-fns";
 import { Check, CheckCircle } from "lucide-react";
 import { queries } from "@/queries";
 
-type ChangelogItemSelectorProps = {
+interface ChangelogItemSelectorProps {
   organizationId: string;
   selectedIds: string[];
   onSelectionChange: (ids: string[]) => void;
   /** Only show items completed after this date (for auto-population) */
   completedAfter?: number;
-};
+}
 
 export function ChangelogItemSelector({
   organizationId,

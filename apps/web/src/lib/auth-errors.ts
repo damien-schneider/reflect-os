@@ -1,10 +1,10 @@
 import type { ResendErrorCode } from "@repo/email";
 
-type AuthClientError = {
+interface AuthClientError {
   message?: string;
   status?: number;
   code?: string | ResendErrorCode;
-};
+}
 
 /**
  * Generate user-facing sign-up error messages from backend errors.

@@ -65,7 +65,7 @@ export function MembersList({ orgId }: { orgId: string }) {
   );
 }
 
-type OrgDetailContentProps = {
+interface OrgDetailContentProps {
   selectedOrg: Organization | null;
   inviteError: string | null;
   inviteLoading: boolean;
@@ -76,7 +76,7 @@ type OrgDetailContentProps = {
   canShare: boolean;
   generateInviteLink: () => void;
   generatingLink: boolean;
-};
+}
 
 export function OrgDetailContent({
   selectedOrg,

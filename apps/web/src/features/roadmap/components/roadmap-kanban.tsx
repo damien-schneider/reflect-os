@@ -38,7 +38,7 @@ const COLOR_PALETTE = [
 ];
 
 // Feedback item with roadmap fields
-export type RoadmapFeedbackItem = {
+export interface RoadmapFeedbackItem {
   id: string;
   title: string;
   description: string;
@@ -47,19 +47,19 @@ export type RoadmapFeedbackItem = {
   roadmapLane: string | null;
   roadmapOrder: number;
   completedAt?: number | null;
-};
+}
 
 // Lane configuration from tags
-export type LaneConfig = {
+export interface LaneConfig {
   id: string;
   label: string;
   color: string;
   bgColor: string;
   isDoneStatus: boolean;
   laneOrder: number;
-};
+}
 
-type RoadmapKanbanProps = {
+interface RoadmapKanbanProps {
   items: readonly RoadmapFeedbackItem[];
   backlogItems?: readonly RoadmapFeedbackItem[];
   isAdmin?: boolean;
@@ -70,7 +70,7 @@ type RoadmapKanbanProps = {
   organizationId?: string;
   /** Callback when user wants to add a new item to a lane */
   onAddItem?: (laneId: string) => void;
-};
+}
 
 export function RoadmapKanban({
   items,

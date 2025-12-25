@@ -17,13 +17,13 @@ export const Route = createFileRoute("/invite/$invitationId")({
   component: InvitePage,
 });
 
-type InvitationData = {
+interface InvitationData {
   id: string;
   organizationId: string;
   role: string;
   status: string;
   expiresAt: Date;
-};
+}
 
 /**
  * Maps API error messages to user-friendly error strings

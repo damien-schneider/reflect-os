@@ -14,14 +14,14 @@ import { queries } from "@/queries";
 import { randID } from "@/rand";
 import type { Tag } from "@/schema";
 
-type TagSelectorProps = {
+interface TagSelectorProps {
   feedbackId: string;
   organizationId: string;
   selectedTagIds: string[];
   onChange?: (tagIds: string[]) => void;
   editable?: boolean;
   className?: string;
-};
+}
 
 export function TagSelector({
   feedbackId,

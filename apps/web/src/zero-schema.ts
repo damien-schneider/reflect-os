@@ -658,7 +658,6 @@ export type Schema = typeof schema;
 // Zero 0.25: Register Schema type with DefaultTypes to avoid passing Schema everywhere
 // This allows useZero() instead of useZero<Schema>()
 declare module "@rocicorp/zero" {
-  // biome-ignore lint/style/useConsistentTypeDefinitions: Module augmentation requires interface, not type alias
   interface DefaultTypes {
     schema: Schema;
   }

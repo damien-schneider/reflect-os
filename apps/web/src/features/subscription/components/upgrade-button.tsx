@@ -13,13 +13,13 @@ import {
   useSubscriptionCheckout,
 } from "../hooks/use-subscription";
 
-type UpgradeButtonProps = {
+interface UpgradeButtonProps {
   productId: string;
   variant?: "default" | "outline" | "ghost" | "secondary";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   children?: React.ReactNode;
-};
+}
 
 /**
  * Upgrade button that initiates Polar checkout.

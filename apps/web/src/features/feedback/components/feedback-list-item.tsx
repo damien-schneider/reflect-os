@@ -7,7 +7,7 @@ import { StatusBadge } from "@/features/feedback/components/status-badge";
 import { VoteButton } from "@/features/feedback/components/vote-button";
 import type { Feedback, Tag } from "@/schema";
 
-type FeedbackListItemProps = {
+interface FeedbackListItemProps {
   feedback: Feedback & {
     author?: { id: string; name: string } | null;
     feedbackTags?: readonly { tag: Tag | null | undefined }[];
@@ -15,7 +15,7 @@ type FeedbackListItemProps = {
   orgSlug: string;
   boardSlug: string;
   className?: string;
-};
+}
 
 export function FeedbackListItem({
   feedback,

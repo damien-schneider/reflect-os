@@ -32,7 +32,7 @@ import { RoadmapKanban } from "@/features/roadmap/components/roadmap-kanban";
 import { authClient } from "@/lib/auth-client";
 import { mutators } from "@/mutators";
 
-type RoadmapFeedbackItem = {
+interface RoadmapFeedbackItem {
   id: string;
   title: string;
   description: string;
@@ -41,9 +41,9 @@ type RoadmapFeedbackItem = {
   roadmapLane: string | null;
   roadmapOrder: number;
   completedAt: number | null;
-};
+}
 
-type FeedbackForRoadmap = {
+interface FeedbackForRoadmap {
   id: string;
   title: string;
   description: string;
@@ -52,7 +52,7 @@ type FeedbackForRoadmap = {
   roadmapLane?: string | null;
   roadmapOrder?: number | null;
   completedAt?: number | null;
-};
+}
 
 function toRoadmapItem(f: FeedbackForRoadmap): RoadmapFeedbackItem {
   return {
@@ -67,7 +67,7 @@ function toRoadmapItem(f: FeedbackForRoadmap): RoadmapFeedbackItem {
   };
 }
 
-type BoardViewProps = {
+interface BoardViewProps {
   /**
    * Whether the current user is an admin/owner of this board
    */
@@ -81,7 +81,7 @@ type BoardViewProps = {
    * Custom wrapper classes for the content
    */
   wrapperClassName?: string;
-};
+}
 
 /**
  * Unified board view component used by both public and dashboard routes.
@@ -248,7 +248,7 @@ function NewBoardBanner() {
   );
 }
 
-type BoardType = {
+interface BoardType {
   id: string;
   organizationId: string;
   slug: string;
@@ -262,12 +262,12 @@ type BoardType = {
   } | null;
   createdAt: number;
   updatedAt: number;
-};
+}
 
-type OrgType = {
+interface OrgType {
   id: string;
   isPublic?: boolean | null;
-};
+}
 
 function BoardHeader({
   board,
@@ -514,7 +514,7 @@ function EmptyState({
   );
 }
 
-type TagType = {
+interface TagType {
   id: string;
   name: string;
   color: string;
@@ -523,7 +523,7 @@ type TagType = {
   isRoadmapLane: boolean | null;
   laneOrder: number | null;
   createdAt: number;
-};
+}
 
 function RoadmapView({
   board,

@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { Calendar, CheckCircle } from "lucide-react";
 import type { Board, Feedback, Release } from "@/schema";
 
-type ReleaseCardProps = {
+interface ReleaseCardProps {
   release: Release & {
     feedbacks?: readonly (Feedback & {
       board?: Board | null;
@@ -12,7 +12,7 @@ type ReleaseCardProps = {
   };
   orgSlug: string;
   showFullContent?: boolean;
-};
+}
 
 export function ReleaseCard({
   release,

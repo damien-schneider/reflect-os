@@ -25,10 +25,10 @@ import {
 import type { SortOption } from "@/features/feedback/store/atoms";
 import { STATUS_OPTIONS } from "@/lib/constants";
 
-type FeedbackFiltersProps = {
+interface FeedbackFiltersProps {
   className?: string;
   showSubmitButton?: boolean;
-};
+}
 
 /**
  * Feedback filter controls component.

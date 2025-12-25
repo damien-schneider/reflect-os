@@ -5,7 +5,7 @@ import { EditorContent } from "@tiptap/react";
 import { type Ref, useEffect, useImperativeHandle } from "react";
 import { useInlineEditor } from "@/features/editor/hooks/use-inline-editor";
 
-type InlineEditorProps = {
+interface InlineEditorProps {
   /**
    * Initial value (plain text)
    */
@@ -64,15 +64,15 @@ type InlineEditorProps = {
    * Ref for imperative methods (React 19 ref as prop)
    */
   ref?: Ref<InlineEditorRef>;
-};
+}
 
-export type InlineEditorRef = {
+export interface InlineEditorRef {
   focus: (position?: "start" | "end" | "all" | boolean) => void;
   blur: () => void;
   getText: () => string;
   setText: (text: string) => void;
   selectAll: () => void;
-};
+}
 
 /**
  * A minimalist single-line TipTap editor that is easy to style.

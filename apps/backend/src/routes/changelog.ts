@@ -15,30 +15,30 @@ const app = new Hono();
 // Regex for removing trailing slashes from URLs
 const TRAILING_SLASH_RE = /\/$/;
 
-type SubscriberRow = {
+interface SubscriberRow {
   user_id: string;
   email: string;
   name: string;
-};
+}
 
-type ReleaseRow = {
+interface ReleaseRow {
   id: string;
   title: string;
   version: string | null;
   description: string | null;
   published_at: string | null;
-};
+}
 
-type OrganizationRow = {
+interface OrganizationRow {
   id: string;
   name: string;
   slug: string;
-};
+}
 
-type FeedbackItem = {
+interface FeedbackItem {
   title: string;
   board_name: string | null;
-};
+}
 
 // =============================================================================
 // NOTIFY SUBSCRIBERS

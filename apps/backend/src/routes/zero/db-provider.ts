@@ -14,7 +14,6 @@ export const dbProvider = zeroNodePg(schema, dbPool);
 
 // Register the database provider for type safety
 declare module "@rocicorp/zero" {
-  // biome-ignore lint/style/useConsistentTypeDefinitions: Module augmentation requires interface, not type alias
   interface DefaultTypes {
     dbProvider: typeof dbProvider;
   }

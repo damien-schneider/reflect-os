@@ -13,7 +13,7 @@ import { Hash } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { mutators } from "@/mutators";
 
-type ChangelogSettingsProps = {
+interface ChangelogSettingsProps {
   org: {
     id: string;
     changelogSettings?: {
@@ -22,7 +22,7 @@ type ChangelogSettingsProps = {
       versionPrefix?: string;
     };
   };
-};
+}
 
 export function ChangelogSettings({ org }: ChangelogSettingsProps) {
   const zero = useZero();

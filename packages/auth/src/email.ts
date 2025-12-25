@@ -11,11 +11,11 @@ import {
 } from "@repo/email";
 import type { AuthConfig } from "./config";
 
-type User = {
+interface User {
   id: string;
   email: string;
   name?: string | null;
-};
+}
 
 // Default callback path for email verification redirects
 export const DEFAULT_VERIFICATION_CALLBACK = "/dashboard";

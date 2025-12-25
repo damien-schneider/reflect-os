@@ -34,11 +34,11 @@ type CommentWithRelations = Comment & {
   })[];
 };
 
-type CommentThreadProps = {
+interface CommentThreadProps {
   feedbackId: string;
   isOrgMember?: boolean;
   className?: string;
-};
+}
 
 export function CommentThread({
   feedbackId,
@@ -159,7 +159,7 @@ export function CommentThread({
   );
 }
 
-type CommentItemProps = {
+interface CommentItemProps {
   comment: Comment & {
     author?: { id: string; name: string } | null;
     replies?: readonly (Comment & {
@@ -170,7 +170,7 @@ type CommentItemProps = {
   isOrgMember: boolean;
   currentUserId?: string;
   depth?: number;
-};
+}
 
 function CommentItem({
   comment,

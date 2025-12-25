@@ -19,7 +19,7 @@ import type { PolarConfig } from "./config";
  */
 const BILLING_INTERVALS = ["Monthly", "Yearly"] as const;
 
-type ValidationResult = {
+interface ValidationResult {
   valid: boolean;
   errors: string[];
   warnings: string[];
@@ -29,7 +29,7 @@ type ValidationResult = {
     missingProducts: string[];
     unmappedProducts: string[];
   };
-};
+}
 
 /**
  * Get expected product names for all paid tiers.

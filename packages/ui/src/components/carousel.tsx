@@ -12,12 +12,12 @@ type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
 type CarouselOptions = UseCarouselParameters[0];
 type CarouselPlugin = UseCarouselParameters[1];
 
-type CarouselProps = {
+interface CarouselProps {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
-};
+}
 
 type CarouselContextProps = {
   carouselRef: ReturnType<typeof useEmblaCarousel>[0];
@@ -59,13 +59,12 @@ function Carousel({
   const [canScrollPrev, setCanScrollPrev] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
 
-  // biome-ignore lint/nursery/noShadow: callback parameter intentionally shadows outer api variable
-  const onSelect = React.useCallback((api: CarouselApi) => {
-    if (!api) {
+  const onSelect = React.useCallback((carouselApi: CarouselApi) => {
+    if (!carouselApi) {
       return;
     }
-    setCanScrollPrev(api.canScrollPrev());
-    setCanScrollNext(api.canScrollNext());
+    setCanScrollPrev(carouselApi.canScrollPrev());
+    setCanScrollNext(carouselApi.canScrollNext());
   }, []);
 
   const scrollPrev = React.useCallback(() => {

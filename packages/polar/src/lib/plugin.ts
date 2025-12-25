@@ -10,11 +10,11 @@ import type { Pool } from "pg";
 import type { PolarConfig } from "./config";
 import { createPolarWebhooks } from "./webhooks";
 
-type PolarPluginConfig = {
+interface PolarPluginConfig {
   client: Polar;
   config: PolarConfig;
   pool: Pool;
-};
+}
 
 /**
  * Creates the Polar plugins array for Better Auth.

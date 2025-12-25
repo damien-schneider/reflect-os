@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
-export type Organization = {
+export interface Organization {
   id: string;
   name: string;
   slug: string;
-};
+}
 
 export function useOrganizations() {
   const { data: organizations, refetch } = authClient.useListOrganizations();

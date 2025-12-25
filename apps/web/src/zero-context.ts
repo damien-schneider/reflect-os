@@ -14,7 +14,6 @@ export type ZeroContext =
 // Register the context type with Zero's DefaultTypes
 // This enables proper type inference in queries and mutators
 declare module "@rocicorp/zero" {
-  // biome-ignore lint/style/useConsistentTypeDefinitions: Module augmentation requires interface, not type alias
   interface DefaultTypes {
     context: ZeroContext;
   }

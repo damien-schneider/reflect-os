@@ -71,7 +71,6 @@ function NewFeedback() {
     }
   };
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex form submission with validation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

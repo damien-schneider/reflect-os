@@ -29,7 +29,6 @@ const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
 export const BlockDraggable: RenderNodeWrapper = (blockProps) => {
   const { editor, element, path } = blockProps;
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: drag-and-drop requires many conditions
   const enabled = (() => {
     if (editor.dom.readOnly) {
       return false;

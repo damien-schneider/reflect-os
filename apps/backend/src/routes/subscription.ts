@@ -273,7 +273,6 @@ app.post("/ensure-customer", async (c) => {
 // SYNC SUBSCRIPTION
 // =============================================================================
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex subscription sync logic
 app.post("/sync-subscription", async (c) => {
   if (!polarClient) {
     return c.json({ error: "Polar not configured" }, 500);
@@ -498,7 +497,6 @@ app.post("/sync-subscription", async (c) => {
 // CHECK SUBSCRIPTION
 // =============================================================================
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex subscription checking logic
 app.post("/check-subscription", async (c) => {
   if (!polarClient) {
     return c.json({ error: "Polar not configured" }, 500);

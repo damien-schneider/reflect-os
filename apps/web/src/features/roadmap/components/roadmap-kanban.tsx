@@ -64,6 +64,8 @@ interface RoadmapKanbanProps {
   backlogItems?: readonly RoadmapFeedbackItem[];
   isAdmin?: boolean;
   boardId: string;
+  orgSlug: string;
+  boardSlug: string;
   /** Custom lanes from tags - if provided, uses these instead of default lanes */
   customLanes?: readonly Tag[];
   /** Organization ID for tag-based lanes */
@@ -77,6 +79,8 @@ export function RoadmapKanban({
   backlogItems = [],
   isAdmin = false,
   boardId: _boardId,
+  orgSlug,
+  boardSlug,
   customLanes,
   organizationId,
   onAddItem,
@@ -348,40 +352,44 @@ export function RoadmapKanban({
 
   return (
     <>
-      <div
-        className="grid grid-cols-1 gap-4"
-        style={{
-          gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))`,
-        }}
-      >
-        {allLaneConfigs.map((laneConfig) => (
-          <RoadmapLaneColumn
-            draggingItemId={draggingItemId}
-            isAdmin={isAdmin}
-            items={itemsByLane[laneConfig.id] ?? []}
-            key={laneConfig.id}
-            lane={laneConfig.id as RoadmapLaneWithBacklog}
-            laneConfig={laneConfig}
-            onAddItem={onAddItem}
-            onDragEnd={handleDragEnd}
-            onDragStart={handleDragStart}
-            onDrop={(e) => handleDrop(e, laneConfig.id)}
-          />
-        ))}
+      <div className="overflow-x-auto pb-2" style={{ contain: "inline-size" }}>
+        <div
+          className="grid gap-4"
+          style={{
+            gridTemplateColumns: `repeat(${gridColumns}, 280px)`,
+          }}
+        >
+          {allLaneConfigs.map((laneConfig) => (
+            <RoadmapLaneColumn
+              boardSlug={boardSlug}
+              draggingItemId={draggingItemId}
+              isAdmin={isAdmin}
+              items={itemsByLane[laneConfig.id] ?? []}
+              key={laneConfig.id}
+              lane={laneConfig.id as RoadmapLaneWithBacklog}
+              laneConfig={laneConfig}
+              onAddItem={onAddItem}
+              onDragEnd={handleDragEnd}
+              onDragStart={handleDragStart}
+              onDrop={(e) => handleDrop(e, laneConfig.id)}
+              orgSlug={orgSlug}
+            />
+          ))}
 
-        {/* Add Column Button (admin only, when using custom lanes) */}
-        {isAdmin && organizationId && (
-          <button
-            className={cn(
-              "flex min-h-[400px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-muted-foreground/30 border-dashed bg-muted/10 text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted/30 hover:text-foreground"
-            )}
-            onClick={() => setShowAddColumnModal(true)}
-            type="button"
-          >
-            <Plus className="h-8 w-8" />
-            <span className="font-medium text-sm">Add Column</span>
-          </button>
-        )}
+          {/* Add Column Button (admin only, when using custom lanes) */}
+          {isAdmin && organizationId && (
+            <button
+              className={cn(
+                "flex min-h-[400px] min-w-[280px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-muted-foreground/30 border-dashed bg-muted/10 text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted/30 hover:text-foreground"
+              )}
+              onClick={() => setShowAddColumnModal(true)}
+              type="button"
+            >
+              <Plus className="h-8 w-8" />
+              <span className="font-medium text-sm">Add Column</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Add Column Modal */}

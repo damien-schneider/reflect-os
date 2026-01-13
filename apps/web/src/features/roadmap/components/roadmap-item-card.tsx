@@ -1,11 +1,14 @@
 import { cn } from "@repo/ui/lib/utils";
-import { ChevronUp, ExternalLink, GripVertical } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ChevronUp, ExternalLink } from "lucide-react";
 import type { RoadmapFeedbackItem } from "@/features/roadmap/components/roadmap-kanban";
 
 interface RoadmapItemCardProps {
   item: RoadmapFeedbackItem;
   isAdmin?: boolean;
   isDragging?: boolean;
+  orgSlug: string;
+  boardSlug: string;
   onDragStart?: (
     e: React.DragEvent<HTMLDivElement>,
     item: RoadmapFeedbackItem
@@ -17,6 +20,8 @@ export function RoadmapItemCard({
   item,
   isAdmin = false,
   isDragging = false,
+  orgSlug,
+  boardSlug,
   onDragStart,
   onDragEnd,
 }: RoadmapItemCardProps) {
@@ -50,13 +55,6 @@ export function RoadmapItemCard({
       role={isAdmin ? "button" : undefined}
     >
       <div className="flex items-start gap-2">
-        {/* Drag Handle (admin only) */}
-        {isAdmin && (
-          <div className="mt-0.5 touch-none">
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
-          </div>
-        )}
-
         <div className="min-w-0 flex-1">
           {/* Title */}
           <h4 className="line-clamp-2 font-medium text-sm">{item.title}</h4>
@@ -75,10 +73,15 @@ export function RoadmapItemCard({
               <span className="text-xs">{item.voteCount}</span>
             </div>
 
-            <span className="flex items-center gap-1 text-muted-foreground text-xs">
+            <Link
+              className="flex items-center gap-1 text-muted-foreground text-xs transition-colors hover:text-foreground"
+              params={{ orgSlug, boardSlug, feedbackId: item.id }}
+              search={{ modal: true }}
+              to="/$orgSlug/$boardSlug/$feedbackId"
+            >
               View
               <ExternalLink className="h-3 w-3" />
-            </span>
+            </Link>
           </div>
         </div>
       </div>

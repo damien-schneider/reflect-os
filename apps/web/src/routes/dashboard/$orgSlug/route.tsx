@@ -1,3 +1,4 @@
+import { ScrollArea } from "@repo/ui/components/scroll-area";
 import { useQuery } from "@rocicorp/zero/react";
 import {
   createFileRoute,
@@ -120,9 +121,11 @@ function DashboardOrgLayout() {
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: admin-controlled CSS */}
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
 
-      <div className="p-4 md:p-6">
-        <Outlet />
-      </div>
+      <ScrollArea className="h-full">
+        <div className="min-w-0 p-4 md:p-6">
+          <Outlet />
+        </div>
+      </ScrollArea>
     </>
   );
 }

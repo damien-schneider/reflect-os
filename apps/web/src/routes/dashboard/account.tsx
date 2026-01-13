@@ -49,7 +49,6 @@ export const Route = createFileRoute("/dashboard/account")({
   component: MyAccount,
 });
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex account page with multiple sections
 function MyAccount() {
   const { data: session } = authClient.useSession();
   const isMobile = useIsMobile();
@@ -59,6 +58,8 @@ function MyAccount() {
     // Clear Zero IndexedDB data to prevent stale data on next login
     try {
       await dropAllDatabases();
+      // Clear the userID tracking to prevent stale data detection on re-login
+      localStorage.removeItem("zero_last_user_id");
       console.log("[Account] Cleared Zero data on sign out");
     } catch (error) {
       console.error("[Account] Failed to clear Zero data:", error);

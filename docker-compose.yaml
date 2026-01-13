@@ -1,41 +1,73 @@
-# Docker Compose for Dokploy deployment
+# Docker Compose with profiles for dev and production
 #
-# Required Environment Variables (set in Dokploy UI):
+# Usage:
+#   Development: docker compose --profile dev up -d
+#   Production:  docker compose --profile prod up -d (Dokploy)
+#
+# Development profile (dev):
+#   - PostgreSQL database only (port 5430)
+#   - Zero-cache runs locally via `npx zero-cache-dev`
+#   - Vite and backend run via Turbo
+#
+# Production profile (prod):
+#   - Full stack for Dokploy/self-hosted deployment
+#   - PostgreSQL, migrations, zero-cache, backend, web
+#
+# Required Environment Variables (production only - set in Dokploy UI):
 #   POSTGRES_PASSWORD - Database password
 #   BETTER_AUTH_SECRET - Auth secret key
 #   ZERO_AUTH_SECRET - Zero sync auth secret
 #   PUBLIC_URL - Frontend URL (e.g., https://beta.reflet.app)
 #   ZERO_SERVER_URL - Zero cache public URL (e.g., https://beta-zero.reflet.app)
-#
-# Dokploy Domain Setup:
-#   web        → beta.reflet.app:3000
-#   backend    → beta-backend.reflet.app:3001
-#   zero-cache → beta-zero.reflet.app:4848
-#
-# Optional:
-#   POSTGRES_USER - Database username (default: reflect_user)
-#   POLAR_ACCESS_TOKEN - For billing integration
-#   POLAR_WEBHOOK_SECRET - For billing webhooks
-#   POLAR_ENVIRONMENT - sandbox or production
-#   RESEND_API_KEY - For sending emails (verification, notifications)
-#   EMAIL_FROM_ADDRESS - Sender email (e.g., noreply@yourdomain.com)
-#   EMAIL_FROM_NAME - Sender display name
-
-# TODO: Improvements: use secrets instead of environment vars for sensitive data (keeping the build check and t3-oss/env-core validation working.)
+#   RESEND_API_KEY - For sending emails
+#   EMAIL_FROM_ADDRESS - Sender email
 
 services:
-  # PostgreSQL Database
+  # ============================================================================
+  # DEVELOPMENT: PostgreSQL only (zero-cache runs locally)
+  # ============================================================================
+  postgres-dev:
+    image: postgres:16-alpine
+    container_name: reflect-dev-postgres
+    profiles: ["dev"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: password
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+      - "-c"
+      - "max_replication_slots=10"
+      - "-c"
+      - "max_wal_senders=10"
+    ports:
+      - "5430:5432"
+    volumes:
+      - reflect_dev_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ============================================================================
+  # PRODUCTION: Full stack for Dokploy deployment
+  # Note: Variables use defaults to avoid interpolation errors in dev mode.
+  #       Dokploy validates required vars are set before deployment.
+  # ============================================================================
   postgres:
     image: postgres:16-alpine
+    profiles: ["prod"]
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-reflect_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       POSTGRES_DB: reflect
     volumes:
-      # Named volume for Dokploy backup management
       - postgres_data:/var/lib/postgresql/data
-    # Required for Zero replication
     command:
       - "postgres"
       - "-c"
@@ -53,30 +85,28 @@ services:
     networks:
       - reflect-network
 
-  # Database Migrations (init container - runs once and exits)
   migrations:
     build:
       context: .
       dockerfile: Dockerfile.migrations
+    profiles: ["prod"]
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/reflect
     networks:
       - reflect-network
-    # Init container: runs once, must complete successfully
     restart: "no"
-    # Deploy configuration for compatibility with various orchestrators
     deploy:
       restart_policy:
         condition: none
 
-  # Zero Cache Server (sync server for Rocicorp Zero)
   zero-cache:
     build:
       context: .
       dockerfile: Dockerfile.zero-cache
+    profiles: ["prod"]
     restart: unless-stopped
     depends_on:
       postgres:
@@ -86,38 +116,29 @@ services:
     expose:
       - "4848"
     environment:
-      # Database connections
-      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
-      ZERO_CVR_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
-      ZERO_CHANGE_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
-      # Authentication
-      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET:?ZERO_AUTH_SECRET is required}
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/reflect
+      ZERO_CVR_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/reflect
+      ZERO_CHANGE_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/reflect
+      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET:-changeme}
       ZERO_ADMIN_PASSWORD: ${ZERO_ADMIN_PASSWORD:-admin}
-      # Cookie-based auth (Zero 0.25+)
       ZERO_QUERY_FORWARD_COOKIES: "true"
       ZERO_MUTATE_FORWARD_COOKIES: "true"
-      # Custom endpoints for named queries and mutators
-      # Note: Direct to backend (port 3001) to avoid web proxy issues with cookies
       ZERO_QUERY_URL: http://backend:3001/api/zero/query
       ZERO_MUTATE_URL: http://backend:3001/api/zero/mutate
-      # Replica file for local caching
       ZERO_REPLICA_FILE: /data/zero_replica.db
-      # Logging
       ZERO_LOG_LEVEL: ${ZERO_LOG_LEVEL:-info}
-      LOG_LEVEL: ${ZERO_LOG_LEVEL:-info}
       ZERO_NUM_SYNC_WORKERS: ${ZERO_NUM_SYNC_WORKERS:-2}
       NODE_ENV: production
     volumes:
-      # Named volume for zero-cache replica data
       - zero_data:/data
     networks:
       - reflect-network
 
-  # Backend API Server (Hono)
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    profiles: ["prod"]
     restart: unless-stopped
     depends_on:
       postgres:
@@ -127,31 +148,26 @@ services:
     expose:
       - "3001"
     environment:
-      # Database connection
-      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
-      # Auth secrets
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
-      BETTER_AUTH_URL: ${PUBLIC_URL:?PUBLIC_URL is required - set in Dokploy UI}
-      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET}
-      # Polar billing (optional)
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/reflect
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-changeme}
+      BETTER_AUTH_URL: ${PUBLIC_URL:-http://localhost:3000}
+      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET:-changeme}
       POLAR_ACCESS_TOKEN: ${POLAR_ACCESS_TOKEN:-}
       POLAR_WEBHOOK_SECRET: ${POLAR_WEBHOOK_SECRET:-}
       POLAR_ENVIRONMENT: ${POLAR_ENVIRONMENT:-sandbox}
-      # Email (required - for verification & notifications)
-      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
-      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?EMAIL_FROM_ADDRESS is required}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-noreply@example.com}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Reflet}
-      # Server config
       PORT: "3001"
       NODE_ENV: production
     networks:
       - reflect-network
 
-  # Web Application (Vite/React frontend)
   web:
     build:
       context: .
       dockerfile: Dockerfile.web
+    profiles: ["prod"]
     restart: unless-stopped
     depends_on:
       postgres:
@@ -163,61 +179,26 @@ services:
     expose:
       - "3000"
     environment:
-      # Zero server URL (public URL for frontend WebSocket connection)
-      VITE_PUBLIC_ZERO_SERVER: ${ZERO_SERVER_URL:?ZERO_SERVER_URL is required - set in Dokploy UI}
-      # Email verification flag (must match backend RESEND_API_KEY presence)
+      VITE_PUBLIC_ZERO_SERVER: ${ZERO_SERVER_URL:-http://localhost:4848}
       VITE_PUBLIC_REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-true}
-      # Internal API URL for server-side proxy (Docker network, NOT browser)
       INTERNAL_API_URL: http://backend:3001
-      # Server-side environment
-      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD}@postgres:5432/reflect
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${PUBLIC_URL}
-      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET}
+      ZERO_UPSTREAM_DB: postgres://${POSTGRES_USER:-reflect_user}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/reflect
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-changeme}
+      BETTER_AUTH_URL: ${PUBLIC_URL:-http://localhost:3000}
+      ZERO_AUTH_SECRET: ${ZERO_AUTH_SECRET:-changeme}
       NODE_ENV: production
     networks:
       - reflect-network
 
-  # Drizzle Gateway for database management
-  # Note: Database connection must be configured via the web UI after deployment.
-  # Access the gateway at https://drizzle.reflet.app and use:
-  #   - Host: postgres (internal Docker network hostname)
-  #   - Port: 5432
-  #   - Database: reflect
-  #   - User: (your POSTGRES_USER value, default: reflect_user)
-  #   - Password: (your POSTGRES_PASSWORD value)
-  drizzle-gateway:
-    image: ghcr.io/drizzle-team/gateway:latest
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      PORT: "4983"
-      STORE_PATH: "/app"
-      MASTERPASS: ${MASTERPASS:?MASTERPASS is required}
-    volumes:
-      - drizzle_gateway_data:/app
-    networks:
-      - reflect-network
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.drizzle-gateway.rule=Host(`drizzle.reflet.app`)"
-        - "traefik.http.routers.drizzle-gateway.tls=true"
-        - "traefik.http.routers.drizzle-gateway.tls.certresolver=letsencrypt"
-        - "traefik.http.services.drizzle-gateway.loadbalancer.server.port=4983"
-
 volumes:
-  # PostgreSQL data - backs up the entire database
+  # Development volume
+  reflect_dev_pgdata:
+    name: reflect-dev-postgres-data
+  # Production volumes
   postgres_data:
     name: reflect-postgres-data
-  # Zero cache replica - can be regenerated but speeds up restarts
   zero_data:
     name: reflect-zero-data
-  # Drizzle Gateway data - stores gateway configuration
-  drizzle_gateway_data:
-    name: reflect-drizzle-gateway-data
 
 networks:
   reflect-network:

@@ -8,12 +8,11 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run dev:kill && docker compose -f docker-compose.dev.yaml up -d && bun run dev:db && dotenv -e .env -- turbo dev",
-    "dev:db": "./scripts/wait-for-db.sh && bun run db:push:dev && bun run zero:deploy-permissions",
-    "dev:kill": "pkill -f 'zero-cache' 2>/dev/null || true; pkill -f 'vite' 2>/dev/null || true; pkill -f 'apps/backend' 2>/dev/null || true",
-    "dev:backend": "bun --filter @repo/backend dev",
-    "dev:web": "bun --filter @repo/web dev",
-    "dev:zero-cache": "bun --filter @repo/web dev:zero-cache",
+    "dev": "./scripts/dev-setup.sh && dotenv -e .env -- turbo dev dev:zero-cache --filter=@repo/web --filter=@repo/backend",
+    "dev:setup": "./scripts/dev-setup.sh",
+    "dev:servers": "dotenv -e .env -- turbo dev dev:zero-cache --filter=@repo/web --filter=@repo/backend",
+    "dev:stop": "docker compose --profile dev stop && lsof -ti:4848,4849,5173,3001 | xargs kill -9 2>/dev/null || true",
+    "dev:clean": "docker compose --profile dev down -v && bun run zero:clean && lsof -ti:4848,4849,5173,3001 | xargs kill -9 2>/dev/null || true",
     "build": "bun run validate:polar && dotenv -e .env -- turbo build",
     "build:skip-validation": "dotenv -e .env -- turbo build",
     "validate:polar": "dotenv -e .env -- bun run scripts/validate-polar.ts",
@@ -31,12 +30,8 @@
     "db:studio": "dotenv -e .env -- bun --filter @repo/db db:studio",
     "db:seed": "dotenv -e .env -- bun --filter @repo/db db:seed",
     "zero:deploy-permissions": "cd apps/web && dotenv -e ../../.env -- bun x zero-deploy-permissions -p src/schema.ts",
-    "docker:start": "docker compose -f docker-compose.dev.yaml up -d",
-    "docker:stop": "docker compose -f docker-compose.dev.yaml down",
-    "docker:logs": "docker compose -f docker-compose.dev.yaml logs -f",
-    "docker:clean": "docker compose -f docker-compose.dev.yaml down -v",
-    "dev:stop": "bun run dev:kill && docker compose -f docker-compose.dev.yaml stop",
-    "zero:clean": "source .env && rm -rf \"${ZERO_REPLICA_FILE}\"*",
+    "zero:clean": "rm -rf /tmp/reflect_zero_replica.db*",
+    "docker:logs": "docker compose --profile dev logs -f",
     "tunnel": "ngrok http 5173",
     "prepare": "husky",
     "test": "turbo test",
@@ -54,16 +49,13 @@
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
-    "@vitest/ui": "^4.0.16",
+    "@vitest/ui": "^4.0.17",
     "dotenv-cli": "^11.0.0",
     "husky": "^9.1.7",
-    "jsdom": "^27.3.0",
-    "turbo": "^2.7.2",
-    "ultracite": "6.5.0",
-    "vitest": "^4.0.16"
-  },
-  "dependencies": {
-    "sst": "3.17.25"
+    "jsdom": "^27.4.0",
+    "turbo": "^2.7.4",
+    "ultracite": "7.0.11",
+    "vitest": "^4.0.17"
   },
   "trustedDependencies": [
     "@rocicorp/zero-sqlite3"
@@ -73,7 +65,6 @@
       "@rocicorp/zero-sqlite3"
     ]
   },
-  "_": "For some reason, sst requires esbuild 0.25.0 when deploying the permission deployer",
   "overrides": {
     "esbuild": "0.25.0",
     "react": "19.2.3",

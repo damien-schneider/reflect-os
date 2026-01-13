@@ -12,6 +12,8 @@ interface RoadmapLaneColumnProps {
   lane: RoadmapLaneWithBacklog | string;
   items: RoadmapFeedbackItem[];
   isAdmin?: boolean;
+  orgSlug: string;
+  boardSlug: string;
   /** Custom lane configuration - if not provided, uses default LANE_CONFIG */
   laneConfig?: LaneConfig;
   draggingItemId?: string | null;
@@ -29,6 +31,8 @@ export function RoadmapLaneColumn({
   lane,
   items,
   isAdmin = false,
+  orgSlug,
+  boardSlug,
   laneConfig,
   draggingItemId,
   onDragStart,
@@ -67,7 +71,7 @@ export function RoadmapLaneColumn({
     <section
       aria-label={`${config.label} lane`}
       className={cn(
-        "group/lane flex min-h-[400px] flex-col rounded-lg border bg-muted/30 transition-all",
+        "group/lane flex min-h-[400px] min-w-[280px] flex-col rounded-lg border bg-muted/30 transition-all",
         draggingItemId && "ring-2 ring-dashed ring-primary/20"
       )}
       data-lane={lane}
@@ -108,12 +112,14 @@ export function RoadmapLaneColumn({
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
         {items.map((item) => (
           <RoadmapItemCard
+            boardSlug={boardSlug}
             isAdmin={isAdmin}
             isDragging={draggingItemId === item.id}
             item={item}
             key={item.id}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}
+            orgSlug={orgSlug}
           />
         ))}
 

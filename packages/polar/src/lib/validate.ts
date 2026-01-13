@@ -76,7 +76,6 @@ const extractTierFromProductName = (
  */
 export const validatePolarProducts = async (
   config: PolarConfig
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex validation logic with many checks
 ): Promise<ValidationResult> => {
   const result: ValidationResult = {
     valid: true,

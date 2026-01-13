@@ -21,7 +21,6 @@ const SYNC_TIMEOUT_MS = 15_000;
 // Maximum number of sync retry attempts
 const MAX_SYNC_ATTEMPTS = 30;
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex org layout with auth and sync states
 function OrgLayout() {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string };
   const navigate = useNavigate();
@@ -142,7 +141,6 @@ function OrgLayout() {
   // Redirect to login if:
   // - Organization is not public AND
   // - User is not logged in OR user is not a member
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex auth redirect logic
   useEffect(() => {
     // Wait for queries to complete
     // For members, use memberQueryStatus; for public orgs, we need org query

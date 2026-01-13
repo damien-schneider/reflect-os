@@ -12,7 +12,7 @@ import {
 } from "@/features/feedback/store/atoms";
 import { authClient } from "@/lib/auth-client";
 import type { FeedbackStatus } from "@/lib/constants";
-import { zql } from "@/zero-schema";
+import { queries } from "@/queries";
 
 /**
  * Hook for managing feedback filter state.
@@ -84,6 +84,7 @@ export function useFeedbackFilters() {
 
 /**
  * Hook for fetching board data using Zero client and route params.
+ * Uses named queries for proper Zero 0.25 data sync.
  * Eliminates need to pass orgSlug/boardSlug through props.
  */
 export function useBoardData() {
@@ -92,17 +93,20 @@ export function useBoardData() {
     boardSlug: string;
   };
 
-  const [orgs] = useQuery(zql.organization.where("slug", "=", orgSlug));
+  const [orgs] = useQuery(queries.organization.bySlug({ slug: orgSlug }));
   const org = orgs?.[0];
 
   const [boards] = useQuery(
-    zql.board
-      .where("organizationId", "=", org?.id ?? "")
-      .where("slug", "=", boardSlug)
+    queries.board.byOrgAndSlug({
+      organizationId: org?.id ?? "",
+      slug: boardSlug,
+    })
   );
   const board = boards?.[0];
 
-  const [tags] = useQuery(zql.tag.where("organizationId", "=", org?.id ?? ""));
+  const [tags] = useQuery(
+    queries.tag.byOrganizationId({ organizationId: org?.id ?? "" })
+  );
 
   return {
     org,
@@ -115,6 +119,7 @@ export function useBoardData() {
 
 /**
  * Hook for fetching filtered and sorted feedback.
+ * Uses named queries for proper Zero 0.25 data sync.
  * Combines Zero queries with client-side filtering from atoms.
  */
 export function useFeedbackData(options?: { includeUnapproved?: boolean }) {
@@ -122,31 +127,38 @@ export function useFeedbackData(options?: { includeUnapproved?: boolean }) {
   const { sortBy, search, selectedStatuses, selectedTagIds } =
     useFeedbackFilters();
 
-  let feedbackQuery = zql.feedback
-    .where("boardId", "=", board?.id ?? "")
-    .related("author")
-    .related("feedbackTags", (q) => q.related("tag"));
+  // Use named query for proper Zero 0.25 server sync
+  // This ensures the server knows what data to sync to the client
+  const [rawFeedbacks] = useQuery(
+    queries.feedback.byBoardId({ boardId: board?.id ?? "" })
+  );
 
-  // Only filter by approved for public views
+  // Client-side filtering and sorting
+  // (Named queries have fixed ordering, so we sort client-side for flexibility)
+  let feedbacks = rawFeedbacks ?? [];
+
+  // Filter by approved status
   if (!options?.includeUnapproved) {
-    feedbackQuery = feedbackQuery.where("isApproved", "=", true);
+    feedbacks = feedbacks.filter((f) => f.isApproved);
   }
 
   // Apply sorting
   if (sortBy === "newest") {
-    feedbackQuery = feedbackQuery.orderBy("createdAt", "desc");
+    feedbacks = [...feedbacks].sort((a, b) => b.createdAt - a.createdAt);
   } else if (sortBy === "oldest") {
-    feedbackQuery = feedbackQuery.orderBy("createdAt", "asc");
+    feedbacks = [...feedbacks].sort((a, b) => a.createdAt - b.createdAt);
   } else if (sortBy === "most_votes") {
-    feedbackQuery = feedbackQuery.orderBy("voteCount", "desc");
+    feedbacks = [...feedbacks].sort(
+      (a, b) => (b.voteCount ?? 0) - (a.voteCount ?? 0)
+    );
   } else if (sortBy === "most_comments") {
-    feedbackQuery = feedbackQuery.orderBy("commentCount", "desc");
+    feedbacks = [...feedbacks].sort(
+      (a, b) => (b.commentCount ?? 0) - (a.commentCount ?? 0)
+    );
   }
 
-  const [feedbacks] = useQuery(feedbackQuery);
-
   // Client-side filtering
-  let filtered = feedbacks ?? [];
+  let filtered = feedbacks;
 
   if (search !== "") {
     const searchLower = search.toLowerCase();
@@ -165,7 +177,7 @@ export function useFeedbackData(options?: { includeUnapproved?: boolean }) {
 
   if (selectedTagIds.length > 0) {
     filtered = filtered.filter((f) =>
-      f.feedbackTags?.some((ft) => selectedTagIds.includes(ft.tag?.id ?? ""))
+      f.tags?.some((tag) => selectedTagIds.includes(tag?.id ?? ""))
     );
   }
 
@@ -173,7 +185,7 @@ export function useFeedbackData(options?: { includeUnapproved?: boolean }) {
   const regularFeedbacks = filtered.filter((f) => !f.isPinned);
 
   return {
-    feedbacks: feedbacks ?? [],
+    feedbacks,
     filteredFeedbacks: filtered,
     pinnedFeedbacks,
     regularFeedbacks,

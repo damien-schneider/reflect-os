@@ -26,13 +26,13 @@ function DashboardPending() {
 
 function DashboardLayout() {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-dvh max-h-dvh">
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="flex max-h-dvh flex-col overflow-hidden">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 md:hidden">
           <SidebarTrigger className="-ml-1" />
         </header>
-        <main className="flex-1 p-4">
+        <main className="min-h-0 min-w-0 flex-1 overflow-hidden p-0">
           <Outlet />
         </main>
       </SidebarInset>

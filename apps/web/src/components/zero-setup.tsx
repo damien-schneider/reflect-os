@@ -36,6 +36,40 @@ interface ZeroState {
   error?: string;
 }
 
+// Key for storing the last known userID in localStorage
+const ZERO_LAST_USER_KEY = "zero_last_user_id";
+
+/**
+ * Check if Zero data might be stale due to userID change.
+ * If the userID changed since last session, clear Zero data to prevent sync issues.
+ */
+async function checkAndClearStaleData(currentUserID: string): Promise<boolean> {
+  try {
+    const lastUserID = localStorage.getItem(ZERO_LAST_USER_KEY);
+
+    // If userID changed (or was anon and now logged in), clear stale data
+    if (lastUserID && lastUserID !== currentUserID && lastUserID !== "anon") {
+      console.log(
+        "[ZeroSetup] UserID changed from",
+        lastUserID,
+        "to",
+        currentUserID,
+        "- clearing stale data"
+      );
+      await dropAllDatabases();
+      localStorage.setItem(ZERO_LAST_USER_KEY, currentUserID);
+      return true; // Data was cleared
+    }
+
+    // Store current userID for next check
+    localStorage.setItem(ZERO_LAST_USER_KEY, currentUserID);
+    return false; // No data cleared
+  } catch (error) {
+    console.error("[ZeroSetup] Error checking stale data:", error);
+    return false;
+  }
+}
+
 export function ZeroSetup({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<ZeroState>({
     status: "loading",
@@ -62,7 +96,7 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const initZero = () => {
+    const initZero = async () => {
       fetchingRef.current = true;
 
       console.log("[ZeroSetup] Initializing Zero...", {
@@ -70,6 +104,12 @@ export function ZeroSetup({ children }: { children: React.ReactNode }) {
         userID,
         cacheURL: clientEnv.VITE_PUBLIC_ZERO_SERVER,
       });
+
+      // Check if userID changed and clear stale data if needed
+      const wasCleared = await checkAndClearStaleData(userID);
+      if (wasCleared) {
+        console.log("[ZeroSetup] Stale data cleared due to userID change");
+      }
 
       // Zero 0.25: Cookie-based auth - no token needed
       // Cookies are automatically forwarded by zero-cache to query/mutate endpoints
@@ -184,6 +224,8 @@ async function clearZeroData(): Promise<void> {
   try {
     console.log("[ZeroSetup] Clearing Zero IndexedDB data...");
     const result = await dropAllDatabases();
+    // Also clear the userID tracking
+    localStorage.removeItem(ZERO_LAST_USER_KEY);
     console.log("[ZeroSetup] Zero data cleared:", result);
   } catch (error) {
     console.error("[ZeroSetup] Failed to clear Zero data:", error);
@@ -214,15 +256,53 @@ async function handleAuthError(): Promise<void> {
  * Internal component to handle connection state changes.
  * Zero: Use Connection Status API for auth failures and errors.
  * When 'needs-auth' occurs, we clear all Zero data and redirect to login.
+ *
+ * Also handles stale client data: if we stay in 'connecting' for too long
+ * or see repeated connection attempts, clear Zero data and retry.
  */
 function ZeroConnectionHandler({ onNeedsAuth }: { onNeedsAuth: () => void }) {
   const connectionState = useConnectionState();
   const { data: session } = authClient.useSession();
   const hasTriggeredReauth = useRef(false);
+  const connectingStartTime = useRef<number | null>(null);
+  const hasTriggeredStaleDataRecovery = useRef(false);
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: auth error handling requires multiple state checks
+  // Track how long we've been stuck in 'connecting' state
+  // If stuck for too long, likely stale IndexedDB data from previous server
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: connection recovery requires multiple state checks
   useEffect(() => {
     console.log("[ZeroSetup] Connection state:", connectionState.name);
+
+    // Track time in 'connecting' state to detect stale data issues
+    if (connectionState.name === "connecting") {
+      if (connectingStartTime.current === null) {
+        connectingStartTime.current = Date.now();
+      } else {
+        const timeInConnecting = Date.now() - connectingStartTime.current;
+        // If stuck connecting for more than 10 seconds, likely stale data
+        if (
+          timeInConnecting > 10_000 &&
+          !hasTriggeredStaleDataRecovery.current
+        ) {
+          console.log(
+            "[ZeroSetup] Stuck in connecting state for",
+            timeInConnecting,
+            "ms - clearing stale Zero data..."
+          );
+          hasTriggeredStaleDataRecovery.current = true;
+          clearZeroData().then(() => {
+            console.log("[ZeroSetup] Stale data cleared, reloading...");
+            window.location.reload();
+          });
+          return;
+        }
+      }
+    }
+
+    // Reset connecting timer when we're no longer connecting
+    if (connectionState.name !== "connecting") {
+      connectingStartTime.current = null;
+    }
 
     // Handle needs-auth state - session expired or token invalid
     if (connectionState.name === "needs-auth") {
@@ -259,6 +339,7 @@ function ZeroConnectionHandler({ onNeedsAuth }: { onNeedsAuth: () => void }) {
     // Reset the flag when connection is successful
     if (connectionState.name === "connected") {
       hasTriggeredReauth.current = false;
+      hasTriggeredStaleDataRecovery.current = false;
     }
 
     // Handle connection errors - may indicate auth issues

@@ -2,17 +2,15 @@
 
 import { Button } from "@repo/ui/components/button";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
+import { cn } from "@repo/ui/lib/utils";
 import { useZero } from "@rocicorp/zero/react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   ArrowLeft,
   ExternalLink,
-  Lightbulb,
   List,
   Map as MapIcon,
-  Pencil,
   Plus,
-  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { AdminFloatingBar } from "@/components/admin-floating-bar";
@@ -22,6 +20,7 @@ import { BoardActions } from "@/features/board/components/board-actions";
 import { SlugEditDialog } from "@/features/board/components/slug-edit-dialog";
 import { FeedbackFilters } from "@/features/feedback/components/feedback-filters";
 import { FeedbackListItem } from "@/features/feedback/components/feedback-list-item";
+import { InlineFeedbackCreator } from "@/features/feedback/components/inline-feedback-creator";
 import {
   useBoardData,
   useFeedbackData,
@@ -130,9 +129,6 @@ export function BoardView({
     ? feedbacks.filter((f) => !f.roadmapLane).map(toRoadmapItem)
     : [];
 
-  // Check if this is a newly created board (has default name)
-  const isNewBoard = board?.name === "Untitled Board" && showAdminControls;
-
   const handleTitleSave = (newName: string) => {
     if (board) {
       zero.mutate(mutators.board.update({ id: board.id, name: newName }));
@@ -154,8 +150,6 @@ export function BoardView({
 
   return (
     <div className="space-y-6">
-      {isNewBoard === true && <NewBoardBanner />}
-
       <div className={wrapperClassName}>
         <BoardHeader
           board={board}
@@ -171,6 +165,7 @@ export function BoardView({
 
       {viewMode === "list" ? (
         <ListView
+          boardId={board?.id}
           boardSlug={boardSlug}
           filteredFeedbacks={filteredFeedbacks}
           hasFilters={hasFilters}
@@ -216,34 +211,6 @@ export function BoardView({
           orgSlug={orgSlug}
         />
       )}
-    </div>
-  );
-}
-
-function NewBoardBanner() {
-  return (
-    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-      <div className="flex items-start gap-3">
-        <div className="rounded-lg bg-primary/10 p-2">
-          <Lightbulb className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium">Welcome to your new board!</h3>
-          <p className="mt-1 text-muted-foreground text-sm">
-            Get started by customizing your board:
-          </p>
-          <ul className="mt-3 space-y-2 text-sm">
-            <li className="flex items-center gap-2">
-              <Pencil className="h-4 w-4 text-muted-foreground" />
-              <span>Click the title above to rename your board</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <Settings className="h-4 w-4 text-muted-foreground" />
-              <span>Use the menu (⋮) to edit description and visibility</span>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
   );
 }
@@ -385,6 +352,7 @@ type SessionData = {
 } | null;
 
 function ListView({
+  boardId,
   orgSlug,
   boardSlug,
   filteredFeedbacks,
@@ -396,6 +364,7 @@ function ListView({
   openAuthDialog,
   wrapperClassName,
 }: {
+  boardId: string | undefined;
   orgSlug: string;
   boardSlug: string;
   filteredFeedbacks: FeedbackItem[];
@@ -411,6 +380,9 @@ function ListView({
   // In public mode, show the submit button
   const showSubmitInFilters = !isAdmin;
 
+  // Show inline feedback creator for admins who are logged in
+  const showInlineFeedbackCreator = isAdmin && session?.user && boardId;
+
   return (
     <div className={`${wrapperClassName} space-y-6`}>
       <FeedbackFilters showSubmitButton={showSubmitInFilters} />
@@ -421,10 +393,20 @@ function ListView({
       </p>
 
       <div className="space-y-3">
+        {/* Inline feedback creator for admins */}
+        {showInlineFeedbackCreator && (
+          <InlineFeedbackCreator
+            boardId={boardId}
+            boardSlug={boardSlug}
+            orgSlug={orgSlug}
+          />
+        )}
+
         {pinnedFeedbacks.map((feedback) => (
           <FeedbackListItem
             boardSlug={boardSlug}
             feedback={feedback}
+            isAdmin={isAdmin}
             key={feedback.id}
             orgSlug={orgSlug}
           />
@@ -434,6 +416,7 @@ function ListView({
           <FeedbackListItem
             boardSlug={boardSlug}
             feedback={feedback}
+            isAdmin={isAdmin}
             key={feedback.id}
             orgSlug={orgSlug}
           />
@@ -560,15 +543,17 @@ function RoadmapView({
   };
 
   return (
-    <div className={`${wrapperClassName} space-y-6`}>
+    <div className={cn(wrapperClassName, "min-w-0 max-w-full space-y-6")}>
       <RoadmapKanban
         backlogItems={isAdmin ? backlogItems : undefined}
         boardId={board?.id ?? ""}
+        boardSlug={boardSlug}
         customLanes={roadmapLaneTags.length > 0 ? roadmapLaneTags : undefined}
         isAdmin={isAdmin}
         items={roadmapItems}
         onAddItem={isAdmin ? handleAddItem : undefined}
         organizationId={org?.id}
+        orgSlug={orgSlug}
       />
 
       {roadmapItems.length === 0 &&

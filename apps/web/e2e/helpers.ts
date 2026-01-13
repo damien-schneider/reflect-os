@@ -70,9 +70,22 @@ export async function waitForDashboardStable(
     // Check if we're on the org dashboard (URL has org slug)
     // Pattern: /dashboard/org-slug or /dashboard/org-slug/...
     if (DASHBOARD_WITH_ORG_PATTERN.test(currentUrl)) {
-      // Check for dashboard-specific content
+      // Sidebar visible = dashboard is ready (even if content is still syncing)
+      const sidebar = page.locator("aside");
+      try {
+        if (await sidebar.isVisible({ timeout: 1000 })) {
+          console.log(
+            "DEBUG: Sidebar visible, dashboard ready. URL:",
+            page.url()
+          );
+          return; // Success!
+        }
+      } catch {
+        // Sidebar not visible yet, continue
+      }
+
+      // Also check for dashboard-specific content as fallback
       const dashboardIndicators = [
-        page.locator("aside"),
         page.getByText(WELCOME_BACK_PATTERN),
         page.getByText("Total Boards"),
       ];

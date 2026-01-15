@@ -16,8 +16,8 @@ import { mustGetQuery } from "@rocicorp/zero";
 import { handleQueryRequest } from "@rocicorp/zero/server";
 import { Hono } from "hono";
 import { queries } from "../../../../web/src/queries";
+import { schema } from "../../../../web/src/schema";
 import type { ZeroContext } from "../../../../web/src/zero-context";
-import { schema } from "../../../../web/src/zero-schema";
 import { auth } from "../../auth";
 
 const app = new Hono();

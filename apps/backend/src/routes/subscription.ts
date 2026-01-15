@@ -4,11 +4,11 @@
  * Handles subscription management: ensuring customers, syncing, and checking status.
  */
 
+import { mapProductToTier } from "@repo/polar";
 import { Hono } from "hono";
 import {
   auth,
   dbPool,
-  mapProductToTier,
   polarClient,
   updateOrgSubscription,
   upsertSubscription,

@@ -1,17 +1,18 @@
-# Docker Compose with profiles for dev and production
+# Docker Compose for Reflect OS
 #
 # Usage:
 #   Development: docker compose --profile dev up -d
-#   Production:  docker compose --profile prod up -d (Dokploy)
+#   Production:  docker compose up -d (Dokploy - no profile needed)
 #
 # Development profile (dev):
 #   - PostgreSQL database only (port 5430)
 #   - Zero-cache runs locally via `npx zero-cache-dev`
 #   - Vite and backend run via Turbo
 #
-# Production profile (prod):
+# Production (default - no profile):
 #   - Full stack for Dokploy/self-hosted deployment
 #   - PostgreSQL, migrations, zero-cache, backend, web
+#   - Services start automatically without --profile flag
 #
 # Required Environment Variables (production only - set in Dokploy UI):
 #   POSTGRES_PASSWORD - Database password
@@ -25,6 +26,7 @@
 services:
   # ============================================================================
   # DEVELOPMENT: PostgreSQL only (zero-cache runs locally)
+  # Only starts with: docker compose --profile dev up -d
   # ============================================================================
   postgres-dev:
     image: postgres:16-alpine
@@ -54,13 +56,13 @@ services:
       retries: 10
 
   # ============================================================================
-  # PRODUCTION: Full stack for Dokploy deployment
+  # PRODUCTION: Full stack for Dokploy deployment (no profile = default)
+  # Starts automatically with: docker compose up -d
   # Note: Variables use defaults to avoid interpolation errors in dev mode.
   #       Dokploy validates required vars are set before deployment.
   # ============================================================================
   postgres:
     image: postgres:16-alpine
-    profiles: ["prod"]
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-reflect_user}
@@ -89,7 +91,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.migrations
-    profiles: ["prod"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -106,7 +107,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.zero-cache
-    profiles: ["prod"]
     restart: unless-stopped
     depends_on:
       postgres:
@@ -138,7 +138,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    profiles: ["prod"]
     restart: unless-stopped
     depends_on:
       postgres:
@@ -167,7 +166,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-    profiles: ["prod"]
     restart: unless-stopped
     depends_on:
       postgres:

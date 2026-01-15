@@ -15,8 +15,8 @@
 
 import { defineQueries, defineQuery } from "@rocicorp/zero";
 import { z } from "zod";
+import { zql } from "./schema";
 import { getAuthenticatedUserID } from "./zero-context";
-import { zql } from "./zero-schema";
 
 // ============================================
 // USER QUERIES

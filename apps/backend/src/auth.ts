@@ -16,9 +16,6 @@ import { organization } from "better-auth/plugins";
 import { Pool } from "pg";
 import { env } from "./env";
 
-// Re-export for backwards compatibility with routes that import from auth.ts
-export { mapProductToTier } from "@repo/polar";
-
 // =============================================================================
 // CONFIGURATION
 // =============================================================================

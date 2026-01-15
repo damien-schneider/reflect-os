@@ -30,5 +30,6 @@ function CustomRender(
   return render(ui, { wrapper: Wrapper, ...options });
 }
 
-export * from "@testing-library/react";
+// Re-export commonly used utilities from testing-library
+export { screen, waitFor, within } from "@testing-library/react";
 export { CustomRender as render };

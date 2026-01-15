@@ -18,6 +18,18 @@ lsof -ti:4848,4849,5173,3001 2>/dev/null | xargs kill -9 2>/dev/null || true
 
 # 2. Start PostgreSQL via Docker
 echo -e "${YELLOW}   Starting PostgreSQL...${NC}"
+
+# Stop and remove any existing containers with conflicting names
+echo -e "${YELLOW}   Cleaning up existing Docker containers...${NC}"
+docker compose --profile dev down 2>/dev/null || true
+
+# Remove any conflicting containers that might exist from a different project
+EXISTING_CONTAINER=$(docker ps -aq -f name=reflect-dev-postgres 2>/dev/null)
+if [ -n "$EXISTING_CONTAINER" ]; then
+  echo -e "${YELLOW}   Removing conflicting container...${NC}"
+  docker rm -f "$EXISTING_CONTAINER" 2>/dev/null || true
+fi
+
 docker compose --profile dev up -d --remove-orphans
 
 # 3. Wait for PostgreSQL to be healthy

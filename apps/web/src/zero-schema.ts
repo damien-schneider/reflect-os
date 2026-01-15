@@ -682,3 +682,10 @@ export type Subscription = Row<typeof subscriptionTable.schema>;
 export type ChangelogSubscription = Row<
   typeof changelogSubscriptionTable.schema
 >;
+
+// Auth context type - used in queries/mutators for permissions
+export interface AuthData {
+  sub: string | null;
+}
+
+export default schema;

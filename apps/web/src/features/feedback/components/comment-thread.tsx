@@ -23,9 +23,9 @@ import { authClient } from "@/lib/auth-client";
 import { mutators } from "@/mutators";
 import { queries } from "@/queries";
 import { randID } from "@/rand";
-import type { Comment } from "@/zero-schema";
+import type { Comment } from "@/schema";
 // Note: zql is kept for imperative zero.run() calls only
-import { zql } from "@/zero-schema";
+import { zql } from "@/schema";
 
 type CommentWithRelations = Comment & {
   author?: { id: string; name: string } | null;

@@ -6,7 +6,7 @@
  */
 
 import { zeroNodePg } from "@rocicorp/zero/server/adapters/pg";
-import { schema } from "../../../../web/src/zero-schema";
+import { schema } from "../../../../web/src/schema";
 import { dbPool } from "../../auth";
 
 // Create the database provider for Zero server-side operations

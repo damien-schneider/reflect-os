@@ -1,51 +1,39 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/core", "ultracite/react"],
+  "extends": [
+    "ultracite/core",
+    "ultracite/react",
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/remix"
+  ],
   "files": {
     "includes": [
       "**/*",
       "!bun.lock",
       "!sst.config.ts",
       "!.sst",
-      "!**/routeTree.gen.ts"
+      "!**/routeTree.gen.ts",
+      "!reflect-homepage-prototype"
     ]
   },
-  "linter": {
-    "rules": {
-      "nursery": {
-        // Disable noLeakedRender as it has many false positives with:
-        // - cn() function calls (string manipulation, not JSX rendering)
-        // - JSX prop expressions (values, not children)
-        // - String/number expressions that are safe to render
-        "noLeakedRender": "off"
-      },
-      "performance": {
-        // Barrel files are intentionally used for re-exporting schema types
-        "noBarrelFile": {
-          "level": "info"
-        },
-        "noNamespaceImport": {
-          "level": "info"
+  "overrides": [
+    {
+      "includes": [
+        "packages/*/src/index.ts",
+        "packages/*/src/*/index.ts",
+        "apps/*/src/index.ts",
+        "apps/*/src/env/index.ts",
+        "apps/*/src/features/*/index.ts",
+        "**/test-utils.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
         }
-      },
-      "style": {
-        // TanStack Router generates files with specific naming convention
-        "useFilenamingConvention": "off"
-      },
-      "security": {
-        // dangerouslySetInnerHTML is used intentionally for user-provided CSS
-        "noDangerouslySetInnerHtml": "warn"
-      },
-      "a11y": {
-        // These are too strict for interactive UI components
-        "noNoninteractiveElementInteractions": "info",
-        "useKeyWithClickEvents": "info",
-        "noStaticElementInteractions": "info"
-      },
-      "correctness": {
-        // Image sizing is handled by CSS classes
-        "useImageSize": "info"
       }
     }
-  }
+  ]
 }

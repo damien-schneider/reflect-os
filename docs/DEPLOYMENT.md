@@ -4,9 +4,9 @@ Deploy Reflect OS to production using Docker Compose on Dokploy or any self-host
 
 ## Overview
 
-Reflect OS uses a single `docker-compose.yaml` with profiles:
-- **dev** profile: PostgreSQL only (for local development)
-- **prod** profile: Full stack for production
+Reflect OS uses a single `docker-compose.yaml` with selective profiles:
+- **No profile (default)**: Production services start automatically
+- **dev profile**: Development PostgreSQL only (local development)
 
 ## Prerequisites
 
@@ -113,8 +113,8 @@ RESEND_API_KEY=re_xxxxx
 EMAIL_FROM_ADDRESS=noreply@reflet.app
 EOF
 
-# Deploy
-docker compose --profile prod --env-file .env.prod up -d
+# Deploy (production services run by default, no --profile needed)
+docker compose --env-file .env.prod up -d
 ```
 
 ## Database Backups
@@ -147,13 +147,13 @@ Zero cache stores its SQLite replica in the `reflect-zero-data` volume. This can
 
 ```bash
 # Stop zero-cache
-docker compose --profile prod stop zero-cache
+docker compose stop zero-cache
 
 # Remove volume
 docker volume rm reflect-zero-data
 
 # Restart
-docker compose --profile prod up -d zero-cache
+docker compose up -d zero-cache
 ```
 
 ### Inspector Access
@@ -217,10 +217,10 @@ All services expose health endpoints:
 
 ```bash
 # All services
-docker compose --profile prod logs -f
+docker compose logs -f
 
 # Specific service
-docker compose --profile prod logs -f zero-cache
+docker compose logs -f zero-cache
 ```
 
 ## Troubleshooting
@@ -229,7 +229,7 @@ docker compose --profile prod logs -f zero-cache
 
 Check migration logs:
 ```bash
-docker compose --profile prod logs migrations
+docker compose logs migrations
 ```
 
 ### Zero-cache Won't Start
@@ -239,7 +239,7 @@ docker compose --profile prod logs migrations
 3. Check Zero logs for replication errors
 
 ```bash
-docker compose --profile prod logs zero-cache
+docker compose logs zero-cache
 ```
 
 ### WebSocket Connection Issues

@@ -21,11 +21,8 @@ import {
   PLAN_LIMITS,
   type SubscriptionTier,
 } from "./features/subscription/tiers.config";
+import { zql } from "./schema";
 import { isLoggedIn } from "./zero-context";
-import { zql } from "./zero-schema";
-
-// Re-export PLAN_LIMITS from shared config for backwards compatibility
-export { PLAN_LIMITS } from "./features/subscription/tiers.config";
 
 // ============================================
 // AUTHORIZATION HELPERS

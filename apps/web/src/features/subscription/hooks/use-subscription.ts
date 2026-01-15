@@ -4,8 +4,8 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
-import type { Subscription } from "@/zero-schema";
-import { zql } from "@/zero-schema";
+import type { Subscription } from "@/schema";
+import { zql } from "@/schema";
 import type { SubscriptionStatus } from "../status.config";
 import {
   currentPlanLimitsAtom,

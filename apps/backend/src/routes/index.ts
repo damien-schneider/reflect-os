@@ -9,7 +9,8 @@ import authRoutes from "./auth";
 import changelogRoutes from "./changelog";
 import productsRoutes from "./products";
 import subscriptionRoutes from "./subscription";
-import { mutateRoutes, queryRoutes } from "./zero";
+import mutateRoutes from "./zero/mutate";
+import queryRoutes from "./zero/query";
 import zeroTokenRoutes from "./zero-token";
 
 export const app = new Hono()

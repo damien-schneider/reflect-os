@@ -5,7 +5,28 @@
  * All error codes are defined here and can be used by both backend and frontend.
  */
 
-// Re-export all modules
-export * from "./codes";
-export * from "./messages";
-export * from "./types";
+export type {
+  AppErrorCodeType,
+  AuthErrorCodeType,
+  EmailErrorCodeType,
+} from "./codes";
+// Codes
+export {
+  AppErrorCode,
+  AuthErrorCode,
+  EmailErrorCode,
+  isAppErrorCode,
+  isAuthErrorCode,
+  isEmailErrorCode,
+} from "./codes";
+
+// Messages
+export {
+  APP_ERROR_MESSAGES,
+  AUTH_ERROR_MESSAGES,
+  EMAIL_ERROR_MESSAGES,
+  getErrorMessage,
+} from "./messages";
+export type { AppError, Result } from "./types";
+// Types
+export { createError, err, ok } from "./types";

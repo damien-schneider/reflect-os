@@ -1,5 +1,5 @@
 import { useQuery } from "@rocicorp/zero/react";
-import { zql } from "@/zero-schema";
+import { zql } from "@/schema";
 
 type VersionIncrement = "patch" | "minor" | "major";
 

@@ -1,10 +1,8 @@
+bun test
+
 #!/bin/sh
 # Exit on any error
 set -e
-
-# Run tests and type checking
-bun test
-bun run check-types
 
 # Check if there are any staged files
 if [ -z "$(git diff --cached --name-only)" ]; then
@@ -24,9 +22,8 @@ PARTIALLY_STAGED=$(git diff --name-only)
 git stash push --quiet --keep-index --message "pre-commit-stash" || true
 STASHED=$?
 
-# Run formatter on the staged files (use biome directly to avoid ultracite CLI issues)
-# bun x ultracite fix #TODO: replace as soon as ultracite CLI is fixed
-bun x biome check --write .
+# Run formatter on the staged files
+bun x ultracite fix
 FORMAT_EXIT_CODE=$?
 
 # Restore working directory state

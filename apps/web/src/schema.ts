@@ -1,48 +1,691 @@
 /**
- * Zero schema exports
+ * Native Zero Schema
+ * Defines the Zero schema using native Zero schema builders for full TypeScript type safety.
+ * This schema mirrors the Drizzle schema in packages/db/src/schema.ts.
  *
- * Tables and relationships are defined natively in zero-schema.ts
- * This mirrors the Drizzle schema in packages/db/src/schema.ts
- *
- * Zero 0.25 Migration Status:
- * - Schema updated for Zero 0.25 (auth string, cacheURL, connection API)
- * - Using enableLegacyQueries and enableLegacyMutators for gradual migration
- * - queries.ts and mutators.ts define the new API (ready for future use)
- * - zql builder exported for use in queries.ts
- *
- * TODO: Complete migration by:
- * 1. Implement /api/zero/query and /api/zero/mutate server endpoints
- * 2. Update all z.query.* usages to use queries.* from queries.ts
- * 3. Update all z.mutate.* usages to use zero.mutate(mutators.*) from mutators.ts
- * 4. Remove enableLegacyQueries/enableLegacyMutators flags
- *
- * See https://zero.rocicorp.dev/docs/queries and https://zero.rocicorp.dev/docs/mutators
+ * When you update the Drizzle schema, update this file accordingly to keep them in sync.
  */
 
-export {
-  type AdminNote,
-  type Board,
-  type ChangelogSubscription,
-  type Comment,
-  type Feedback,
-  type FeedbackTag,
-  type Invitation,
-  type Member,
-  type Notification,
-  type Organization,
-  type Release,
-  type ReleaseItem,
-  type Schema,
-  type Subscription,
-  schema as default,
-  schema,
-  type Tag,
-  type User,
-  type Vote,
-  zql,
-} from "./zero-schema";
+import {
+  boolean,
+  createBuilder,
+  createSchema,
+  json,
+  number,
+  type Row,
+  relationships,
+  string,
+  table,
+} from "@rocicorp/zero";
+
+// ============================================
+// TABLE DEFINITIONS
+// ============================================
+
+const userTable = table("user")
+  .columns({
+    id: string(),
+    name: string(),
+    email: string(),
+    emailVerified: boolean().optional(),
+    image: string().optional(),
+    createdAt: number().optional(),
+    updatedAt: number().optional(),
+    partner: boolean().optional(),
+    avatar: string().optional(),
+    bio: string().optional(),
+    bannedAt: number().optional().from("banned_at"),
+  })
+  .primaryKey("id");
+
+const organizationTable = table("organization")
+  .columns({
+    id: string(),
+    name: string(),
+    slug: string(),
+    logo: string().optional(),
+    createdAt: number().optional(),
+    metadata: string().optional(),
+    primaryColor: string().optional().from("primary_color"),
+    customCss: string().optional().from("custom_css"),
+    isPublic: boolean().optional().from("is_public"),
+    changelogSettings: json<{
+      autoVersioning?: boolean;
+      versionIncrement?: "patch" | "minor" | "major";
+      versionPrefix?: string;
+    }>()
+      .optional()
+      .from("changelog_settings"),
+    // Subscription fields - synced from Polar webhooks
+    // NOTE: Team tier is currently disabled
+    subscriptionTier: string().optional().from("subscription_tier"), // "free" | "pro"
+    subscriptionStatus: string().optional().from("subscription_status"), // "active" | "trialing" | "past_due" | "canceled" | "none"
+    subscriptionId: string().optional().from("subscription_id"), // Reference to active subscription
+  })
+  .primaryKey("id");
+
+const memberTable = table("member")
+  .columns({
+    id: string(),
+    organizationId: string(),
+    userId: string(),
+    role: string(),
+    createdAt: number().optional(),
+  })
+  .primaryKey("id");
+
+const invitationTable = table("invitation")
+  .columns({
+    id: string(),
+    organizationId: string(),
+    email: string(),
+    role: string().optional(),
+    status: string(),
+    expiresAt: number(),
+    createdAt: number().optional(),
+    inviterId: string(),
+  })
+  .primaryKey("id");
+
+const boardTable = table("board")
+  .columns({
+    id: string(),
+    organizationId: string().from("organization_id"),
+    name: string(),
+    slug: string(),
+    description: string().optional(),
+    isPublic: boolean().optional().from("is_public"),
+    settings: json<{
+      allowAnonymousVoting?: boolean;
+      requireApproval?: boolean;
+      defaultStatus?: string;
+    }>().optional(),
+    createdAt: number().from("created_at"),
+    updatedAt: number().from("updated_at"),
+  })
+  .primaryKey("id");
+
+const feedbackTable = table("feedback")
+  .columns({
+    id: string(),
+    boardId: string().from("board_id"),
+    title: string(),
+    description: string(),
+    status: string().optional(),
+    authorId: string().from("author_id"),
+    voteCount: number().optional().from("vote_count"),
+    commentCount: number().optional().from("comment_count"),
+    isApproved: boolean().optional().from("is_approved"),
+    isPinned: boolean().optional().from("is_pinned"),
+    roadmapLane: string().optional().from("roadmap_lane"),
+    roadmapOrder: number().optional().from("roadmap_order"),
+    completedAt: number().optional().from("completed_at"),
+    createdAt: number().from("created_at"),
+    updatedAt: number().from("updated_at"),
+  })
+  .primaryKey("id");
+
+const voteTable = table("vote")
+  .columns({
+    id: string(),
+    feedbackId: string().from("feedback_id"),
+    userId: string().from("user_id"),
+    createdAt: number().from("created_at"),
+  })
+  .primaryKey("id");
+
+const commentTable = table("comment")
+  .columns({
+    id: string(),
+    feedbackId: string().from("feedback_id"),
+    authorId: string().from("author_id"),
+    body: string(),
+    isOfficial: boolean().optional().from("is_official"),
+    parentId: string().optional().from("parent_id"),
+    createdAt: number().from("created_at"),
+    updatedAt: number().from("updated_at"),
+  })
+  .primaryKey("id");
+
+const tagTable = table("tag")
+  .columns({
+    id: string(),
+    organizationId: string().from("organization_id"),
+    name: string(),
+    color: string(),
+    isDoneStatus: boolean().optional().from("is_done_status"),
+    isRoadmapLane: boolean().optional().from("is_roadmap_lane"),
+    laneOrder: number().optional().from("lane_order"),
+    createdAt: number().from("created_at"),
+  })
+  .primaryKey("id");
+
+const feedbackTagTable = table("feedbackTag")
+  .from("feedback_tag")
+  .columns({
+    id: string(),
+    feedbackId: string().from("feedback_id"),
+    tagId: string().from("tag_id"),
+  })
+  .primaryKey("id");
+
+const notificationTable = table("notification")
+  .columns({
+    id: string(),
+    userId: string().from("user_id"),
+    type: string(),
+    title: string(),
+    message: string(),
+    feedbackId: string().optional().from("feedback_id"),
+    isRead: boolean().optional().from("is_read"),
+    createdAt: number().from("created_at"),
+  })
+  .primaryKey("id");
+
+const adminNoteTable = table("adminNote")
+  .from("admin_note")
+  .columns({
+    id: string(),
+    feedbackId: string().from("feedback_id"),
+    authorId: string().from("author_id"),
+    body: string(),
+    createdAt: number().from("created_at"),
+    updatedAt: number().from("updated_at"),
+  })
+  .primaryKey("id");
+
+const releaseTable = table("release")
+  .columns({
+    id: string(),
+    organizationId: string().from("organization_id"),
+    title: string(),
+    description: string().optional(),
+    version: string().optional(),
+    publishedAt: number().optional().from("published_at"),
+    createdAt: number().from("created_at"),
+    updatedAt: number().from("updated_at"),
+  })
+  .primaryKey("id");
+
+const releaseItemTable = table("releaseItem")
+  .from("release_item")
+  .columns({
+    id: string(),
+    releaseId: string().from("release_id"),
+    feedbackId: string().from("feedback_id"),
+    createdAt: number().from("created_at"),
+  })
+  .primaryKey("id");
+
+const subscriptionTable = table("subscription")
+  .columns({
+    id: string(), // Polar subscription ID
+    organizationId: string().from("organization_id"),
+    polarCustomerId: string().from("polar_customer_id"),
+    polarProductId: string().from("polar_product_id"),
+    polarProductName: string().optional().from("polar_product_name"),
+    status: string(), // "active" | "trialing" | "past_due" | "canceled" | "unpaid"
+    currentPeriodStart: number().optional().from("current_period_start"),
+    currentPeriodEnd: number().optional().from("current_period_end"),
+    cancelAtPeriodEnd: boolean().optional().from("cancel_at_period_end"),
+    createdAt: number().from("created_at"),
+    updatedAt: number().from("updated_at"),
+  })
+  .primaryKey("id");
+
+const changelogSubscriptionTable = table("changelogSubscription")
+  .from("changelog_subscription")
+  .columns({
+    id: string(),
+    userId: string().from("user_id"),
+    organizationId: string().from("organization_id"),
+    subscribedAt: number().from("subscribed_at"),
+  })
+  .primaryKey("id");
+
+// ============================================
+// RELATIONSHIPS
+// ============================================
+
+const userRelationships = relationships(userTable, ({ many }) => ({
+  members: many({
+    sourceField: ["id"],
+    destField: ["userId"],
+    destSchema: memberTable,
+  }),
+  feedbacks: many({
+    sourceField: ["id"],
+    destField: ["authorId"],
+    destSchema: feedbackTable,
+  }),
+  votes: many({
+    sourceField: ["id"],
+    destField: ["userId"],
+    destSchema: voteTable,
+  }),
+  comments: many({
+    sourceField: ["id"],
+    destField: ["authorId"],
+    destSchema: commentTable,
+  }),
+  notifications: many({
+    sourceField: ["id"],
+    destField: ["userId"],
+    destSchema: notificationTable,
+  }),
+  changelogSubscriptions: many({
+    sourceField: ["id"],
+    destField: ["userId"],
+    destSchema: changelogSubscriptionTable,
+  }),
+}));
+
+const organizationRelationships = relationships(
+  organizationTable,
+  ({ many }) => ({
+    members: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: memberTable,
+    }),
+    invitations: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: invitationTable,
+    }),
+    boards: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: boardTable,
+    }),
+    tags: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: tagTable,
+    }),
+    releases: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: releaseTable,
+    }),
+    subscriptions: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: subscriptionTable,
+    }),
+    changelogSubscriptions: many({
+      sourceField: ["id"],
+      destField: ["organizationId"],
+      destSchema: changelogSubscriptionTable,
+    }),
+  })
+);
+
+const memberRelationships = relationships(memberTable, ({ one }) => ({
+  user: one({
+    sourceField: ["userId"],
+    destField: ["id"],
+    destSchema: userTable,
+  }),
+  organization: one({
+    sourceField: ["organizationId"],
+    destField: ["id"],
+    destSchema: organizationTable,
+  }),
+}));
+
+const invitationRelationships = relationships(invitationTable, ({ one }) => ({
+  organization: one({
+    sourceField: ["organizationId"],
+    destField: ["id"],
+    destSchema: organizationTable,
+  }),
+  inviter: one({
+    sourceField: ["inviterId"],
+    destField: ["id"],
+    destSchema: userTable,
+  }),
+}));
+
+const boardRelationships = relationships(boardTable, ({ many, one }) => ({
+  organization: one({
+    sourceField: ["organizationId"],
+    destField: ["id"],
+    destSchema: organizationTable,
+  }),
+  feedbacks: many({
+    sourceField: ["id"],
+    destField: ["boardId"],
+    destSchema: feedbackTable,
+  }),
+}));
+
+const feedbackRelationships = relationships(feedbackTable, ({ many, one }) => ({
+  board: one({
+    sourceField: ["boardId"],
+    destField: ["id"],
+    destSchema: boardTable,
+  }),
+  author: one({
+    sourceField: ["authorId"],
+    destField: ["id"],
+    destSchema: userTable,
+  }),
+  votes: many({
+    sourceField: ["id"],
+    destField: ["feedbackId"],
+    destSchema: voteTable,
+  }),
+  comments: many({
+    sourceField: ["id"],
+    destField: ["feedbackId"],
+    destSchema: commentTable,
+  }),
+  feedbackTags: many({
+    sourceField: ["id"],
+    destField: ["feedbackId"],
+    destSchema: feedbackTagTable,
+  }),
+  adminNotes: many({
+    sourceField: ["id"],
+    destField: ["feedbackId"],
+    destSchema: adminNoteTable,
+  }),
+  releaseItems: many({
+    sourceField: ["id"],
+    destField: ["feedbackId"],
+    destSchema: releaseItemTable,
+  }),
+  // Many-to-many through feedbackTag to get tags
+  tags: many(
+    {
+      sourceField: ["id"],
+      destField: ["feedbackId"],
+      destSchema: feedbackTagTable,
+    },
+    {
+      sourceField: ["tagId"],
+      destField: ["id"],
+      destSchema: tagTable,
+    }
+  ),
+  // Many-to-many through releaseItem to get releases
+  releases: many(
+    {
+      sourceField: ["id"],
+      destField: ["feedbackId"],
+      destSchema: releaseItemTable,
+    },
+    {
+      sourceField: ["releaseId"],
+      destField: ["id"],
+      destSchema: releaseTable,
+    }
+  ),
+}));
+
+const voteRelationships = relationships(voteTable, ({ one }) => ({
+  feedback: one({
+    sourceField: ["feedbackId"],
+    destField: ["id"],
+    destSchema: feedbackTable,
+  }),
+  user: one({
+    sourceField: ["userId"],
+    destField: ["id"],
+    destSchema: userTable,
+  }),
+}));
+
+const commentRelationships = relationships(commentTable, ({ many, one }) => ({
+  feedback: one({
+    sourceField: ["feedbackId"],
+    destField: ["id"],
+    destSchema: feedbackTable,
+  }),
+  author: one({
+    sourceField: ["authorId"],
+    destField: ["id"],
+    destSchema: userTable,
+  }),
+  parent: one({
+    sourceField: ["parentId"],
+    destField: ["id"],
+    destSchema: commentTable,
+  }),
+  replies: many({
+    sourceField: ["id"],
+    destField: ["parentId"],
+    destSchema: commentTable,
+  }),
+}));
+
+const tagRelationships = relationships(tagTable, ({ many, one }) => ({
+  organization: one({
+    sourceField: ["organizationId"],
+    destField: ["id"],
+    destSchema: organizationTable,
+  }),
+  feedbackTags: many({
+    sourceField: ["id"],
+    destField: ["tagId"],
+    destSchema: feedbackTagTable,
+  }),
+  // Many-to-many through feedbackTag to get feedbacks
+  feedbacks: many(
+    {
+      sourceField: ["id"],
+      destField: ["tagId"],
+      destSchema: feedbackTagTable,
+    },
+    {
+      sourceField: ["feedbackId"],
+      destField: ["id"],
+      destSchema: feedbackTable,
+    }
+  ),
+}));
+
+const feedbackTagRelationships = relationships(feedbackTagTable, ({ one }) => ({
+  feedback: one({
+    sourceField: ["feedbackId"],
+    destField: ["id"],
+    destSchema: feedbackTable,
+  }),
+  tag: one({
+    sourceField: ["tagId"],
+    destField: ["id"],
+    destSchema: tagTable,
+  }),
+}));
+
+const notificationRelationships = relationships(
+  notificationTable,
+  ({ one }) => ({
+    user: one({
+      sourceField: ["userId"],
+      destField: ["id"],
+      destSchema: userTable,
+    }),
+    feedback: one({
+      sourceField: ["feedbackId"],
+      destField: ["id"],
+      destSchema: feedbackTable,
+    }),
+  })
+);
+
+const adminNoteRelationships = relationships(adminNoteTable, ({ one }) => ({
+  feedback: one({
+    sourceField: ["feedbackId"],
+    destField: ["id"],
+    destSchema: feedbackTable,
+  }),
+  author: one({
+    sourceField: ["authorId"],
+    destField: ["id"],
+    destSchema: userTable,
+  }),
+}));
+
+const releaseRelationships = relationships(releaseTable, ({ many, one }) => ({
+  organization: one({
+    sourceField: ["organizationId"],
+    destField: ["id"],
+    destSchema: organizationTable,
+  }),
+  releaseItems: many({
+    sourceField: ["id"],
+    destField: ["releaseId"],
+    destSchema: releaseItemTable,
+  }),
+  // Many-to-many through releaseItem to get feedbacks
+  feedbacks: many(
+    {
+      sourceField: ["id"],
+      destField: ["releaseId"],
+      destSchema: releaseItemTable,
+    },
+    {
+      sourceField: ["feedbackId"],
+      destField: ["id"],
+      destSchema: feedbackTable,
+    }
+  ),
+}));
+
+const releaseItemRelationships = relationships(releaseItemTable, ({ one }) => ({
+  release: one({
+    sourceField: ["releaseId"],
+    destField: ["id"],
+    destSchema: releaseTable,
+  }),
+  feedback: one({
+    sourceField: ["feedbackId"],
+    destField: ["id"],
+    destSchema: feedbackTable,
+  }),
+}));
+
+const subscriptionRelationships = relationships(
+  subscriptionTable,
+  ({ one }) => ({
+    organization: one({
+      sourceField: ["organizationId"],
+      destField: ["id"],
+      destSchema: organizationTable,
+    }),
+  })
+);
+
+const changelogSubscriptionRelationships = relationships(
+  changelogSubscriptionTable,
+  ({ one }) => ({
+    user: one({
+      sourceField: ["userId"],
+      destField: ["id"],
+      destSchema: userTable,
+    }),
+    organization: one({
+      sourceField: ["organizationId"],
+      destField: ["id"],
+      destSchema: organizationTable,
+    }),
+  })
+);
+
+// ============================================
+// CREATE SCHEMA
+// ============================================
+
+export const schema = createSchema({
+  tables: [
+    userTable,
+    organizationTable,
+    memberTable,
+    invitationTable,
+    boardTable,
+    feedbackTable,
+    voteTable,
+    commentTable,
+    tagTable,
+    feedbackTagTable,
+    notificationTable,
+    adminNoteTable,
+    releaseTable,
+    releaseItemTable,
+    subscriptionTable,
+    changelogSubscriptionTable,
+  ],
+  relationships: [
+    userRelationships,
+    organizationRelationships,
+    memberRelationships,
+    invitationRelationships,
+    boardRelationships,
+    feedbackRelationships,
+    voteRelationships,
+    commentRelationships,
+    tagRelationships,
+    feedbackTagRelationships,
+    notificationRelationships,
+    adminNoteRelationships,
+    releaseRelationships,
+    releaseItemRelationships,
+    subscriptionRelationships,
+    changelogSubscriptionRelationships,
+  ],
+  // Zero 0.25: Named queries are now the default - disable legacy queries
+  // All reactive useQuery() hooks should use queries from @/queries
+  // The zql builder is still exported for imperative queries (.run())
+  enableLegacyQueries: false,
+});
+
+// ============================================
+// ZQL BUILDER
+// ============================================
+
+// Zero 0.25: Create ZQL builder for type-safe queries
+// Use this in queries.ts to build ZQL expressions
+export const zql = createBuilder(schema);
+
+// ============================================
+// TYPE EXPORTS
+// ============================================
+
+export type Schema = typeof schema;
+
+// Zero 0.25: Register Schema type with DefaultTypes to avoid passing Schema everywhere
+// This allows useZero() instead of useZero<Schema>()
+declare module "@rocicorp/zero" {
+  interface DefaultTypes {
+    schema: Schema;
+  }
+}
+
+// Row types for each table - using schema property for proper type inference
+export type User = Row<typeof userTable.schema>;
+export type Organization = Row<typeof organizationTable.schema>;
+export type Member = Row<typeof memberTable.schema>;
+export type Invitation = Row<typeof invitationTable.schema>;
+export type Board = Row<typeof boardTable.schema>;
+export type Feedback = Row<typeof feedbackTable.schema>;
+export type Vote = Row<typeof voteTable.schema>;
+export type Comment = Row<typeof commentTable.schema>;
+export type Tag = Row<typeof tagTable.schema>;
+export type FeedbackTag = Row<typeof feedbackTagTable.schema>;
+export type Notification = Row<typeof notificationTable.schema>;
+export type AdminNote = Row<typeof adminNoteTable.schema>;
+export type Release = Row<typeof releaseTable.schema>;
+export type ReleaseItem = Row<typeof releaseItemTable.schema>;
+export type Subscription = Row<typeof subscriptionTable.schema>;
+export type ChangelogSubscription = Row<
+  typeof changelogSubscriptionTable.schema
+>;
 
 // Auth context type - used in queries/mutators for permissions
 export interface AuthData {
   sub: string | null;
 }
+
+export default schema;
